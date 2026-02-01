@@ -69,6 +69,115 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
     transform: translateY(0);
     pointer-events: auto; /* Volta a aceitar cliques (se houver) quando aparece */
 }
+/* Card de Navegação Ultra Compacto */
+.nav-container {
+    background: var(--card);
+    padding: 4px 10px; /* Reduzido ao mínimo */
+    border-radius: 8px;
+    margin-bottom: 5px;
+    box-shadow: 0 1px 3px var(--shadow);
+    display: flex;
+    justify-content: center;
+}
+
+.month-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 300px; /* Limita a largura para não espalhar demais no PC */
+}
+
+.month-nav i {
+    padding: 5px 12px; /* Área de toque boa, mas sem ocupar altura */
+    cursor: pointer;
+    color: var(--blue);
+    font-size: 0.9rem; /* Setas menores */
+}
+
+/* Estilo dos Selects Minimalistas */
+.filter-select {
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-weight: bold;
+    font-size: 0.85rem; /* Fonte menor */
+    padding: 2px;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Card de Resumo também um pouco mais compacto para combinar */
+.resumo-card {
+    background: var(--card);
+    padding: 8px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 5px var(--shadow);
+    display: flex;
+    justify-content: space-around;
+}
+
+
+.resumo-item {
+    text-align: center;
+    flex: 1;
+}
+
+.resumo-item span {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text);
+    opacity: 0.7;
+}
+
+.resumo-item b {
+    font-size: 0.9rem;
+}
+
+
+/* Card do Gráfico */
+.chart-card {
+    background: var(--card);
+    border-radius: 12px;
+    margin-bottom: 0px; /* Margem controlada pelo container do botão */
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 8px var(--shadow);
+    max-height: 1000px; /* Altura máxima quando aberto */
+    opacity: 1;
+}
+
+/* Estado quando o gráfico some COMPLETAMENTE */
+.chart-card.oculto {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    pointer-events: none;
+}
+
+/* Container do Botão que fica sempre abaixo do que estiver visível */
+.btn-toggle-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px; /* Espaço após o card de cima */
+    margin-bottom: 15px;
+}
+
+.btn-toggle-dash {
+    background: var(--blue);
+    color: white;
+    padding: 5px 20px;
+    border-radius: 20px; /* Estilo pílula para ficar bonito abaixo dos cards */
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 5px var(--shadow);
+}
 
 
 
@@ -206,31 +315,89 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
         <span id="ai-advice">Analisando...</span>
         <span id="ai-random-tip"></span>
     </div>
-    <div class="dashboard">
-        <div class="month-nav" style="display: flex; justify-content: space-around; align-items: center;">
-            <i class="fas fa-chevron-left" onclick="changeMonth(-1)"></i>
-            <div style="display: flex; align-items: center;">
-                <select id="filter-month" class="filter-select" onchange="jumpToDate()"></select>
-                <select id="filter-year" class="filter-select" onchange="jumpToDate()"></select>
-            </div>
-            <i class="fas fa-chevron-right" onclick="changeMonth(1)"></i>
+    
+ <div class="nav-container">
+    <div class="month-nav">
+        <i class="fas fa-chevron-left" onclick="changeMonth(-1)"></i>
+        <div>
+            <select id="filter-month" class="filter-select" onchange="jumpToDate()"></select>
+            <select id="filter-year" class="filter-select" onchange="jumpToDate()"></select>
         </div>
-        <div class="chart-box"><canvas id="graficoCategorias"></canvas></div>
-    <div id="chart-legend"></div>
-    <div id="resumo-estatico" style="display:flex; justify-content:space-around; margin-top:15px; font-size: 0.8rem;">
-        <div>Saldo: <br><b id="saldo-atual" style="color:var(--blue)">R$ 0,00</b></div>
-        <div>Pago: <br><b id="total-pago" style="color:var(--green)">R$ 0,00</b></div>
-        <div>Falta: <br><b id="total-pendente" style="color:var(--red)">R$ 0,00</b></div>
+        <i class="fas fa-chevron-right" onclick="changeMonth(1)"></i>
     </div>
+</div>
 
+<div class="resumo-card">
+    <div class="resumo-item">
+        <span>Saldo</span>
+        <b id="saldo-atual" style="color:var(--blue)">R$ 0,00</b>
     </div>
+    <div class="resumo-item" style="border-left: 1px solid rgba(0,0,0,0.05); border-right: 1px solid rgba(0,0,0,0.05);">
+        <span>Pago</span>
+        <b id="total-pago" style="color:var(--green)">R$ 0,00</b>
+    </div>
+    <div class="resumo-item">
+        <span>Falta</span>
+        <b id="total-pendente" style="color:var(--red)">R$ 0,00</b>
+    </div>
+</div>
+
+<div class="chart-card" id="dashboard-card-graph">
+    <div class="dashboard-content">
+        <div class="chart-box"><canvas id="graficoCategorias"></canvas></div>
+        <div id="chart-legend"></div>
+    </div>
+</div>
+
+<div class="btn-toggle-container">
+    <button class="btn-toggle-dash" onclick="toggleDashboard()">
+        <span id="toggle-text">EXIBIR GRÁFICO</span> <i id="toggle-dash-icon" class="fas fa-chevron-down"></i>
+    </button>
+</div>
+
+
+    
     <div id="lista"></div>
 </div>
 <button class="btn-fab" onclick="abrirNovo()"><i class="fas fa-plus"></i></button>
-<script src="js/dicas.js"></script>
+<script>const economyTips =[];</script><script src="js/dicas.js"></script>
 <script>
 // Recupera o estado de visibilidade do localStorage ou define como falso por padrão
 let valoresOcultos = localStorage.getItem('financas_oculto') === 'true';
+
+function toggleDashboard() {
+    const graphCard = document.getElementById('dashboard-card-graph');
+    const icon = document.getElementById('toggle-dash-icon');
+    const text = document.getElementById('toggle-text');
+    
+    if (graphCard.classList.contains('oculto')) {
+        graphCard.classList.remove('oculto');
+        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+        text.innerText = "OCULTAR GRÁFICO";
+        localStorage.setItem('dash_visivel', 'true');
+        
+        // Scroll suave para ver o gráfico aberto
+        setTimeout(() => {
+            graphCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    } else {
+        graphCard.classList.add('oculto');
+        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+        text.innerText = "EXIBIR GRÁFICO";
+        localStorage.setItem('dash_visivel', 'false');
+    }
+}
+
+// Ao carregar a página
+window.addEventListener('load', () => {
+    if (localStorage.getItem('dash_visivel') === 'false') {
+        const graphCard = document.getElementById('dashboard-card-graph');
+        graphCard.classList.add('oculto');
+        document.getElementById('toggle-dash-icon').classList.replace('fa-chevron-up', 'fa-chevron-down');
+        document.getElementById('toggle-text').innerText = "EXIBIR GRÁFICO";
+    }
+});
+
 
 function toggleOcultarValor() {
     valoresOcultos = !valoresOcultos;
@@ -276,60 +443,74 @@ function fecharTodosSwipes(excetoId) {
   
 
     
-    function processarIA(receitas, pago, pendente){
+   function processarIA(receitas, pago, pendente){
     const conselho = document.getElementById('ai-advice');
     const dDica = document.getElementById('ai-random-tip');
-    
-    // 1. Identificação de Atrasos e Categorias
-    const hoje = new Date(); 
-    hoje.setHours(0,0,0,0);
-    
-    const itensAtrasados = dados.filter(i => 
-        i.mov === 'despesa' && i.status !== 'pago' && 
-        new Date(i.ano, i.mes, i.dia) < hoje
-    );
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const limiteProximo = new Date(); limiteProximo.setDate(hoje.getDate() + 10);
 
-    // 2. Cálculo da categoria com maior gasto no mês atual
+    // 1. Lógica de Filtros
+    const atrasados = dados.filter(i => i.mov === 'despesa' && i.status !== 'pago' && new Date(i.ano, i.mes, i.dia) < hoje);
+    const proximos = dados.filter(i => i.mov === 'despesa' && i.status !== 'pago' && new Date(i.ano, i.mes, i.dia) >= hoje && new Date(i.ano, i.mes, i.dia) <= limiteProximo);
+
+    // 2. Cálculo de Maior Gasto
     const gastosMes = dados.filter(i => i.mov === 'despesa' && i.mes === dataFiltro.getMonth() && i.ano === dataFiltro.getFullYear());
     const catTotais = {};
     gastosMes.forEach(i => catTotais[i.categoria] = (catTotais[i.categoria] || 0) + i.valor);
-    
     const maiorCat = Object.keys(catTotais).reduce((a, b) => catTotais[a] > catTotais[b] ? a : b, null);
-    const nomeCat = catNomes[maiorCat] || "lançamentos";
+    const nomeCat = catNomes[maiorCat] || "Gastos";
 
-    // 3. Mensagem Dinâmica de Economia
-    let dicaDinâmica = "";
-    if (maiorCat) {
-        const dicasPorCat = {
-            'utensils': "comer fora está custando caro. Que tal levar marmita amanhã?",
-            'shopping-basket': "os gastos no mercado subiram. Já tentou marcas próprias?",
-            'fuel': "o combustível pesou. Consegue planejar rotas mais curtas esta semana?",
-            'shopping': "as comprinhas somaram um valor alto. Precisa mesmo disso agora?",
-            'user': "os gastos pessoais estão altos. Defina um limite semanal para lazer!",
-            'tag': "muitos gastos em 'Outros'. Tente categorizar melhor para enxergar os ralos de dinheiro."
-        };
-        dicaDinâmica = dicasPorCat[maiorCat] || `seus maiores gastos são com ${nomeCat}. Consegue reduzir 10% aqui?`;
+    // Função interna para formatar a linha do item com data
+    const formatarLinha = (i) => {
+        const d = String(i.dia).padStart(2, '0');
+        const m = String(i.mes + 1).padStart(2, '0');
+        return `<div style="font-size: 0.7rem; color: var(--text); margin-bottom: 2px;">• ${d}/${m} - ${i.desc.substring(0,12)}</div>`;
+    };
+
+    // 3. Construção do Layout
+    let html = `
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
+                ${(pago + pendente) > receitas ? '⚠️' : '✅'} 
+                <span>${(pago + pendente) > receitas ? '<b>Orçamento apertado</b>' : '<b>Orçamento saudável</b>'}</span>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.04); padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; border-left: 3px solid var(--blue);">
+                <i class="fas fa-chart-line"></i> Atenção em <b>${nomeCat}</b>.
+            </div>
+    `;
+
+    if(atrasados.length > 0 || proximos.length > 0) {
+        html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">`;
+        
+        // Coluna Vencidos
+        if(atrasados.length > 0) {
+            html += `
+                <div style="background: rgba(231, 76, 60, 0.08); padding: 6px; border-radius: 6px; border: 1px solid rgba(231, 76, 60, 0.3);">
+                    <div style="color: var(--red); font-size: 0.6rem; font-weight: bold; margin-bottom: 4px; text-transform: uppercase;">Vencidos</div>
+                    ${atrasados.slice(0, 3).map(formatarLinha).join('')}
+                </div>`;
+        } else { html += `<div></div>`; }
+
+        // Coluna Próximos
+        if(proximos.length > 0) {
+            html += `
+                <div style="background: rgba(52, 152, 219, 0.08); padding: 6px; border-radius: 6px; border: 1px solid rgba(52, 152, 219, 0.3);">
+                    <div style="color: var(--blue); font-size: 0.6rem; font-weight: bold; margin-bottom: 4px; text-transform: uppercase;">Próximos</div>
+                    ${proximos.slice(0, 3).map(formatarLinha).join('')}
+                </div>`;
+        }
+        
+        html += `</div>`;
     }
 
-    // 4. Montagem do HTML
-    let mensagemPrincipal = (pago + pendente) > receitas 
-        ? `🔴 <b>Cuidado!</b> Seus gastos superam sua receita.` 
-        : `✅ <b>Boa!</b> Você está dentro do orçamento.`;
-
-    let htmlFinal = `${mensagemPrincipal}<br><i class="fas fa-lightbulb" style="color:var(--yellow)"></i> <b>Foco em ${nomeCat}:</b> ${dicaDinâmica}`;
-    
-    if(itensAtrasados.length > 0) {
-        htmlFinal += `<br><br><span style="color:var(--red); font-size: 0.85rem; font-weight: bold;">⚠️ Atenção ao vencimento:</span>`;
-        itensAtrasados.forEach(item => {
-            const d = String(item.dia).padStart(2, '0');
-            const m = String(item.mes + 1).padStart(2, '0');
-            htmlFinal += `<br><span style="color:var(--red); font-size: 0.8rem; opacity: 0.9;">• ${item.desc} (${d}/${m})</span>`;
-        });
-    }
-
-    conselho.innerHTML = htmlFinal;
+    html += `</div>`;
+    conselho.innerHTML = html;
     dDica.innerText = economyTips[Math.floor(Math.random() * economyTips.length)];
+
 }
+
+
 
 
 
