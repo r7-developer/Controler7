@@ -5,19 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestor de finanças - R7 Services</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
    <style>
 :root {
-    --bg: #bdc3c7;       /* Cinza sólido e fechado para o fundo */
-    --card: #ecf0f1;     /* Cinza azulado claro para os containers */
-    --text: #2c3e50;
-    --green: #27ae60; --red: #e74c3c; --yellow: #f39c12; --blue: #3498db; 
-    --shadow: rgba(0,0,0,0.2); 
-    --ai-bg: #d1d8e0;    /* Papo de bolso mais escuro */
-    --ai-border: #3498db;
-    
+    --bg: #050505;          /* Preto profundo */
+    --card: #0d0d0d;        /* Cinza quase preto */
+    --text: #e0e0e0;
+    --green: #00ff41;       /* Verde Matrix/Razer */
+    --red: #ff0055;         /* Vermelho Neon */
+    --yellow: #f39c12; 
+    --blue: #00d4ff;        /* Azul Ciano Cyber */
+    --purple: #bc13fe;      /* Roxo Neon */
+    --shadow: rgba(0, 212, 255, 0.2);
 }
+
+/* Efeito de Scanline (linhas de TV antiga) no fundo */
+body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 9999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
+/* Cards com bordas de neon */
+.item-wrapper {
+    height: auto !important;
+    min-height: 95px;
+    margin-bottom: 20px !important;
+    background: #1a1a1a !important;
+    border-radius: 4px !important; /* Bordas menos arredondadas = mais tech */
+    clip-path: polygon(0 0, 95% 0, 100% 25%, 100% 100%, 5% 100%, 0 75%); /* Corte angular gamer */
+    border: 1px solid rgba(0, 212, 255, 0.3) !important;
+}
+
+.item-body {
+    background: var(--card) !important;
+    border-left: 4px solid var(--blue) !important;
+    padding: 15px !important;
+    transition: all 0.3s ease;
+}
+
+/* Brilho ao redor do card baseado no status */
+.status-pago { border-left-color: var(--green) !important; box-shadow: inset 5px 0 15px rgba(0, 255, 65, 0.1); }
+.status-pendente { border-left-color: var(--red) !important; box-shadow: inset 5px 0 15px rgba(255, 0, 85, 0.1); }
+
+/* Títulos com fonte Rajdhani */
+.card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--blue);
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+}
+
+.badge-parcela {
+    background: var(--blue);
+    color: #000;
+    padding: 1px 6px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+    margin-left: 8px;
+}
+
                                
 
 * {
@@ -72,10 +130,10 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
 /* Card de Navegação Ultra Compacto */
 .nav-container {
     background: var(--card);
-    padding: 4px 10px; /* Reduzido ao mínimo */
-    border-radius: 8px;
-    margin-bottom: 5px;
-    box-shadow: 0 1px 3px var(--shadow);
+    padding: 8px 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 5px var(--shadow);
     display: flex;
     justify-content: center;
 }
@@ -193,16 +251,20 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
     #form-modal, #delete-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--card); padding:20px; border-radius:20px; width:92%; max-width:400px; z-index:9001; box-shadow:0 10px 30px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     header h2 { margin: 0; font-size: 1.4rem; color: var(--blue); }
+    
     .ai-pocket-box { background: var(--ai-bg); border-left: 5px solid var(--ai-border); padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px var(--shadow); margin-bottom: 20px; }
     #ai-random-tip { display: block; margin-top: 8px; font-size: 0.75rem; color: #576574; font-style: italic; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 5px; }
     .dashboard { background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px var(--shadow); text-align: center; }
     .chart-box { width: 180px; height: 180px; margin: 10px auto; position: relative; }
     #chart-legend { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 15px; }
+    
     .legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; width: 100%; }
     .legend-circle-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.9rem; flex-shrink: 0; }
+    
     .legend-value { margin-left: auto; font-weight: bold; }
     .hand-cash-box { background: var(--card); padding: 12px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px dashed var(--blue); }
     .item-wrapper { position: relative; background: #34495e; border-radius: 18px; margin-bottom: 12px; height: 95px; overflow: hidden; }
+    
     .item-body { position: absolute; inset: 0; background: var(--card); z-index: 2; display: flex; align-items: center; padding: 0 15px; transition: 0.3s; border-left: 8px solid #ccc; }
     .status-pago { border-left-color: var(--green) !important; }
     .status-parcial { border-left-color: var(--yellow) !important; }
@@ -233,7 +295,22 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
     .btn-fab { position: fixed; bottom: 20px; right: 20px; background: var(--blue); color: white; border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.5rem; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     .btn-delete-option { width: 100%; padding: 12px; margin-bottom: 8px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 </style>
-
+<style>
+    /* Novos Estilos para Gamificação e Protocolos */
+    .ai-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .stat-card { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
+    .stat-card small { display: block; font-size: 0.6rem; text-transform: uppercase; opacity: 0.8; }
+    .stat-card b { font-size: 0.9rem; }
+    
+    .xp-bar-container { width: 100%; height: 8px; background: #dfe6e9; border-radius: 4px; margin-top: 5px; overflow: hidden; }
+    .xp-bar-fill { height: 100%; background: var(--blue); width: 0%; transition: width 1s ease-in-out; }
+    
+    .protocol-badge { font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; margin-bottom: 5px; display: inline-block; }
+    .protocol-safe { background: #27ae6022; color: #27ae60; }
+    .protocol-danger { background: #e74c3c22; color: #e74c3c; animation: pulse 2s infinite; }
+    
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+</style>
 </head>
 <body>
 <div class="backdrop" id="backdrop" onclick="fecharModais()"></div>
@@ -311,10 +388,27 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
 </div>
 
     <div class="ai-pocket-box">
-        <b><i class="fas fa-robot"></i> Papo de Bolso</b><br>
-        <span id="ai-advice">Analisando...</span>
-        <span id="ai-random-tip"></span>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <b><i class="fas fa-robot"></i> Papo de Bolso <small id="user-level">Nível 1</small></b>
+        <div id="protocol-status" class="protocol-badge protocol-safe">Protocolo Estável</div>
     </div>
+    
+    <div class="xp-bar-container"><div id="xp-fill" class="xp-bar-fill"></div></div>
+    
+    <div id="ai-advice">Analisando dados...</div>
+    
+    <div class="ai-stats-grid">
+        <div class="stat-card">
+            <small>Saúde Financeira</small>
+            <b id="health-score">0%</b>
+        </div>
+        <div class="stat-card">
+            <small>XP Acumulado</small>
+            <b id="xp-total">0</b>
+        </div>
+    </div>
+    <span id="ai-random-tip"></span>
+</div>
     
  <div class="nav-container">
     <div class="month-nav">
@@ -359,7 +453,8 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
     
     <div id="lista"></div>
 </div>
-<button class="btn-fab" onclick="abrirNovo()"><i class="fas fa-plus"></i></button><script src="js/dicas.js"></script>
+<button class="btn-fab" onclick="abrirNovo()"><i class="fas fa-plus"></i></button>
+<script>const economyTips =[];</script><script src="js/dicas.js"></script>
 <script>
 // Recupera o estado de visibilidade do localStorage ou define como falso por padrão
 let valoresOcultos = localStorage.getItem('financas_oculto') === 'true';
@@ -440,76 +535,99 @@ function fecharTodosSwipes(excetoId) {
     function changeMonth(d){ dataFiltro.setMonth(dataFiltro.getMonth()+d); render(); }
     
   
-
+// Sistema de Gamificação e Score
+function calcularGamificacao(receitas, pago, pendente) {
+    let xp = 0;
+    const totalDespesas = pago + pendente;
     
-   function processarIA(receitas, pago, pendente){
-    const conselho = document.getElementById('ai-advice');
-    const dDica = document.getElementById('ai-random-tip');
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const limiteProximo = new Date(); limiteProximo.setDate(hoje.getDate() + 10);
-
-    // 1. Lógica de Filtros
-    const atrasados = dados.filter(i => i.mov === 'despesa' && i.status !== 'pago' && new Date(i.ano, i.mes, i.dia) < hoje);
-    const proximos = dados.filter(i => i.mov === 'despesa' && i.status !== 'pago' && new Date(i.ano, i.mes, i.dia) >= hoje && new Date(i.ano, i.mes, i.dia) <= limiteProximo);
-
-    // 2. Cálculo de Maior Gasto
-    const gastosMes = dados.filter(i => i.mov === 'despesa' && i.mes === dataFiltro.getMonth() && i.ano === dataFiltro.getFullYear());
-    const catTotais = {};
-    gastosMes.forEach(i => catTotais[i.categoria] = (catTotais[i.categoria] || 0) + i.valor);
-    const maiorCat = Object.keys(catTotais).reduce((a, b) => catTotais[a] > catTotais[b] ? a : b, null);
-    const nomeCat = catNomes[maiorCat] || "Gastos";
-
-    // Função interna para formatar a linha do item com data
-    const formatarLinha = (i) => {
-        const d = String(i.dia).padStart(2, '0');
-        const m = String(i.mes + 1).padStart(2, '0');
-        return `<div style="font-size: 0.7rem; color: var(--text); margin-bottom: 2px;">• ${d}/${m} - ${i.desc.substring(0,12)}</div>`;
-    };
-
-    // 3. Construção do Layout
-    let html = `
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
-                ${(pago + pendente) > receitas ? '⚠️' : '✅'} 
-                <span>${(pago + pendente) > receitas ? '<b>Orçamento apertado</b>' : '<b>Orçamento saudável</b>'}</span>
-            </div>
-
-            <div style="background: rgba(0,0,0,0.04); padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; border-left: 3px solid var(--blue);">
-                <i class="fas fa-chart-line"></i> Atenção em <b>${nomeCat}</b>.
-            </div>
-    `;
-
-    if(atrasados.length > 0 || proximos.length > 0) {
-        html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">`;
-        
-        // Coluna Vencidos
-        if(atrasados.length > 0) {
-            html += `
-                <div style="background: rgba(231, 76, 60, 0.08); padding: 6px; border-radius: 6px; border: 1px solid rgba(231, 76, 60, 0.3);">
-                    <div style="color: var(--red); font-size: 0.6rem; font-weight: bold; margin-bottom: 4px; text-transform: uppercase;">Vencidos</div>
-                    ${atrasados.slice(0, 3).map(formatarLinha).join('')}
-                </div>`;
-        } else { html += `<div></div>`; }
-
-        // Coluna Próximos
-        if(proximos.length > 0) {
-            html += `
-                <div style="background: rgba(52, 152, 219, 0.08); padding: 6px; border-radius: 6px; border: 1px solid rgba(52, 152, 219, 0.3);">
-                    <div style="color: var(--blue); font-size: 0.6rem; font-weight: bold; margin-bottom: 4px; text-transform: uppercase;">Próximos</div>
-                    ${proximos.slice(0, 3).map(formatarLinha).join('')}
-                </div>`;
-        }
-        
-        html += `</div>`;
+    // XP por pagamentos realizados
+    const itensPagos = dados.filter(i => i.status === 'pago').length;
+    xp += (itensPagos * 15);
+    
+    // Bônus por economia (se gasto < 70% da receita)
+    if (receitas > 0 && totalDespesas < (receitas * 0.7)) {
+        xp += 50;
+    }
+    
+    // Cálculo de Nível (Cada 200 XP = 1 Nível)
+    const nivel = Math.floor(xp / 200) + 1;
+    const xpParaProximoNivel = xp % 200;
+    const porcentagemXP = (xpParaProximoNivel / 200) * 100;
+    
+    // Saúde Financeira (Baseado na sobra de caixa)
+    let score = 0;
+    if (receitas > 0) {
+        score = Math.max(0, Math.min(100, ((receitas - totalDespesas) / receitas) * 100));
     }
 
-    html += `</div>`;
-    conselho.innerHTML = html;
-    dDica.innerText = economyTips[Math.floor(Math.random() * economyTips.length)];
-
+    // Atualiza Interface
+    document.getElementById('user-level').innerText = `Nível ${nivel}`;
+    document.getElementById('xp-fill').style.width = `${porcentagemXP}%`;
+    document.getElementById('xp-total').innerText = xp;
+    document.getElementById('health-score').innerText = `${score.toFixed(0)}%`;
+    
+    return { score, nivel };
 }
 
+    
+   function processarIA(receitas, pago, pendente) {
+    const conselho = document.getElementById('ai-advice');
+    const protocolo = document.getElementById('protocol-status');
+    const stats = calcularGamificacao(receitas, pago, pendente);
+    
+    const totalGasto = pago + pendente;
+    const sobra = receitas - totalGasto;
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
 
+    const faturasAtrasadas = dados.filter(i => 
+        i.mov === 'despesa' && i.status !== 'pago' && 
+        new Date(i.ano, i.mes, i.dia, 12, 0, 0) < hoje
+    );
+
+    const faturasAviso = dados.filter(i => {
+        if (i.mov !== 'despesa' || i.status === 'pago') return false;
+        const dataVenc = new Date(i.ano, i.mes, i.dia, 12, 0, 0);
+        const diffDias = Math.ceil((dataVenc - hoje) / (1000 * 60 * 60 * 24));
+        return diffDias >= 0 && diffDias <= 5;
+    });
+
+    let mensagem = "";
+    let statusProtocolo = "Protocolo Estável";
+    let classeProtocolo = "protocol-safe";
+
+    // MENSAGENS INTERATIVAS
+    if (faturasAtrasadas.length > 0) {
+        statusProtocolo = "DANDO RUIM: ATRASOS";
+        classeProtocolo = "protocol-danger";
+        mensagem = `Eita! Tem <b>${faturasAtrasadas.length} conta(s)</b> que já venceram. Se deixar acumular, o juros vira uma bola de neve e o score cai. Bora resolver isso? 💸`;
+    } 
+    else if (faturasAviso.length > 0) {
+        statusProtocolo = "OLHO NO CALENDÁRIO";
+        const nomes = faturasAviso.map(f => f.desc).join(", ");
+        mensagem = `Fica esperto: <b>${nomes}</b> vencendo nos próximos dias. Já separou o dinheiro pra não ter susto? 📅`;
+    }
+    else if (totalGasto > receitas && receitas > 0) {
+        statusProtocolo = "ZONA DE PERIGO";
+        classeProtocolo = "protocol-danger";
+        mensagem = `Opa, sinal vermelho! Você já gastou <b>R$ ${Math.abs(sobra).toFixed(2)}</b> a mais do que recebeu. Hora de segurar o cartão! 🛑`;
+    } 
+    else if (sobra > (receitas * 0.3)) {
+        statusProtocolo = "MODO INVESTIDOR ATIVADO";
+        mensagem = `Aí sim! Sobrou uma grana boa (30%+). Que tal mandar esse extra pra reserva em vez de gastar com bobeira? 🚀`;
+    } 
+    else if (pago > 0 && pendente === 0) {
+        statusProtocolo = "PAZ FINANCEIRA";
+        mensagem = `Tudo pago! Não tem nada pendente por aqui. Aproveita esse sossego (mas sem gastar o que não tem)! 😎`;
+    }
+    else {
+        mensagem = `Tudo sob controle por enquanto. Mantém esse ritmo que o seu XP vai subir rapidinho! ✨`;
+    }
+
+    protocolo.innerText = statusProtocolo;
+    protocolo.className = `protocol-badge ${classeProtocolo}`;
+    conselho.innerHTML = `<div style="margin-top:10px; font-size:0.85rem; line-height:1.4;"><i class="fas fa-brain" style="color:var(--blue)"></i> ${mensagem}</div>`;
+}
 
 
 
@@ -603,32 +721,7 @@ let infoS = ` | <span style="color:${corDestaque}; font-weight:800; ${isVencido 
     }
 
 // 4. Coluna de Valores com a soma das parcelas restantes
-let corValor = isRec ? corVerdeForte : (item.status === 'pago' ? corVerdeForte : (item.status === 'parcial' ? corLaranjaForte : corVermelhoForte));
-let colunaValores = `<div style="font-weight:bold; color:${corValor}; font-size: 1.05rem;">R$ ${vTotal.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</div>`;
 
-if (!isRec) {
-    let textoRestanteParcelas = "";
-    // Se for parcelado e tiver um grupoId, busca o total que falta no "carnê"
-    if (item.grupoId && totalRestantePorGrupo[item.grupoId]) {
-        textoRestanteParcelas = `<div style="font-size: 0.65rem; color: #7f8c8d; font-weight: normal;">Total Restante: R$ ${totalRestantePorGrupo[item.grupoId].toLocaleString('pt-br', { minimumFractionDigits: 2 })}</div>`;
-    }
-
-    if (item.status === 'parcial') {
-        colunaValores = `
-            <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1;">
-                <div style="font-weight:bold; color:${corVermelhoForte}; font-size: 1.05rem;">R$ ${vTotal.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</div>
-                <div style="font-size: 0.7rem; color: ${corVerdeForte}; font-weight: bold;">Pago: R$ ${vPago.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</div>
-                <div style="font-weight:bold; color:${corLaranjaForte}; font-size: 0.75rem; opacity: 0.9;">Falta: R$ ${(vTotal - vPago).toLocaleString('pt-br', { minimumFractionDigits: 2 })}</div>
-                ${textoRestanteParcelas}
-            </div>`;
-    } else if (item.status === 'pendente') {
-        colunaValores = `
-            <div style="display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1;">
-                <div style="font-weight:bold; color:${corVermelhoForte}; font-size: 1.05rem;">R$ ${vTotal.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</div>
-                ${textoRestanteParcelas}
-            </div>`;
-    }
-}
 
    
            let fundoCor;
@@ -642,29 +735,83 @@ if (!isRec) {
     
 
     const larguraSwipe = isRec ? 140 : 280;
+const vFaltaItem = vTotal - vPago; // Calcula o que resta pagar neste card específico
+const corValor = isRec ? corVerdeForte : (item.status === 'pago' ? corVerdeForte : (item.status === 'parcial' ? corLaranjaForte : corVermelhoForte));
 
-    // 6. Renderização
-    lista.innerHTML += `
-        <div class="item-wrapper" style="margin-bottom: 12px; border-radius: 15px; background: #34495e; position: relative; overflow: hidden; height: 95px; border: 1px solid ${isRec ? corVerdeForte : 'transparent'};">
-            <div class="actions" style="width: ${larguraSwipe}px; position: absolute; right: 0; top: 0; bottom: 0; display: flex; z-index: 1;">
-                ${!isRec ? `
-                    <div class="act-btn" onclick="setPagoTotal(${item.id})" style="background:${corVerdeForte}; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: white; font-weight: bold;">PAGO</div>
-                    <div class="act-btn" onclick="setPagoParcial(${item.id})" style="background:#f39c12; flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: white; font-weight: bold;">PARCIAL</div>
-                ` : ''}
-                <div class="act-btn" onclick="confirmarEdicao(${item.id})" style="background:var(--blue); flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: white; font-weight: bold;">EDITAR</div>
-                <div class="act-btn" onclick="abrirModalExcluir(${item.id})" style="background:var(--red); flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: white; font-weight: bold;">DEL</div>
+// 1. Lógica da Coluna de Valores (Lado Direito)
+let colunaValoresCyber = "";
+
+if (isRec) {
+    colunaValoresCyber = `
+        <div style="text-align: right;">
+            <div style="font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--green); font-size: 1.2rem; text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);">
+                + ${vTotal.toLocaleString('pt-br', { minimumFractionDigits: 2 })}
             </div>
-            <div class="item-body status-${item.status}" 
-                 onclick="fecharTodosSwipes(this); const s = this.style; s.transform = (s.transform === 'translateX(-${larguraSwipe}px)') ? 'translateX(0)' : 'translateX(-${larguraSwipe}px)'" 
-                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background: ${fundoCor}; display: flex; align-items: center; padding: 0 15px; transition: 0.3s ease; transform: translateX(0); border-left: 10px solid ${corDestaque} !important;">
-                <div style="margin-right:12px; font-size:1.3rem;">${isRec ? '💰' : (iconMap[item.categoria] || '🏷️')}</div>
-                <div style="flex:1">
-                    <b style="${isRec ? `color:${corVerdeForte}` : 'color:var(--text)'}">${item.desc} ${item.parc ? `<small>(${item.parc})</small>` : ''}</b><br>
-                    <small style="opacity:0.8; font-weight: 500; color:var(--text)">${infoDatas}${infoS}</small>
-                </div>
-                ${colunaValores}
-            </div>
+            <small style="font-size: 0.6rem; color: var(--green); opacity: 0.8; font-family: monospace;">CREDIT_RECEIVED</small>
         </div>`;
+} else {
+    colunaValoresCyber = `
+        <div style="text-align: right; display: flex; flex-direction: column; justify-content: center; line-height: 1.2;">
+            <div style="font-family: 'Rajdhani', sans-serif; font-weight: 700; color: ${corValor}; font-size: 1.1rem; text-shadow: 0 0 8px ${corValor}44;">
+                ${item.status === 'pago' ? '✅' : 'R$'} ${vTotal.toLocaleString('pt-br', { minimumFractionDigits: 2 })}
+            </div>`;
+
+    if (item.status !== 'pago') {
+        if (vPago > 0) {
+            colunaValoresCyber += `<small style="color: var(--green); font-size: 0.6rem; font-family: monospace;">REDEEMED: ${vPago.toLocaleString('pt-br', { minimumFractionDigits: 2 })}</small>`;
+        }
+        // EXIBE O VALOR QUE FALTA (MISSING)
+        colunaValoresCyber += `
+            <small style="color: var(--yellow); font-size: 0.65rem; font-family: monospace; font-weight: bold;">
+                PENDENTE: ${vFaltaItem.toLocaleString('pt-br', { minimumFractionDigits: 2 })}
+            </small>`;
+    }
+
+    if (item.grupoId && totalRestantePorGrupo[item.grupoId] > 0) {
+        colunaValoresCyber += `
+            <div style="font-size: 0.55rem; color: var(--blue); opacity: 0.7; font-family: monospace; border-top: 1px dashed rgba(0,212,255,0.3); margin-top: 4px; padding-top: 2px;">
+                TOTAL_DEBT: ${totalRestantePorGrupo[item.grupoId].toLocaleString('pt-br', { minimumFractionDigits: 2 })}
+            </div>`;
+    }
+    colunaValoresCyber += `</div>`;
+}
+
+// 2. Renderização do Card na Lista
+lista.innerHTML += `
+    <div class="item-wrapper" style="margin-bottom: 12px; border-radius: 15px; background: #1a1a1a; position: relative; overflow: hidden; height: 95px; border: 1px solid ${isRec ? 'var(--green)' : 'rgba(0,212,255,0.2)'}; clip-path: polygon(0 0, 95% 0, 100% 25%, 100% 100%, 5% 100%, 0 75%);">
+        <div class="actions" style="width: ${larguraSwipe}px; position: absolute; right: 0; top: 0; bottom: 0; display: flex; z-index: 1;">
+            ${!isRec ? `
+                <div class="act-btn" onclick="setPagoTotal(${item.id})" style="background:var(--green); flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #000; font-weight: bold;">PAGO</div>
+                <div class="act-btn" onclick="setPagoParcial(${item.id})" style="background:var(--yellow); flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #000; font-weight: bold;">PARCIAL</div>
+            ` : ''}
+            <div class="act-btn" onclick="confirmarEdicao(${item.id})" style="background:var(--blue); flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #000; font-weight: bold;">EDITAR</div>
+            <div class="act-btn" onclick="abrirModalExcluir(${item.id})" style="background:var(--red); flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: white; font-weight: bold;">DEL</div>
+        </div>
+
+        <div class="item-body" 
+             onclick="fecharTodosSwipes(this); this.style.transform = (this.style.transform === 'translateX(-${larguraSwipe}px)') ? 'translateX(0)' : 'translateX(-${larguraSwipe}px)'" 
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; background: ${fundoCor}; display: flex; align-items: center; padding: 0 15px; transition: 0.3s ease; transform: translateX(0); border-left: 10px solid ${corDestaque} !important;">
+            
+            <div style="margin-right:12px; font-size:1.3rem;">${isRec ? '💰' : (iconMap[item.categoria] || '🏷️')}</div>
+            
+            <div style="flex:1">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <b style="font-family: 'Rajdhani', sans-serif; text-transform: uppercase; color: ${isRec ? 'var(--green)' : 'var(--text)'}">${item.desc}</b>
+                    
+                    ${item.parc ? `
+                        <span style="background: rgba(0, 212, 255, 0.1); color: var(--blue); border: 1px solid var(--blue); padding: 0px 6px; font-size: 0.6rem; font-family: monospace; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);">
+                            UNIT_${item.parc}
+                        </span>` : ''}
+                </div>
+                <small style="opacity:0.8; font-family: monospace; font-size: 0.65rem; color:var(--text)">
+                    ${infoDatas} | <span style="color:${corDestaque}; font-weight:bold;">${textoStatus.toUpperCase()} _</span>
+                </small>
+            </div>
+            
+            ${colunaValoresCyber}
+        </div>
+    </div>`;
+ 
 });
 
 
