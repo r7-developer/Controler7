@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestor de Logistica - R7</title>
+    <title>Logistica PRO - Gestão Total</title>
     <style>
         :root { --primary: #075e54; --secondary: #25d366; --accent: #007bff; --danger: #ff5252; --warning: #ffa000; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; padding-bottom: 80px; }
@@ -29,6 +29,10 @@
         .stars { color: #ffca28; font-weight: bold; letter-spacing: 2px; }
         .item-escala { background: #fffde7; padding: 12px; margin: 8px 0; border-radius: 10px; border-left: 5px solid var(--warning); display: flex; justify-content: space-between; align-items: center; }
         .badge-info { background: #f8f9fa; color: #666; font-size: 0.75rem; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+        
+        .cat-title { font-size: 0.85rem; font-weight: bold; color: #333; background: #e9ecef; padding: 8px; border-radius: 6px; margin-top: 15px; display: block; }
+        .btn-status { width: 70px; height: 30px; border-radius: 15px; font-size: 0.7rem; color: white; border: none; font-weight: bold; }
+        .status-on { background: var(--secondary); } .status-off { background: var(--danger); }
     </style>
 </head>
 <body>
@@ -36,7 +40,7 @@
 <div id="toast"></div>
 
 <div class="base-management">
-    <h2>🏢 Gestão de Bases - R7</h2>
+    <h2>🏢 Gestão de Bases</h2>
     <select id="seletorBase" onchange="mudarBase()"></select>
     <div style="display: flex; gap: 5px;">
         <button class="btn-action" onclick="novaBase()">➕ Criar</button>
@@ -44,9 +48,9 @@
         <button class="btn-action" style="background:var(--danger)" onclick="deletarBase()">🗑️ Deletar</button>
     </div>
     <div style="display: flex; gap: 5px; margin-top: 10px;">
-        <button class="btn-action" style="background:#444" onclick="exportarDados()">📥 Backup bases (Exportar)</button>
+        <button class="btn-action" style="background:#444" onclick="exportarDados()">📥 Backup (Exportar)</button>
         <input type="file" id="importFile" style="display:none" onchange="importarDados(event)">
-        <button class="btn-action" style="background:#444" onclick="document.getElementById('importFile').click()">📤 Importar base</button>
+        <button class="btn-action" style="background:#444" onclick="document.getElementById('importFile').click()">📤 Importar JSON</button>
     </div>
 </div>
 
@@ -55,10 +59,10 @@
 <div class="card" id="formCadastro">
     <h2 id="tituloForm">🚚 Cadastro de Motorista</h2>
     <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
-    <input type="text" id="moraArea" placeholder="Cidade onde mora(Ex: RIO, NITEROI)">
-    <input type="text" id="experienciaInput" placeholder="Experiência (Ex: Conhece bem Centro)">
+    <input type="text" id="moraArea" placeholder="Cidade (Ex: RIO, NITEROI)">
+    <input type="text" id="experienciaInput" placeholder="Experiência">
     <select id="estrelasInput">
-        <option value="1">⭐ (Novato)</option><option value="2">⭐⭐ (Iniciante)</option><option value="3">⭐⭐⭐ (Operacional)</option><option value="4">⭐⭐⭐⭐ (Experiente)</option><option value="5" selected>⭐⭐⭐⭐⭐ (Antigo)</option>
+        <option value="1">⭐</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5" selected>⭐⭐⭐⭐⭐</option>
     </select>
     <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
     <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
@@ -86,6 +90,12 @@
 </div>
 
 <div class="card">
+    <h2>🟢 Disponibilidade (FROTA)</h2>
+    <div id="listaDisponibilidade"></div>
+    <button onclick="gerarTextoDisp()" style="background:var(--secondary); color:white; border-radius:8px; height:45px; border:none; margin-top:10px; font-weight:bold;">📋 COPIAR DISPONIBILIDADE</button>
+</div>
+
+<div class="card">
     <h2>📂 Banco de Dados Geral</h2>
     <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar no banco..." oninput="renderTudo(this.value)">
     <div id="listaBanco"></div>
@@ -109,6 +119,8 @@
         carregarDadosBase();
         document.getElementById('displayDataHoje').innerText = "📅 " + (new Date().toLocaleDateString('pt-BR'));
         renderTudo();
+        renderDisp();
+        renderRevisao();
     }
 
     function renderBases() {
@@ -231,6 +243,7 @@
         salvarDADOS();
         limparFormulario();
         renderTudo();
+        renderDisp();
         showToast("Salvo!");
     }
 
@@ -244,24 +257,41 @@
         document.getElementById('btnCancelar').style.display = "none";
     }
 
+    function renderDisp() {
+        const div = document.getElementById('listaDisponibilidade');
+        div.innerHTML = "";
+        const tipos = ['FIORINO', 'VUC', 'CARRO'];
+        tipos.forEach(t => {
+            const lista = motoristas.filter(m => m.modelo === t && m.tipo === 'FROTA');
+            if(lista.length > 0) {
+                div.innerHTML += `<div class="cat-title">${getIcon(t)} ${t}S</div>`;
+                lista.forEach(m => {
+                    const realIdx = motoristas.indexOf(m);
+                    div.innerHTML += `<div class="disp-item">
+                        <span>${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]} <span class="stars">${getStars(m.estrelas)}</span></span>
+                        <button onclick="motoristas[${realIdx}].ativo=!motoristas[${realIdx}].ativo; salvarDADOS(); renderDisp(); renderTudo();" class="btn-status ${m.ativo ? 'status-on' : 'status-off'}">${m.ativo ? 'DISP' : 'FOLGA'}</button>
+                    </div>`;
+                });
+            }
+        });
+    }
+
     function renderTudo(filtro = "") {
         const div = document.getElementById('listaBanco');
         div.innerHTML = "";
-        motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m, idx) => {
+        motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m) => {
             const realIdx = motoristas.indexOf(m);
             div.innerHTML += `<div class="disp-item">
                 <div style="flex:1">
                     <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span><br>
-                    <span class="badge-info">${m.tipo} | ${m.mora}</span><br>
-                    <small style="color:gray">EXP: ${m.experiencia}</small>
+                    <span class="badge-info">${m.tipo} | ${m.mora}</span>
                 </div>
                 <div>
-                    <button onclick="carregarEdicao(${realIdx})" style="border:none; background:none; font-size:1.2rem; cursor:pointer;">✏️</button>
-                    <button onclick="motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo();" style="border:none; background:none; font-size:1.2rem; cursor:pointer; color:red;">❌</button>
+                    <button onclick="carregarEdicao(${realIdx})" style="border:none; background:none; font-size:1.2rem;">✏️</button>
+                    <button onclick="motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo(); renderDisp();" style="border:none; background:none; font-size:1.2rem; color:red;">❌</button>
                 </div>
             </div>`;
         });
-        renderRevisao();
     }
 
     function carregarEdicao(idx) {
@@ -315,20 +345,62 @@
         const div = document.getElementById('revisaoEscala');
         div.innerHTML = "";
         ['AM', 'PM'].forEach(t => {
-            escalaAtual[t].forEach((m, idx) => {
-                div.innerHTML += `<div class="item-escala">
-                    <span><b>[${t}]</b> ${m.nome} - ROTA: ${m.rota}</span>
-                    <button onclick="escalaAtual['${t}'].splice(${idx},1); salvarDADOS(); renderRevisao();" style="border:none; background:none; color:red; font-weight:bold;">❌</button>
-                </div>`;
-            });
+            if(escalaAtual[t].length > 0) {
+                div.innerHTML += `<div class="cat-title">ESCALA ${t}</div>`;
+                ['FIORINO', 'VUC', 'CARRO'].forEach(tipoVeic => {
+                    const filtrados = escalaAtual[t].filter(m => m.modelo === tipoVeic);
+                    if(filtrados.length > 0) {
+                        div.innerHTML += `<small style="display:block; margin-top:5px; font-weight:bold; color:var(--accent)">${tipoVeic}S:</small>`;
+                        filtrados.forEach((m) => {
+                            const idxNaEscala = escalaAtual[t].indexOf(m);
+                            div.innerHTML += `<div class="item-escala">
+                                <span>${m.nome.split(' ')[0]} - <b>${m.rota}</b></span>
+                                <button onclick="escalaAtual['${t}'].splice(${idxNaEscala},1); salvarDADOS(); renderRevisao();" style="border:none; background:none; color:red; font-weight:bold;">❌</button>
+                            </div>`;
+                        });
+                    }
+                });
+            }
         });
     }
 
     function gerarTexto(t) {
+        let filtroCidade = prompt("Filtrar escala por CIDADE? (Deixe vazio para todos)");
+        filtroCidade = limparTexto(filtroCidade);
         let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n📅 ${new Date().toLocaleDateString('pt-BR')}\n\n`;
-        escalaAtual[t].forEach(m => { txt += `• ${getIcon(m.modelo)} ${m.nome} - ROTA: ${m.rota}\n`; });
+        let encontrou = false;
+        ['FIORINO', 'VUC', 'CARRO'].forEach(tipo => {
+            let lista = escalaAtual[t].filter(m => m.modelo === tipo);
+            if(filtroCidade) lista = lista.filter(m => m.cidade.includes(filtroCidade));
+            if(lista.length > 0) {
+                encontrou = true;
+                txt += `*${tipo}S:*\n`;
+                lista.forEach(m => { txt += `• ${m.nome.split(' ')[0]} - ROTA: ${m.rota} - ROM: ${m.romaneio}\n`; });
+                txt += `\n`;
+            }
+        });
+        if(!encontrou) return alert("Nenhum motorista nesta cidade.");
         navigator.clipboard.writeText(txt);
-        showToast("Copiado!");
+        showToast("Escala Copiada!");
+    }
+
+    function gerarTextoDisp() {
+        let filtroCidade = prompt("Filtrar Disponibilidade por CIDADE? (Deixe vazio para todos)");
+        filtroCidade = limparTexto(filtroCidade);
+        let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+        let encontrou = false;
+        ['FIORINO', 'VUC', 'CARRO'].forEach(tipo => {
+            let lista = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === tipo);
+            if(filtroCidade) lista = lista.filter(m => m.mora.includes(filtroCidade));
+            if(lista.length > 0) {
+                encontrou = true;
+                txt += `*${tipo}S:*\n`;
+                txt += lista.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n\n`;
+            }
+        });
+        if(!encontrou) return alert("Nada encontrado.");
+        navigator.clipboard.writeText(txt);
+        showToast("Disponibilidade Copiada!");
     }
 
     function resetGeral() { if(confirm("Apagar TUDO?")) { localStorage.clear(); location.reload(); } }
