@@ -3,168 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestão Operacional Inteligente - R7</title>
+    <title>Logistica PRO - Gestão Total</title>
     <style>
-        :root {
-            --primary: #1e293b; /* Azul Marinho Moderno */
-            --secondary: #10b981; /* Verde Esmeralda */
-            --accent: #3b82f6; /* Azul Royal */
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-sub: #64748b;
-        }
-
-        body { 
-            font-family: 'Inter', -apple-system, sans-serif; 
-            background: var(--bg); 
-            color: var(--text-main);
-            margin: 0; padding: 15px; padding-bottom: 100px;
-            line-height: 1.5;
-        }
-
-        /* Notificações */
-        #toast { visibility: hidden; min-width: 250px; background: var(--primary); color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        :root { --primary: #075e54; --secondary: #25d366; --accent: #007bff; --danger: #ff5252; --warning: #ffa000; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; padding-bottom: 80px; }
+        
+        #toast { visibility: hidden; min-width: 200px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2s; }
-
-        /* Cabeçalhos e Containers */
-        .section-title { font-size: 1rem; font-weight: 700; color: var(--primary); margin: 20px 0 10px 5px; display: flex; align-items: center; gap: 8px; }
-        .header-main { background: var(--primary); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        
-        .card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; border: 1px solid #e2e8f0; }
-
-        /* Formulários */
-        input, select { 
-            width: 100%; height: 48px; padding: 12px; margin-bottom: 12px; 
-            border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; 
-            transition: border-color 0.2s; box-sizing: border-box;
-        }
-        input:focus { border-color: var(--accent); outline: none; }
-
-        /* Botões */
-        button { 
-            width: 100%; min-height: 48px; border: none; border-radius: 10px; 
-            font-weight: 600; cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        button:active { transform: scale(0.98); }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-success { background: var(--secondary); color: white; }
-        .btn-outline { background: #fff; border: 1.5px solid #e2e8f0; color: var(--text-main); height: 38px; min-height: 38px; font-size: 0.8rem; }
-        .btn-danger { background: #fee2e2; color: var(--danger); }
-
-        /* Lista de Motoristas (Banco de Dados) */
-        .db-card { 
-            display: flex; justify-content: space-between; align-items: flex-start;
-            padding: 15px; border-radius: 12px; background: #fff;
-            border: 1px solid #f1f5f9; margin-bottom: 10px; transition: 0.2s;
-        }
-        .db-card:hover { border-color: var(--accent); }
-        .db-info b { font-size: 1rem; display: block; margin-bottom: 4px; }
-        
-        /* Badges e Tags */
-        .badge-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-        .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
-        .tag-gray { background: #f1f5f9; color: #475569; }
-        .tag-blue { background: #dbeafe; color: #1e40af; }
-        .tag-exp { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-
-        /* Disponibilidade e Escala */
-        .disp-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
-        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; border: none; color: white; font-weight: bold; width: 80px; }
-        .on { background: var(--secondary); }
-        .off { background: var(--danger); }
-        
-        .cat-divider { font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; font-weight: 800; border-left: 3px solid var(--accent); padding-left: 8px; }
-
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+        .base-management { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px solid #333; }
+        .header-box { background: var(--primary); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 1.2rem; }
+        .card { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        h2 { color: var(--primary); font-size: 1.1rem; margin: 0 0 10px 0; border-bottom: 2px solid var(--secondary); padding-bottom: 5px; }
+        
+        input, select { width: 100%; height: 45px; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        
+        button { width: 100%; min-height: 48px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-save { background: var(--secondary); color: white; }
+        .btn-edit-mode { background: var(--warning); color: #000; }
+        .btn-action { background: #6c757d; color: white; margin-top: 5px; height: 35px; min-height: 35px; font-size: 0.8rem; }
+        
+        .disp-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
+        .stars { color: #ffca28; font-weight: bold; letter-spacing: 2px; }
+        .item-escala { background: #fffde7; padding: 12px; margin: 8px 0; border-radius: 10px; border-left: 5px solid var(--warning); display: flex; justify-content: space-between; align-items: center; }
+        .badge-info { background: #f8f9fa; color: #666; font-size: 0.75rem; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+        
+        .cat-title { font-size: 0.85rem; font-weight: bold; color: #333; background: #e9ecef; padding: 8px; border-radius: 6px; margin-top: 15px; display: block; }
+        .btn-status { width: 70px; height: 30px; border-radius: 15px; font-size: 0.7rem; color: white; border: none; font-weight: bold; }
+        .status-on { background: var(--secondary); } .status-off { background: var(--danger); }
     </style>
 </head>
 <body>
 
 <div id="toast"></div>
 
-<div class="card" style="border: 2px solid var(--primary);">
-    <div style="font-weight: 800; margin-bottom: 10px; color: var(--primary);">📍 BASE SELECIONADA</div>
-    <select id="seletorBase" onchange="mudarBase()" style="font-weight: bold; color: var(--accent);"></select>
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-        <button class="btn-outline" onclick="novaBase()">➕ Nova</button>
-        <button class="btn-outline" onclick="renomearBase()">✏️ Nome</button>
-        <button class="btn-outline btn-danger" onclick="deletarBase()">🗑️ Apagar</button>
+<div class="base-management">
+    <h2>🏢 Gestão de Bases</h2>
+    <select id="seletorBase" onchange="mudarBase()"></select>
+    <div style="display: flex; gap: 5px;">
+        <button class="btn-action" onclick="novaBase()">➕ Criar</button>
+        <button class="btn-action" onclick="renomearBase()">✏️ Nome</button>
+        <button class="btn-action" style="background:var(--danger)" onclick="deletarBase()">🗑️ Deletar</button>
     </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-        <button class="btn-outline" style="background: #f8fafc;" onclick="exportarDados()">📥 Backup</button>
-        <button class="btn-outline" style="background: #f8fafc;" onclick="document.getElementById('importFile').click()">📤 Importar</button>
+    <div style="display: flex; gap: 5px; margin-top: 10px;">
+        <button class="btn-action" style="background:#444" onclick="exportarDados()">📥 Backup (Exportar)</button>
         <input type="file" id="importFile" style="display:none" onchange="importarDados(event)">
+        <button class="btn-action" style="background:#444" onclick="document.getElementById('importFile').click()">📤 Importar JSON</button>
     </div>
 </div>
 
-<div class="header-main">
-    <div id="displayDataHoje" style="font-size: 0.9rem; opacity: 0.9;"></div>
-    <div style="font-size: 1.4rem; font-weight: 900; letter-spacing: -1px;">Gestor inteligente - R7</div>
-</div>
+<div class="header-box"><div id="displayDataHoje"></div></div>
 
-<div class="section-title">🚚 CADASTRO DE MOTORISTA</div>
-<div class="card">
-    <input type="text" id="nomeCompleto" placeholder="Nome Completo">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <input type="text" id="moraArea" placeholder="Cidade/Base">
-        <select id="estrelasInput">
-            <option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option>
-            <option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option>
-        </select>
-    </div>
-    <input type="text" id="experienciaInput" placeholder="Experiência (Ex: Conhece bem o Centro)">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
-        <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
-    </div>
-    <button class="btn-success" id="btnSalvar" onclick="salvarMotorista()">💾 SALVAR NO SISTEMA</button>
-    <button id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top:10px;" class="btn-outline">CANCELAR EDIÇÃO</button>
-</div>
-
-<div class="section-title">📝 ESCALA DIÁRIA</div>
-<div class="card">
-    <select id="turnoSelecao" style="background: #f1f5f9; font-weight: bold; border: none;">
-        <option value="AM">☀️ TURNO MANHÃ (AM)</option>
-        <option value="PM">🌙 TURNO TARDE (PM)</option>
+<div class="card" id="formCadastro">
+    <h2 id="tituloForm">🚚 Cadastro de Motorista</h2>
+    <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
+    <input type="text" id="moraArea" placeholder="Cidade (Ex: RIO, NITEROI)">
+    <input type="text" id="experienciaInput" placeholder="Experiência">
+    <select id="estrelasInput">
+        <option value="1">⭐</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5" selected>⭐⭐⭐⭐⭐</option>
     </select>
-    <input type="text" id="buscaEscala" placeholder="🔍 Digite o nome para escalar..." oninput="buscarParaEscala(this.value)">
+    <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
+    <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
+    <button class="btn-save" id="btnSalvar" onclick="salvarMotorista()">💾 SALVAR MOTORISTA</button>
+    <button id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top:10px; background:#666; color:white; border:none; border-radius:8px; height:40px; width:100%;">CANCELAR / LIMPAR</button>
+</div>
+
+<div class="card">
+    <h2>📝 Escala Diaria</h2>
+    <select id="turnoSelecao"><option value="AM">☀️ TURNO AM</option><option value="PM">🌙 TURNO PM</option></select>
+    <input type="text" id="buscaEscala" placeholder="🔍 Buscar para escala..." oninput="buscarParaEscala(this.value)">
     <div id="listaBuscaEscala"></div>
-    
-    <div id="camposExtras" style="display:none; background: #f0f7ff; padding: 15px; border-radius: 12px; border: 2px solid var(--accent); margin: 10px 0;">
-        <div id="nomeSeleccionado" style="font-weight: 900; color: var(--accent); margin-bottom: 10px;"></div>
-        <input type="text" id="rotaInput" placeholder="📍 Qual a Rota?">
-        <input type="text" id="romaneioInput" placeholder="🔢 Nº Romaneio">
-        <button onclick="confirmarAdicao()" class="btn-primary">CONFIRMAR ESCALA</button>
+    <div id="camposExtras" style="display:none; background:#e3f2fd; padding:15px; border-radius:12px; margin-top:10px; border:2px solid var(--accent);">
+        <b id="nomeSeleccionado"></b><br>
+        <input type="text" id="rotaInput" placeholder="📍 Rota">
+        <input type="text" id="cidadeInput" placeholder="🌆 Cidade Filtro">
+        <input type="text" id="romaneioInput" placeholder="🔢 Romaneio">
+        <button onclick="confirmarAdicao()" style="background:var(--accent); color:white; width:100%; border:none; border-radius:8px; height:45px;">CONFIRMAR NA ESCALA</button>
     </div>
-
     <div id="revisaoEscala"></div>
-    
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
-        <button onclick="gerarTexto('AM')" class="btn-primary" style="height: 55px;">📋 COPIAR AM</button>
-        <button onclick="gerarTexto('PM')" class="btn-primary" style="height: 55px; background: #6366f1;">📋 COPIAR PM</button>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
+        <button onclick="gerarTexto('AM')" style="background:var(--accent); color:white; border-radius:8px; height:45px; border:none;">COPIAR AM</button>
+        <button onclick="gerarTexto('PM')" style="background:#6610f2; color:white; border-radius:8px; height:45px; border:none;">COPIAR PM</button>
     </div>
 </div>
 
-<div class="section-title">🟢 DISPONIBILIDADE FROTA</div>
 <div class="card">
+    <h2>🟢 Disponibilidade (FROTA)</h2>
     <div id="listaDisponibilidade"></div>
-    <button onclick="gerarTextoDisp()" class="btn-success" style="margin-top: 15px; background: #059669;">📋 COPIAR LISTA DISP.</button>
+    <button onclick="gerarTextoDisp()" style="background:var(--secondary); color:white; border-radius:8px; height:45px; border:none; margin-top:10px; font-weight:bold;">📋 COPIAR DISPONIBILIDADE</button>
 </div>
 
-<div class="section-title">📂 BANCO DE DADOS GERAL</div>
 <div class="card">
-    <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar motorista..." oninput="renderTudo(this.value)">
+    <h2>📂 Banco de Dados Geral</h2>
+    <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar no banco..." oninput="renderTudo(this.value)">
     <div id="listaBanco"></div>
 </div>
 
-<button onclick="resetGeral()" style="background:none; color:#cbd5e1; font-size:0.7rem; margin:40px auto; display:block; border:none; text-decoration: underline;">LIMPAR TODO O SISTEMA</button>
+<button onclick="resetGeral()" style="background:none; color:gray; font-size:0.6rem; margin:20px auto; display:block; border:1px solid #ccc;">RESET TOTAL</button>
 <script>
-    const limparTexto = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim() : "";
+    function limparTexto(str) { return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim() : ""; }
     const getIcon = (mod) => mod === 'FIORINO' ? '🚐' : (mod === 'VUC' ? '🚚' : '🚗');
     const getStars = (n) => "⭐".repeat(parseInt(n));
 
@@ -178,7 +117,7 @@
         if(!bases.includes(baseAtiva)) baseAtiva = bases[0];
         renderBases();
         carregarDadosBase();
-        document.getElementById('displayDataHoje').innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
+        document.getElementById('displayDataHoje').innerText = "📅 " + (new Date().toLocaleDateString('pt-BR'));
         renderTudo();
         renderDisp();
         renderRevisao();
@@ -186,7 +125,13 @@
 
     function renderBases() {
         const sel = document.getElementById('seletorBase');
-        sel.innerHTML = bases.map(b => `<option value="${b}" ${b === baseAtiva ? 'selected' : ''}>📍 ${b}</option>`).join('');
+        sel.innerHTML = "";
+        bases.forEach(b => {
+            let opt = document.createElement('option');
+            opt.value = b; opt.innerText = "📍 " + b;
+            if(b === baseAtiva) opt.selected = true;
+            sel.appendChild(opt);
+        });
     }
 
     function mudarBase() {
@@ -213,20 +158,22 @@
         if(n) {
             n = limparTexto(n);
             let idx = bases.indexOf(baseAtiva);
-            localStorage.setItem('MOT_' + n, localStorage.getItem('MOT_' + baseAtiva));
-            localStorage.setItem('ESC_' + n, localStorage.getItem('ESC_' + baseAtiva));
-            localStorage.removeItem('MOT_' + baseAtiva);
-            localStorage.removeItem('ESC_' + baseAtiva);
-            bases[idx] = n;
-            localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
-            localStorage.setItem('LOG_BASE_ATIVA', n);
-            location.reload();
+            if(idx !== -1) {
+                localStorage.setItem('MOT_' + n, localStorage.getItem('MOT_' + baseAtiva));
+                localStorage.setItem('ESC_' + n, localStorage.getItem('ESC_' + baseAtiva));
+                localStorage.removeItem('MOT_' + baseAtiva);
+                localStorage.removeItem('ESC_' + baseAtiva);
+                bases[idx] = n;
+                localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
+                localStorage.setItem('LOG_BASE_ATIVA', n);
+                location.reload();
+            }
         }
     }
 
     function deletarBase() {
-        if(bases.length <= 1) return alert("Não pode apagar a única base.");
-        if(confirm("Apagar base " + baseAtiva + "?")) {
+        if(bases.length <= 1) return alert("Não é possível deletar a única base.");
+        if(confirm("Apagar base " + baseAtiva + " permanentemente?")) {
             localStorage.removeItem('MOT_' + baseAtiva);
             localStorage.removeItem('ESC_' + baseAtiva);
             bases = bases.filter(b => b !== baseAtiva);
@@ -247,31 +194,34 @@
     }
 
     function exportarDados() {
-        let backup = { bases, dados: {} };
+        let backup = { bases: bases, dados: {} };
         bases.forEach(b => {
             backup.dados['MOT_'+b] = JSON.parse(localStorage.getItem('MOT_'+b)) || [];
             backup.dados['ESC_'+b] = JSON.parse(localStorage.getItem('ESC_'+b)) || { AM: [], PM: [] };
         });
-        const blob = new Blob([JSON.stringify(backup)], {type: 'application/json'});
-        const a = document.createElement('a');
+        let blob = new Blob([JSON.stringify(backup)], {type: 'application/json'});
+        let a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `backup_log_pro_${baseAtiva}.json`;
+        a.download = 'backup_logistica.json';
         a.click();
     }
 
     function importarDados(event) {
         let reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = function(e) {
             try {
                 let backup = JSON.parse(e.target.result);
-                backup.bases.forEach(b => {
-                    if(!bases.includes(b)) bases.push(b);
-                    localStorage.setItem('MOT_'+b, JSON.stringify(backup.dados['MOT_'+b]));
-                    localStorage.setItem('ESC_'+b, JSON.stringify(backup.dados['ESC_'+b]));
-                });
-                localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
-                alert("Dados importados!"); location.reload();
-            } catch { alert("Erro no arquivo!"); }
+                if(backup.bases) {
+                    backup.bases.forEach(b => {
+                        if(!bases.includes(b)) bases.push(b);
+                        localStorage.setItem('MOT_'+b, JSON.stringify(backup.dados['MOT_'+b]));
+                        localStorage.setItem('ESC_'+b, JSON.stringify(backup.dados['ESC_'+b]));
+                    });
+                    localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
+                    alert("Dados mesclados!");
+                    location.reload();
+                }
+            } catch (err) { alert("Arquivo JSON inválido."); }
         };
         reader.readAsText(event.target.files[0]);
     }
@@ -286,53 +236,61 @@
             tipo: document.getElementById('tipo').value,
             ativo: true
         };
-        if(!m.nome) return alert("Preencha o nome!");
+        if(!m.nome) return;
         if(editandoIndex === -1) motoristas.push(m);
         else motoristas[editandoIndex] = m;
         motoristas.sort((a,b) => a.nome.localeCompare(b.nome));
-        salvarDADOS(); limparFormulario(); renderTudo(); renderDisp();
-        showToast("✅ Motorista Salvo!");
+        salvarDADOS();
+        limparFormulario();
+        renderTudo();
+        renderDisp();
+        showToast("Salvo!");
     }
 
-    function renderTudo(filtro = "") {
-        const div = document.getElementById('listaBanco');
-        div.innerHTML = motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).map((m, idx) => {
-            const realIdx = motoristas.indexOf(m);
-            return `
-            <div class="db-card">
-                <div class="db-info">
-                    <b>${getIcon(m.modelo)} ${m.nome}</b>
-                    <span style="font-size:0.8rem;">${getStars(m.estrelas)}</span>
-                    <div class="badge-group">
-                        <span class="tag tag-blue">${m.tipo}</span>
-                        <span class="tag tag-gray">${m.mora || 'S/ BASE'}</span>
-                        ${m.experiencia ? `<span class="tag tag-exp">📍 EXP: ${m.experiencia}</span>` : ''}
-                    </div>
-                </div>
-                <div style="display:flex; gap:12px;">
-                    <button onclick="carregarEdicao(${realIdx})" style="background:none; color:var(--accent); font-size:1.2rem; width:auto; min-height:auto;">✏️</button>
-                    <button onclick="if(confirm('Apagar?')){motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo(); renderDisp();}" style="background:none; color:var(--danger); font-size:1.2rem; width:auto; min-height:auto;">🗑️</button>
-                </div>
-            </div>`;
-        }).join('');
+    function limparFormulario() {
+        editandoIndex = -1;
+        document.getElementById('nomeCompleto').value = "";
+        document.getElementById('moraArea').value = "";
+        document.getElementById('experienciaInput').value = "";
+        document.getElementById('tituloForm').innerText = "🚚 Cadastro de Motorista";
+        document.getElementById('btnSalvar').innerText = "💾 SALVAR MOTORISTA";
+        document.getElementById('btnCancelar').style.display = "none";
     }
 
     function renderDisp() {
         const div = document.getElementById('listaDisponibilidade');
         div.innerHTML = "";
-        ['FIORINO', 'VUC', 'CARRO'].forEach(t => {
+        const tipos = ['FIORINO', 'VUC', 'CARRO'];
+        tipos.forEach(t => {
             const lista = motoristas.filter(m => m.modelo === t && m.tipo === 'FROTA');
             if(lista.length > 0) {
-                div.innerHTML += `<div class="cat-divider">${t}s</div>`;
+                div.innerHTML += `<div class="cat-title">${getIcon(t)} ${t}S</div>`;
                 lista.forEach(m => {
                     const realIdx = motoristas.indexOf(m);
-                    div.innerHTML += `
-                    <div class="disp-row">
-                        <span style="font-weight:600; font-size:0.9rem;">${m.nome.split(' ')[0]}</span>
-                        <button onclick="motoristas[${realIdx}].ativo=!motoristas[${realIdx}].ativo; salvarDADOS(); renderDisp();" class="status-pill ${m.ativo ? 'on' : 'off'}">${m.ativo ? 'DISP' : 'FOLGA'}</button>
+                    div.innerHTML += `<div class="disp-item">
+                        <span>${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]} <span class="stars">${getStars(m.estrelas)}</span></span>
+                        <button onclick="motoristas[${realIdx}].ativo=!motoristas[${realIdx}].ativo; salvarDADOS(); renderDisp(); renderTudo();" class="btn-status ${m.ativo ? 'status-on' : 'status-off'}">${m.ativo ? 'DISP' : 'FOLGA'}</button>
                     </div>`;
                 });
             }
+        });
+    }
+
+    function renderTudo(filtro = "") {
+        const div = document.getElementById('listaBanco');
+        div.innerHTML = "";
+        motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m) => {
+            const realIdx = motoristas.indexOf(m);
+            div.innerHTML += `<div class="disp-item">
+                <div style="flex:1">
+                    <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span><br>
+                    <span class="badge-info">${m.tipo} | ${m.mora}</span>
+                </div>
+                <div>
+                    <button onclick="carregarEdicao(${realIdx})" style="border:none; background:none; font-size:1.2rem;">✏️</button>
+                    <button onclick="motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo(); renderDisp();" style="border:none; background:none; font-size:1.2rem; color:red;">❌</button>
+                </div>
+            </div>`;
         });
     }
 
@@ -341,14 +299,14 @@
         const m = motoristas[idx];
         document.getElementById('nomeCompleto').value = m.nome;
         document.getElementById('moraArea').value = m.mora;
-        document.getElementById('experienciaInput').value = m.experiencia || "";
+        document.getElementById('experienciaInput').value = m.experiencia;
         document.getElementById('estrelasInput').value = m.estrelas;
         document.getElementById('modelo').value = m.modelo;
         document.getElementById('tipo').value = m.tipo;
-        document.getElementById('tituloForm').innerText = "✏️ EDITANDO: " + m.nome;
-        document.getElementById('btnSalvar').innerText = "ATUALIZAR CADASTRO";
+        document.getElementById('tituloForm').innerText = "✏️ Editando: " + m.nome;
+        document.getElementById('btnSalvar').innerText = "💾 ATUALIZAR";
         document.getElementById('btnCancelar').style.display = "block";
-        window.scrollTo({top: 0, behavior: 'smooth'});
+        window.scrollTo(0,0);
     }
 
     function buscarParaEscala(val) {
@@ -357,11 +315,11 @@
         if(!val) return;
         motoristas.filter(m => m.nome.includes(val.toUpperCase())).forEach(m => {
             const d = document.createElement('div');
-            d.className = "db-card"; d.style.cursor="pointer";
-            d.innerHTML = `<div><b>${getIcon(m.modelo)} ${m.nome}</b><br><small style="color:var(--warning)">${m.experiencia || ''}</small></div>`;
+            d.className = "disp-item"; d.style.cursor="pointer";
+            d.innerHTML = `${getIcon(m.modelo)} ${m.nome} <span class="stars">${getStars(m.estrelas)}</span>`;
             d.onclick = () => {
                 window.selMot = m;
-                document.getElementById('nomeSeleccionado').innerText = "ESCALANDO: " + m.nome;
+                document.getElementById('nomeSeleccionado').innerText = m.nome;
                 document.getElementById('camposExtras').style.display = "block";
                 sug.innerHTML = "";
             };
@@ -371,10 +329,16 @@
 
     function confirmarAdicao() {
         const turno = document.getElementById('turnoSelecao').value;
-        escalaAtual[turno].push({ ...window.selMot, rota: limparTexto(document.getElementById('rotaInput').value), romaneio: limparTexto(document.getElementById('romaneioInput').value) });
-        salvarDADOS(); document.getElementById('camposExtras').style.display = "none";
-        document.getElementById('buscaEscala').value = "";
-        renderRevisao(); showToast("🚀 Escalado com sucesso!");
+        escalaAtual[turno].push({
+            ...window.selMot,
+            rota: limparTexto(document.getElementById('rotaInput').value),
+            cidade: limparTexto(document.getElementById('cidadeInput').value),
+            romaneio: limparTexto(document.getElementById('romaneioInput').value)
+        });
+        salvarDADOS();
+        document.getElementById('camposExtras').style.display = "none";
+        renderRevisao();
+        showToast("Escalado!");
     }
 
     function renderRevisao() {
@@ -382,55 +346,65 @@
         div.innerHTML = "";
         ['AM', 'PM'].forEach(t => {
             if(escalaAtual[t].length > 0) {
-                div.innerHTML += `<div class="cat-divider">ESCALA CONFIRMADA ${t}</div>`;
-                escalaAtual[t].forEach((m, idx) => {
-                    div.innerHTML += `
-                    <div class="disp-row">
-                        <span style="font-size:0.85rem;"><b>${m.nome.split(' ')[0]}</b> - ${m.rota}</span>
-                        <button onclick="escalaAtual['${t}'].splice(${idx},1); salvarDADOS(); renderRevisao();" style="background:none; color:var(--danger); width:auto; min-height:auto; font-weight:bold;">❌</button>
-                    </div>`;
+                div.innerHTML += `<div class="cat-title">ESCALA ${t}</div>`;
+                ['FIORINO', 'VUC', 'CARRO'].forEach(tipoVeic => {
+                    const filtrados = escalaAtual[t].filter(m => m.modelo === tipoVeic);
+                    if(filtrados.length > 0) {
+                        div.innerHTML += `<small style="display:block; margin-top:5px; font-weight:bold; color:var(--accent)">${tipoVeic}S:</small>`;
+                        filtrados.forEach((m) => {
+                            const idxNaEscala = escalaAtual[t].indexOf(m);
+                            div.innerHTML += `<div class="item-escala">
+                                <span>${m.nome.split(' ')[0]} - <b>${m.rota}</b></span>
+                                <button onclick="escalaAtual['${t}'].splice(${idxNaEscala},1); salvarDADOS(); renderRevisao();" style="border:none; background:none; color:red; font-weight:bold;">❌</button>
+                            </div>`;
+                        });
+                    }
                 });
             }
         });
     }
 
     function gerarTexto(t) {
-        let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n📅 ${new Date().toLocaleDateString()}\n\n`;
+        let filtroCidade = prompt("Filtrar escala por CIDADE? (Deixe vazio para todos)");
+        filtroCidade = limparTexto(filtroCidade);
+        let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n📅 ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+        let encontrou = false;
         ['FIORINO', 'VUC', 'CARRO'].forEach(tipo => {
             let lista = escalaAtual[t].filter(m => m.modelo === tipo);
+            if(filtroCidade) lista = lista.filter(m => m.cidade.includes(filtroCidade));
             if(lista.length > 0) {
-                txt += `*${tipo}s:*\n`;
-                lista.forEach(m => { txt += `• ${m.nome.split(' ')[0]} - ROTA: ${m.rota} ${m.romaneio ? '- ROM: '+m.romaneio : ''}\n`; });
+                encontrou = true;
+                txt += `*${tipo}S:*\n`;
+                lista.forEach(m => { txt += `• ${m.nome.split(' ')[0]} - ROTA: ${m.rota} - ROM: ${m.romaneio}\n`; });
                 txt += `\n`;
             }
         });
-        navigator.clipboard.writeText(txt); showToast("📋 Texto Copiado!");
+        if(!encontrou) return alert("Nenhum motorista nesta cidade.");
+        navigator.clipboard.writeText(txt);
+        showToast("Escala Copiada!");
     }
 
     function gerarTextoDisp() {
-        let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n\n`;
+        let filtroCidade = prompt("Filtrar Disponibilidade por CIDADE? (Deixe vazio para todos)");
+        filtroCidade = limparTexto(filtroCidade);
+        let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+        let encontrou = false;
         ['FIORINO', 'VUC', 'CARRO'].forEach(tipo => {
             let lista = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === tipo);
+            if(filtroCidade) lista = lista.filter(m => m.mora.includes(filtroCidade));
             if(lista.length > 0) {
-                txt += `*${tipo}s:*\n`;
+                encontrou = true;
+                txt += `*${tipo}S:*\n`;
                 txt += lista.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n\n`;
             }
         });
-        navigator.clipboard.writeText(txt); showToast("✅ Disponibilidade Copiada!");
+        if(!encontrou) return alert("Nada encontrado.");
+        navigator.clipboard.writeText(txt);
+        showToast("Disponibilidade Copiada!");
     }
 
-    function limparFormulario() {
-        editandoIndex = -1;
-        document.getElementById('nomeCompleto').value = "";
-        document.getElementById('moraArea').value = "";
-        document.getElementById('experienciaInput').value = "";
-        document.getElementById('tituloForm').innerText = "🚚 CADASTRO DE MOTORISTA";
-        document.getElementById('btnSalvar').innerText = "💾 SALVAR NO SISTEMA";
-        document.getElementById('btnCancelar').style.display = "none";
-    }
-
-    function resetGeral() { if(confirm("CUIDADO! Isso apagará tudo. Deseja continuar?")) { localStorage.clear(); location.reload(); } }
-    function showToast(msg) { const x = document.getElementById("toast"); x.innerText = msg; x.className = "show"; setTimeout(() => { x.className = ""; }, 2500); }
+    function resetGeral() { if(confirm("Apagar TUDO?")) { localStorage.clear(); location.reload(); } }
+    function showToast(msg) { const x = document.getElementById("toast"); x.innerText = msg; x.className = "show"; setTimeout(() => { x.className = ""; }, 2000); }
 
     window.onload = init;
 </script>
