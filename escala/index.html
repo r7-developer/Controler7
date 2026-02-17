@@ -389,7 +389,7 @@
     function gerarTextoDisp() {
         let filtroCidade = prompt("Filtrar Disponibilidade por CIDADE? (Deixe vazio para todos)");
         filtroCidade = limparTexto(filtroCidade);
-        let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+        let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 ${new Date().toLocaleDateString('pt-BR') + 1}\n\n`;
         let encontrou = false;
         ['FIORINO', 'VUC', 'CARRO'].forEach(tipo => {
             let lista = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === tipo);
