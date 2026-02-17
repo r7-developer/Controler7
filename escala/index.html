@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Logistica PRO - Fix</title>
+    <title>Gestor de Logistica - R7</title>
     <style>
         :root { --primary: #075e54; --secondary: #25d366; --accent: #007bff; --danger: #ff5252; --warning: #ffa000; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; padding-bottom: 80px; }
@@ -25,10 +25,10 @@
         .btn-edit-mode { background: var(--warning); color: #000; }
         .btn-action { background: #6c757d; color: white; margin-top: 5px; height: 35px; min-height: 35px; font-size: 0.8rem; }
         
-        .disp-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f1f1; }
-        .btn-status { width: 65px; height: 30px; border-radius: 15px; font-size: 0.7rem; color: white; border: none; }
-        .status-on { background: var(--secondary); } .status-off { background: var(--danger); }
+        .disp-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
         .stars { color: #ffca28; font-weight: bold; letter-spacing: 2px; }
+        .item-escala { background: #fffde7; padding: 12px; margin: 8px 0; border-radius: 10px; border-left: 5px solid var(--warning); display: flex; justify-content: space-between; align-items: center; }
+        .badge-info { background: #f8f9fa; color: #666; font-size: 0.75rem; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -36,7 +36,7 @@
 <div id="toast"></div>
 
 <div class="base-management">
-    <h2>🏢 Gestão de Bases</h2>
+    <h2>🏢 Gestão de Bases - R7</h2>
     <select id="seletorBase" onchange="mudarBase()"></select>
     <div style="display: flex; gap: 5px;">
         <button class="btn-action" onclick="novaBase()">➕ Criar</button>
@@ -55,15 +55,15 @@
 <div class="card" id="formCadastro">
     <h2 id="tituloForm">🚚 Cadastro de Motorista</h2>
     <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
-    <input type="text" id="moraArea" placeholder="Cidade">
-    <input type="text" id="experienciaInput" placeholder="Experiência">
+    <input type="text" id="moraArea" placeholder="Cidade onde mora(Ex: RIO, NITEROI)">
+    <input type="text" id="experienciaInput" placeholder="Experiência (Ex: Conhece bem Centro)">
     <select id="estrelasInput">
-        <option value="1">⭐</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5" selected>⭐⭐⭐⭐⭐</option>
+        <option value="1">⭐ (Novato)</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5" selected>⭐⭐⭐⭐⭐ (Antigo)</option>
     </select>
     <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
     <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
     <button class="btn-save" id="btnSalvar" onclick="salvarMotorista()">💾 SALVAR MOTORISTA</button>
-    <button id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top:10px; background:#666; color:white; border:none; border-radius:8px; height:40px; width:100%;">CANCELAR EDIÇÃO</button>
+    <button id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top:10px; background:#666; color:white; border:none; border-radius:8px; height:40px; width:100%;">CANCELAR / LIMPAR</button>
 </div>
 
 <div class="card">
@@ -87,6 +87,7 @@
 
 <div class="card">
     <h2>📂 Banco de Dados Geral</h2>
+    <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar no banco..." oninput="renderTudo(this.value)">
     <div id="listaBanco"></div>
 </div>
 
@@ -146,10 +147,8 @@
             n = limparTexto(n);
             let idx = bases.indexOf(baseAtiva);
             if(idx !== -1) {
-                let m = localStorage.getItem('MOT_' + baseAtiva);
-                let e = localStorage.getItem('ESC_' + baseAtiva);
-                localStorage.setItem('MOT_' + n, m);
-                localStorage.setItem('ESC_' + n, e);
+                localStorage.setItem('MOT_' + n, localStorage.getItem('MOT_' + baseAtiva));
+                localStorage.setItem('ESC_' + n, localStorage.getItem('ESC_' + baseAtiva));
                 localStorage.removeItem('MOT_' + baseAtiva);
                 localStorage.removeItem('ESC_' + baseAtiva);
                 bases[idx] = n;
@@ -191,7 +190,7 @@
         let blob = new Blob([JSON.stringify(backup)], {type: 'application/json'});
         let a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'logistica_pro.json';
+        a.download = 'backup_logistica.json';
         a.click();
     }
 
@@ -207,7 +206,7 @@
                         localStorage.setItem('ESC_'+b, JSON.stringify(backup.dados['ESC_'+b]));
                     });
                     localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
-                    alert("Importação concluída!");
+                    alert("Dados mesclados!");
                     location.reload();
                 }
             } catch (err) { alert("Arquivo JSON inválido."); }
@@ -232,26 +231,33 @@
         salvarDADOS();
         limparFormulario();
         renderTudo();
-        showToast("Salvo com sucesso!");
+        showToast("Salvo!");
     }
 
     function limparFormulario() {
         editandoIndex = -1;
         document.getElementById('nomeCompleto').value = "";
+        document.getElementById('moraArea').value = "";
+        document.getElementById('experienciaInput').value = "";
         document.getElementById('tituloForm').innerText = "🚚 Cadastro de Motorista";
         document.getElementById('btnSalvar').innerText = "💾 SALVAR MOTORISTA";
         document.getElementById('btnCancelar').style.display = "none";
     }
 
-    function renderTudo() {
+    function renderTudo(filtro = "") {
         const div = document.getElementById('listaBanco');
         div.innerHTML = "";
-        motoristas.forEach((m, idx) => {
+        motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m, idx) => {
+            const realIdx = motoristas.indexOf(m);
             div.innerHTML += `<div class="disp-item">
-                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span>
+                <div style="flex:1">
+                    <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span><br>
+                    <span class="badge-info">${m.tipo} | ${m.mora}</span><br>
+                    <small style="color:gray">EXP: ${m.experiencia}</small>
+                </div>
                 <div>
-                    <button onclick="carregarEdicao(${idx})" style="border:none; background:none; color:blue;">✏️</button>
-                    <button onclick="motoristas.splice(${idx},1); salvarDADOS(); renderTudo();" style="border:none; background:none; color:red;">❌</button>
+                    <button onclick="carregarEdicao(${realIdx})" style="border:none; background:none; font-size:1.2rem; cursor:pointer;">✏️</button>
+                    <button onclick="motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo();" style="border:none; background:none; font-size:1.2rem; cursor:pointer; color:red;">❌</button>
                 </div>
             </div>`;
         });
@@ -263,6 +269,10 @@
         const m = motoristas[idx];
         document.getElementById('nomeCompleto').value = m.nome;
         document.getElementById('moraArea').value = m.mora;
+        document.getElementById('experienciaInput').value = m.experiencia;
+        document.getElementById('estrelasInput').value = m.estrelas;
+        document.getElementById('modelo').value = m.modelo;
+        document.getElementById('tipo').value = m.tipo;
         document.getElementById('tituloForm').innerText = "✏️ Editando: " + m.nome;
         document.getElementById('btnSalvar').innerText = "💾 ATUALIZAR";
         document.getElementById('btnCancelar').style.display = "block";
@@ -298,6 +308,7 @@
         salvarDADOS();
         document.getElementById('camposExtras').style.display = "none";
         renderRevisao();
+        showToast("Escalado!");
     }
 
     function renderRevisao() {
@@ -307,20 +318,20 @@
             escalaAtual[t].forEach((m, idx) => {
                 div.innerHTML += `<div class="item-escala">
                     <span><b>[${t}]</b> ${m.nome} - ROTA: ${m.rota}</span>
-                    <button onclick="escalaAtual['${t}'].splice(${idx},1); salvarDADOS(); renderRevisao();" style="border:none; background:none; color:red;">❌</button>
+                    <button onclick="escalaAtual['${t}'].splice(${idx},1); salvarDADOS(); renderRevisao();" style="border:none; background:none; color:red; font-weight:bold;">❌</button>
                 </div>`;
             });
         });
     }
 
     function gerarTexto(t) {
-        let txt = `📋 *ESCALA ${t}*\n\n`;
+        let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n📅 ${new Date().toLocaleDateString('pt-BR')}\n\n`;
         escalaAtual[t].forEach(m => { txt += `• ${getIcon(m.modelo)} ${m.nome} - ROTA: ${m.rota}\n`; });
         navigator.clipboard.writeText(txt);
         showToast("Copiado!");
     }
 
-    function resetGeral() { if(confirm("Apagar tudo?")) { localStorage.clear(); location.reload(); } }
+    function resetGeral() { if(confirm("Apagar TUDO?")) { localStorage.clear(); location.reload(); } }
     function showToast(msg) { const x = document.getElementById("toast"); x.innerText = msg; x.className = "show"; setTimeout(() => { x.className = ""; }, 2000); }
 
     window.onload = init;
