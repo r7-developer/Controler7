@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Logística Mobile PRO</title>
+    <style>
+        :root {
+            --primary: #075e54;
+            --secondary: #25d366;
+            --accent: #007bff;
+            --danger: #ff5252;
+            --warning: #ffa000;
+            --bg: #f0f2f5;
+            --card-bg: #ffffff;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 10px;
+            color: #333;
+        }
+
+        /* Header Fixado para Mobile */
+        .header-box { 
+            background: var(--primary); 
+            color: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            text-align: center; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            padding: 18px; 
+            border-radius: 15px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+        }
+
+        h2 { 
+            color: var(--primary); 
+            font-size: 1.2rem; 
+            margin-top: 0; 
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        label { 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            display: block; 
+            margin: 10px 0 5px 0;
+            color: #666;
+        }
+
+        /* Inputs e Selects maiores para toque */
+        input, select { 
+            width: 100%; 
+            height: 45px;
+            padding: 10px; 
+            margin-bottom: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: #fafafa;
+        }
+
+        button { 
+            width: 100%; 
+            min-height: 48px;
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active { opacity: 0.7; }
+
+        .btn-save { background: var(--secondary); color: white; margin-top: 10px; }
+        .btn-copy-am { background: var(--accent); color: white; }
+        .btn-copy-pm { background: #6610f2; color: white; }
+        .btn-copy-disp { background: #28a745; color: white; }
+
+        /* Lista de Disponibilidade */
+        .disp-group { margin-top: 15px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+        .disp-title { background: #f8f9fa; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; color: #777; border-bottom: 1px solid #eee; }
+        .disp-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f1f1; }
+        
+        .btn-status { width: 60px; height: 32px; border-radius: 16px; font-size: 0.7rem; color: white; }
+        .status-on { background: var(--secondary); } .status-off { background: var(--danger); }
+
+        /* Revisão Escala */
+        .item-escala { 
+            background: #fffde7; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            border-left: 5px solid var(--warning);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-escala b { display: block; color: var(--primary); font-size: 1rem; }
+        .info-escala span { font-size: 0.85rem; color: #555; display: block; }
+
+        .actions { display: flex; gap: 8px; }
+        .btn-circle { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1rem; }
+
+        /* Busca */
+        #listaBusca div { padding: 12px; border-bottom: 1px solid #eee; background: white; font-size: 0.95rem; }
+
+        #camposExtras { 
+            background: #e3f2fd; 
+            border: 2px solid var(--accent); 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-top: 10px;
+        }
+
+        #resultado { 
+            background: #333; 
+            color: #25d366; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 0.85rem; 
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+
+        /* Desktop Adjustment */
+        @media (min-width: 768px) {
+            .container { flex-direction: row; align-items: flex-start; }
+            .card { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-box">
+    <div id="dataHoje" style="font-size: 1.1rem; font-weight: bold;">AGUARDE...</div>
+    <div id="dataAmanha" style="font-size: 0.85rem; opacity: 0.9;"></div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>🚚 Banco de Dados</h2>
+        <label>Vínculo</label>
+        <select id="tipo"><option value="FROTA">FROTA</option><option value="AGREGADO">AGREGADO</option></select>
+        
+        <label>Nome Completo</label>
+        <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
+        
+        <label>Veículo</label>
+        <select id="modelo"><option value="FIORINO">FIORINO</option><option value="VUC">VUC</option><option value="CARRO">CARRO (PASSEIO)</option></select>
+        
+        <button class="btn-save" onclick="salvarMotorista()">💾 SALVAR MOTORISTA</button>
+        
+        <h2 style="margin-top: 25px;">🟢 Status Amanhã</h2>
+        <div id="listaDisponibilidade"></div>
+        
+        <label>Lista Geral para Exclusão</label>
+        <div id="listaGeralExclusao" style="max-height: 150px; overflow-y: auto; background: #fafafa; border-radius: 8px;"></div>
+    </div>
+
+    <div class="card">
+        <h2>📝 Escala de Hoje</h2>
+        <select id="turnoSelecao"><option value="AM">TURNO AM</option><option value="PM">TURNO PM</option></select>
+        
+        <label>Pesquisar Motorista</label>
+        <input type="text" id="buscaMotorista" placeholder="Digite o nome..." oninput="buscar(this.value)">
+        <div id="listaBusca"></div>
+        
+        <div id="camposExtras" style="display:none;">
+            <b id="nomeSeleccionado" style="display:block; margin-bottom:10px;"></b>
+            <input type="text" id="rotaInput" placeholder="📍 Rota (Ex: Centro)">
+            <input type="text" id="romaneioInput" placeholder="🔢 Romaneio (Ex: 502)">
+            <button id="btnConfirmar" onclick="confirmarAdicao()" style="background:var(--accent); color:white;">✅ CONFIRMAR</button>
+        </div>
+
+        <div id="revisaoEscala"></div>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 20px;">
+            <button class="btn-copy-am" onclick="gerarTexto('AM')">📱 COPIAR AM</button>
+            <button class="btn-copy-pm" onclick="gerarTexto('PM')">📱 COPIAR PM</button>
+        </div>
+        <button class="btn-copy-disp" style="margin-top: 10px;" onclick="gerarTextoDisp()">📋 COPIAR DISPONIBILIDADE</button>
+        
+        <div id="resultado" style="display:none;"></div>
+        <button onclick="resetEscala()" style="background:#eee; color:#666; margin-top:20px; min-height: 35px; font-size: 0.8rem;">LIMPAR ESCALA DE HOJE</button>
+    </div>
+</div>
+
+<script>
+    const DB_NAME = 'LOGISTICA_MOBILE_V9';
+    let motoristas = JSON.parse(localStorage.getItem(DB_NAME)) || [];
+    let escalaAtual = { AM: [], PM: [] };
+    let motoristaEmEdicao = null;
+    let indexEdicao = -1;
+
+    // Datas
+    const hoje = new Date();
+    const amanha = new Date(); amanha.setDate(hoje.getDate() + 1);
+    const format = (d) => d.toLocaleDateString('pt-BR', {weekday:'short', day:'2-digit', month:'2-digit'}).toUpperCase();
+    document.getElementById('dataHoje').innerText = "HOJE: " + format(hoje);
+    document.getElementById('dataAmanha').innerText = "AMANHÃ: " + format(amanha);
+
+    function persistir() { localStorage.setItem(DB_NAME, JSON.stringify(motoristas)); }
+
+    function salvarMotorista() {
+        const nome = document.getElementById('nomeCompleto').value.trim();
+        if(!nome) return alert("Digite o nome");
+        motoristas.push({ nome: nome.toUpperCase(), tipo: document.getElementById('tipo').value, modelo: document.getElementById('modelo').value, ativo: true });
+        motoristas.sort((a,b) => a.nome.localeCompare(b.nome));
+        persistir();
+        document.getElementById('nomeCompleto').value = "";
+        renderTudo();
+    }
+
+    function renderTudo() {
+        renderDisponibilidade();
+        renderListaExclusao();
+    }
+
+    function renderDisponibilidade() {
+        const lista = document.getElementById('listaDisponibilidade');
+        lista.innerHTML = "";
+        ['FIORINO', 'VUC'].forEach(mod => {
+            const f = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === mod);
+            if(f.length > 0) {
+                const group = document.createElement('div');
+                group.className = 'disp-group';
+                group.innerHTML = `<div class="disp-title">${mod}S</div>`;
+                f.forEach(m => {
+                    const idx = motoristas.indexOf(m);
+                    group.innerHTML += `<div class="disp-item">
+                        <span>${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}</span>
+                        <button onclick="toggleStatus(${idx})" class="btn-status ${m.ativo ? 'status-on' : 'status-off'}">${m.ativo ? 'DISP' : 'FOLGA'}</button>
+                    </div>`;
+                });
+                lista.appendChild(group);
+            }
+        });
+    }
+
+    function renderListaExclusao() {
+        const container = document.getElementById('listaGeralExclusao');
+        container.innerHTML = "";
+        motoristas.forEach((m, idx) => {
+            container.innerHTML += `<div class="disp-item">
+                <span style="font-size:0.75rem">${m.nome.split(' ')[0]} (${m.tipo})</span>
+                <button onclick="if(confirm('Excluir?')){motoristas.splice(${idx},1); persistir(); renderTudo();}" style="background:none; color:red; border:none; font-weight:bold;">EXCLUIR</button>
+            </div>`;
+        });
+    }
+
+    function toggleStatus(i) { motoristas[i].ativo = !motoristas[i].ativo; persistir(); renderTudo(); }
+
+    function buscar(val) {
+        const sug = document.getElementById('listaBusca');
+        sug.innerHTML = "";
+        if(!val) return;
+        motoristas.filter(m => m.nome.toLowerCase().includes(val.toLowerCase())).forEach(m => {
+            const d = document.createElement('div');
+            d.innerText = `[${m.tipo}] ${m.nome}`;
+            d.onclick = () => {
+                motoristaEmEdicao = m;
+                indexEdicao = -1;
+                abrirCamposEdicao(m.nome, "", "");
+                sug.innerHTML = "";
+                document.getElementById('buscaMotorista').value = "";
+            };
+            sug.appendChild(d);
+        });
+    }
+
+    function abrirCamposEdicao(nome, rota, romaneio) {
+        document.getElementById('nomeSeleccionado').innerText = nome;
+        document.getElementById('rotaInput').value = rota;
+        document.getElementById('romaneioInput').value = romaneio;
+        document.getElementById('camposExtras').style.display = "block";
+        document.getElementById('btnConfirmar').innerText = indexEdicao === -1 ? "✅ ADICIONAR" : "💾 ATUALIZAR";
+        document.getElementById('rotaInput').focus();
+    }
+
+    function confirmarAdicao() {
+        const turno = document.getElementById('turnoSelecao').value;
+        const dados = {
+            ...motoristaEmEdicao,
+            rota: (document.getElementById('rotaInput').value || "S/R").toUpperCase(),
+            romaneio: (document.getElementById('romaneioInput').value || "S/R").toUpperCase()
+        };
+        if(indexEdicao > -1) escalaAtual[turno][indexEdicao] = dados;
+        else escalaAtual[turno].push(dados);
+        
+        document.getElementById('camposExtras').style.display = "none";
+        indexEdicao = -1;
+        renderRevisao();
+    }
+
+    function renderRevisao() {
+        const div = document.getElementById('revisaoEscala');
+        div.innerHTML = "<label>Revisão de Escala:</label>";
+        ['AM', 'PM'].forEach(t => {
+            escalaAtual[t].forEach((m, idx) => {
+                div.innerHTML += `<div class="item-escala">
+                    <div class="info-escala">
+                        <b>${m.nome.split(' ')[0]} [${t}]</b>
+                        <span>📍 ${m.rota} | 🔢 ${m.romaneio}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-circle" style="background:var(--warning)" onclick="editarEscalado('${t}', ${idx})">✏️</button>
+                        <button class="btn-circle" style="background:var(--danger)" onclick="escalaAtual['${t}'].splice(${idx}, 1); renderRevisao();">🗑️</button>
+                    </div>
+                </div>`;
+            });
+        });
+    }
+
+    function editarEscalado(turno, idx) {
+        const m = escalaAtual[turno][idx];
+        motoristaEmEdicao = m;
+        indexEdicao = idx;
+        document.getElementById('turnoSelecao').value = turno;
+        abrirCamposEdicao(m.nome, m.rota, m.romaneio);
+    }
+
+    function gerarTexto(t) {
+        let txt = `📋 *ESCALA ${t} - ${format(hoje)}*\n\n`;
+        ['CARRO', 'FIORINO', 'VUC'].forEach(mod => {
+            let f = escalaAtual[t].filter(m => m.modelo === mod).sort((a,b) => a.nome.localeCompare(b.nome));
+            if(f.length > 0) {
+                txt += `*${mod === 'CARRO' ? 'AGREGADOS' : mod + 'S'}:*\n` + 
+                       f.map(m => `• ${m.nome.split(' ')[0]} - ${m.rota} - ${m.romaneio}`).join('\n') + `\n\n`;
+            }
+        });
+        copy(txt);
+    }
+
+    function gerarTextoDisp() {
+        let txt = `✅ *DISPONIBILIDADE AMANHÃ - ${format(amanha)}*\n`;
+        ['FIORINO', 'VUC'].forEach(mod => {
+            let f = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === mod).sort((a,b) => a.nome.localeCompare(b.nome));
+            if(f.length > 0) txt += `\n*${mod}S:*\n` + f.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n`;
+        });
+        copy(txt);
+    }
+
+    function copy(txt) {
+        const res = document.getElementById('resultado');
+        res.innerText = txt;
+        res.style.display = "block";
+        navigator.clipboard.writeText(txt).then(() => alert("Copiado!"));
+    }
+
+    function resetEscala() { if(confirm("Limpar escala?")) { escalaAtual = { AM: [], PM: [] }; renderRevisao(); } }
+
+    renderTudo();
+</script>
+</body>
+</html>
