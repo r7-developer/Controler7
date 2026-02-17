@@ -64,6 +64,7 @@
     <h2>🚚 Cadastro de Motorista</h2>
     <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
     <input type="text" id="moraArea" placeholder="Cidade (Ex: RIO, NITEROI)">
+    <input type="text" id="experienciaInput" placeholder="Experiência (Ex: Conhece bem Zona Sul)">
     <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
     <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
     <button class="btn-save" onclick="salvarMotorista()">💾 CADASTRAR NESTA BASE</button>
@@ -77,6 +78,7 @@
     
     <div id="camposExtras" style="display:none;">
         <b id="nomeSeleccionado"></b> <span id="infoSeleccionada" class="badge-info"></span>
+        <br><small id="expSeleccionada" style="color: #666;"></small>
         <input type="text" id="rotaInput" placeholder="📍 Rota (Ex: ROTA 01)">
         <input type="text" id="cidadeInput" placeholder="🌆 Cidade (Para Filtro de Cópia)">
         <input type="text" id="romaneioInput" placeholder="🔢 Romaneio">
@@ -105,7 +107,6 @@
 </div>
 
 <button onclick="resetGeral()" style="background:none; color:gray; font-size:0.6rem; margin-top:20px; border:1px solid #ccc; width:100px; margin-left:auto; margin-right:auto; display:block;">RESET GERAL</button>
-
 <script>
     function limparTexto(str) {
         if(!str) return "";
@@ -237,14 +238,16 @@
     function salvarMotorista() {
         const nome = limparTexto(document.getElementById('nomeCompleto').value);
         const mora = limparTexto(document.getElementById('moraArea').value) || "N/A";
+        const exp = limparTexto(document.getElementById('experienciaInput').value) || "S/EXP";
         const mod = document.getElementById('modelo').value;
         const tip = document.getElementById('tipo').value;
         if(!nome) return;
-        motoristas.push({ nome: nome, mora: mora, tipo: tip, modelo: mod, ativo: true });
+        motoristas.push({ nome: nome, mora: mora, experiencia: exp, tipo: tip, modelo: mod, ativo: true });
         motoristas.sort((a,b) => a.nome.localeCompare(b.nome));
         salvarDADOS();
         document.getElementById('nomeCompleto').value = "";
         document.getElementById('moraArea').value = "";
+        document.getElementById('experienciaInput').value = "";
         renderTudo();
         renderBanco();
         showToast("Salvo!");
@@ -257,11 +260,12 @@
         motoristas.filter(m => m.nome.includes(val.toUpperCase())).forEach(m => {
             const d = document.createElement('div');
             d.className = "disp-item"; d.style.cursor="pointer";
-            d.innerHTML = `<span>${getIcon(m.modelo)} <b>${m.nome}</b> <br><small>${m.tipo} | ${m.mora}</small></span>`;
+            d.innerHTML = `<span>${getIcon(m.modelo)} <b>${m.nome}</b> <br><small>${m.tipo} | ${m.mora} | EXP: ${m.experiencia}</small></span>`;
             d.onclick = () => {
                 window.motoristaSelecionado = m;
                 document.getElementById('nomeSeleccionado').innerText = m.nome;
                 document.getElementById('infoSeleccionada').innerText = m.tipo + " - " + m.mora;
+                document.getElementById('expSeleccionada').innerText = "EXP: " + m.experiencia;
                 document.getElementById('camposExtras').style.display = "block";
                 sug.innerHTML = ""; document.getElementById('buscaEscala').value = "";
             };
@@ -290,7 +294,7 @@
         ['AM', 'PM'].forEach(t => {
             escalaAtual[t].forEach((m, idx) => {
                 div.innerHTML += `<div class="item-escala">
-                    <div style="font-size:0.8rem"><b>${getIcon(m.modelo)} ${m.nome.split(' ')[0]} [${t}]</b><br>ROTA: ${m.rota} | CIDADE: ${m.cidade}</div>
+                    <div style="font-size:0.8rem"><b>${getIcon(m.modelo)} ${m.nome.split(' ')[0]} [${t}]</b><br>ROTA: ${m.rota} | CIDADE: ${m.cidade}<br><small>EXP: ${m.experiencia}</small></div>
                     <button class="btn-circle" style="background:var(--danger)" onclick="escalaAtual['${t}'].splice(${idx}, 1); salvarDADOS(); renderRevisao();">❌</button>
                 </div>`;
             });
@@ -324,7 +328,7 @@
         motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m) => {
             const realIdx = motoristas.indexOf(m);
             div.innerHTML += `<div class="disp-item">
-                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <br> <small>${m.tipo} | ${m.mora}</small></span>
+                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <br> <small>${m.tipo} | ${m.mora} | EXP: ${m.experiencia}</small></span>
                 <button onclick="excluirMotorista(${realIdx})" style="background:none; border:none; color:red; font-size:1.2rem;">❌</button>
             </div>`;
         });
@@ -393,6 +397,7 @@
     function limparEscala(t) { if(confirm("Limpar turno " + t + "?")) { escalaAtual[t] = []; salvarDADOS(); renderRevisao(); } }
     function resetGeral() { if(confirm("APAGAR TUDO?")) { localStorage.clear(); location.reload(); } }
     function showToast(msg) { const x = document.getElementById("toast"); x.innerText = msg; x.className = "show"; setTimeout(() => { x.className = ""; }, 2000); }
+
     window.onload = init;
 </script>
 </body>
