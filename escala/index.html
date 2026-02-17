@@ -285,6 +285,7 @@
                 <div style="flex:1">
                     <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span><br>
                     <span class="badge-info">${m.tipo} | ${m.mora}</span>
+                    <span class="exp-tag">Experiente: ${m.experiencia || 'NÃO INFORMADO'}</span>
                 </div>
                 <div>
                     <button onclick="carregarEdicao(${realIdx})" style="border:none; background:none; font-size:1.2rem;">✏️</button>
