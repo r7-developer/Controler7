@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Logística Mobile PRO</title>
+    <title>Logística Mobile PRO - Ultra Fast</title>
     <style>
         :root {
             --primary: #075e54;
@@ -15,205 +15,114 @@
             --card-bg: #ffffff;
         }
 
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--bg); 
-            margin: 0; 
-            padding: 10px;
-            color: #333;
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; padding-bottom: 80px; }
+
+        /* Notificação Toast */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
-        /* Header Fixado para Mobile */
-        .header-box { 
-            background: var(--primary); 
-            color: white; 
-            padding: 15px; 
-            border-radius: 12px; 
-            text-align: center; 
-            margin-bottom: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2s; }
 
-        .container { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            max-width: 800px; 
-            margin: 0 auto; 
-        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
-        .card { 
-            background: var(--card-bg); 
-            padding: 18px; 
-            border-radius: 15px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
-        }
+        .header-box { background: var(--primary); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
+        .container { display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; }
+        .card { background: var(--card-bg); padding: 18px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
-        h2 { 
-            color: var(--primary); 
-            font-size: 1.2rem; 
-            margin-top: 0; 
-            border-bottom: 2px solid var(--secondary);
-            padding-bottom: 8px;
-            margin-bottom: 15px;
-        }
+        h2 { color: var(--primary); font-size: 1.1rem; margin: 0 0 15px 0; border-bottom: 2px solid var(--secondary); padding-bottom: 5px; }
+        label { font-size: 0.8rem; font-weight: 600; display: block; margin: 10px 0 5px 0; color: #666; }
 
-        label { 
-            font-size: 0.85rem; 
-            font-weight: 600; 
-            display: block; 
-            margin: 10px 0 5px 0;
-            color: #666;
-        }
+        input, select { width: 100%; height: 45px; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
 
-        /* Inputs e Selects maiores para toque */
-        input, select { 
-            width: 100%; 
-            height: 45px;
-            padding: 10px; 
-            margin-bottom: 10px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            font-size: 1rem;
-            box-sizing: border-box;
-            background-color: #fafafa;
-        }
+        button { width: 100%; min-height: 48px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        button:active { transform: scale(0.98); filter: brightness(0.9); }
 
-        button { 
-            width: 100%; 
-            min-height: 48px;
-            border: none; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        button:active { opacity: 0.7; }
-
-        .btn-save { background: var(--secondary); color: white; margin-top: 10px; }
+        .btn-save { background: var(--secondary); color: white; }
         .btn-copy-am { background: var(--accent); color: white; }
         .btn-copy-pm { background: #6610f2; color: white; }
         .btn-copy-disp { background: #28a745; color: white; }
 
-        /* Lista de Disponibilidade */
         .disp-group { margin-top: 15px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
-        .disp-title { background: #f8f9fa; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; color: #777; border-bottom: 1px solid #eee; }
-        .disp-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f1f1; }
+        .disp-title { background: #f8f9fa; padding: 6px 12px; font-size: 0.7rem; font-weight: bold; color: #777; border-bottom: 1px solid #eee; }
+        .disp-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid #f1f1f1; }
         
-        .btn-status { width: 60px; height: 32px; border-radius: 16px; font-size: 0.7rem; color: white; }
+        .btn-status { width: 65px; height: 30px; border-radius: 15px; font-size: 0.7rem; color: white; }
         .status-on { background: var(--secondary); } .status-off { background: var(--danger); }
 
-        /* Revisão Escala */
-        .item-escala { 
-            background: #fffde7; 
-            padding: 12px; 
-            margin: 10px 0; 
-            border-radius: 10px; 
-            border-left: 5px solid var(--warning);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        .item-escala { background: #fffde7; padding: 12px; margin: 10px 0; border-radius: 10px; border-left: 5px solid var(--warning); display: flex; justify-content: space-between; align-items: center; }
+        .info-escala b { display: block; color: var(--primary); font-size: 0.95rem; }
+        .info-escala span { font-size: 0.8rem; color: #555; }
 
-        .info-escala b { display: block; color: var(--primary); font-size: 1rem; }
-        .info-escala span { font-size: 0.85rem; color: #555; display: block; }
+        .actions { display: flex; gap: 10px; }
+        .btn-circle { width: 40px; height: 40px; border-radius: 50%; color: white; }
 
-        .actions { display: flex; gap: 8px; }
-        .btn-circle { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1rem; }
+        #listaBusca div { padding: 15px; border-bottom: 1px solid #eee; background: white; }
+        #camposExtras { background: #e3f2fd; border: 2px solid var(--accent); padding: 15px; border-radius: 12px; margin-top: 10px; }
 
-        /* Busca */
-        #listaBusca div { padding: 12px; border-bottom: 1px solid #eee; background: white; font-size: 0.95rem; }
-
-        #camposExtras { 
-            background: #e3f2fd; 
-            border: 2px solid var(--accent); 
-            padding: 15px; 
-            border-radius: 12px; 
-            margin-top: 10px;
-        }
-
-        #resultado { 
-            background: #333; 
-            color: #25d366; 
-            padding: 15px; 
-            border-radius: 8px; 
-            font-family: 'Courier New', monospace; 
-            font-size: 0.85rem; 
-            margin-top: 15px;
-            overflow-x: auto;
-        }
-
-        /* Desktop Adjustment */
-        @media (min-width: 768px) {
-            .container { flex-direction: row; align-items: flex-start; }
-            .card { flex: 1; }
-        }
+        @media (min-width: 768px) { .container { flex-direction: row; align-items: flex-start; } .card { flex: 1; } }
     </style>
 </head>
 <body>
 
+<div id="toast">Mensagem aqui</div>
+
 <div class="header-box">
-    <div id="dataHoje" style="font-size: 1.1rem; font-weight: bold;">AGUARDE...</div>
-    <div id="dataAmanha" style="font-size: 0.85rem; opacity: 0.9;"></div>
+    <div id="dataHoje" style="font-weight: bold;"></div>
+    <div id="dataAmanha" style="font-size: 0.8rem; opacity: 0.9;"></div>
 </div>
 
 <div class="container">
     <div class="card">
-        <h2>🚚 Banco de Dados</h2>
-        <label>Vínculo</label>
+        <h2>🚚 Cadastro</h2>
         <select id="tipo"><option value="FROTA">FROTA</option><option value="AGREGADO">AGREGADO</option></select>
-        
-        <label>Nome Completo</label>
         <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
-        
-        <label>Veículo</label>
         <select id="modelo"><option value="FIORINO">FIORINO</option><option value="VUC">VUC</option><option value="CARRO">CARRO (PASSEIO)</option></select>
+        <button class="btn-save" onclick="salvarMotorista()">💾 SALVAR</button>
         
-        <button class="btn-save" onclick="salvarMotorista()">💾 SALVAR MOTORISTA</button>
-        
-        <h2 style="margin-top: 25px;">🟢 Status Amanhã</h2>
         <div id="listaDisponibilidade"></div>
-        
-        <label>Lista Geral para Exclusão</label>
-        <div id="listaGeralExclusao" style="max-height: 150px; overflow-y: auto; background: #fafafa; border-radius: 8px;"></div>
+        <div id="listaGeralExclusao" style="max-height: 120px; overflow-y: auto; margin-top: 15px; font-size: 0.8rem;"></div>
     </div>
 
     <div class="card">
-        <h2>📝 Escala de Hoje</h2>
+        <h2>📝 Montar Escala</h2>
         <select id="turnoSelecao"><option value="AM">TURNO AM</option><option value="PM">TURNO PM</option></select>
-        
-        <label>Pesquisar Motorista</label>
-        <input type="text" id="buscaMotorista" placeholder="Digite o nome..." oninput="buscar(this.value)">
+        <input type="text" id="buscaMotorista" placeholder="Buscar motorista..." oninput="buscar(this.value)">
         <div id="listaBusca"></div>
         
         <div id="camposExtras" style="display:none;">
-            <b id="nomeSeleccionado" style="display:block; margin-bottom:10px;"></b>
-            <input type="text" id="rotaInput" placeholder="📍 Rota (Ex: Centro)">
-            <input type="text" id="romaneioInput" placeholder="🔢 Romaneio (Ex: 502)">
-            <button id="btnConfirmar" onclick="confirmarAdicao()" style="background:var(--accent); color:white;">✅ CONFIRMAR</button>
+            <b id="nomeSeleccionado"></b>
+            <input type="text" id="rotaInput" placeholder="📍 Rota">
+            <input type="text" id="romaneioInput" placeholder="🔢 Romaneio">
+            <button id="btnConfirmar" onclick="confirmarAdicao()" style="background:var(--accent); color:white;">✅ ADICIONAR / ATUALIZAR</button>
         </div>
 
         <div id="revisaoEscala"></div>
         
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 20px;">
-            <button class="btn-copy-am" onclick="gerarTexto('AM')">📱 COPIAR AM</button>
-            <button class="btn-copy-pm" onclick="gerarTexto('PM')">📱 COPIAR PM</button>
+            <button class="btn-copy-am" onclick="gerarTexto('AM')">📋 COPIAR AM</button>
+            <button class="btn-copy-pm" onclick="gerarTexto('PM')">📋 COPIAR PM</button>
         </div>
-        <button class="btn-copy-disp" style="margin-top: 10px;" onclick="gerarTextoDisp()">📋 COPIAR DISPONIBILIDADE</button>
-        
-        <div id="resultado" style="display:none;"></div>
-        <button onclick="resetEscala()" style="background:#eee; color:#666; margin-top:20px; min-height: 35px; font-size: 0.8rem;">LIMPAR ESCALA DE HOJE</button>
+        <button class="btn-copy-disp" style="margin-top: 10px;" onclick="gerarTextoDisp()">✅ COPIAR DISP.</button>
+        <button onclick="resetEscala()" style="background:none; color:#999; margin-top:20px; font-size: 0.7rem; border:1px solid #ddd;">LIMPAR ESCALA HOJE</button>
     </div>
 </div>
 
 <script>
-    const DB_NAME = 'LOGISTICA_MOBILE_V9';
+    const DB_NAME = 'LOGISTICA_V10_FINAL';
     let motoristas = JSON.parse(localStorage.getItem(DB_NAME)) || [];
     let escalaAtual = { AM: [], PM: [] };
     let motoristaEmEdicao = null;
@@ -226,16 +135,24 @@
     document.getElementById('dataHoje').innerText = "HOJE: " + format(hoje);
     document.getElementById('dataAmanha').innerText = "AMANHÃ: " + format(amanha);
 
+    function showToast(msg) {
+        const x = document.getElementById("toast");
+        x.innerText = msg;
+        x.className = "show";
+        setTimeout(() => { x.className = x.className.replace("show", ""); }, 2500);
+    }
+
     function persistir() { localStorage.setItem(DB_NAME, JSON.stringify(motoristas)); }
 
     function salvarMotorista() {
         const nome = document.getElementById('nomeCompleto').value.trim();
-        if(!nome) return alert("Digite o nome");
+        if(!nome) { showToast("⚠️ Digite o nome!"); return; }
         motoristas.push({ nome: nome.toUpperCase(), tipo: document.getElementById('tipo').value, modelo: document.getElementById('modelo').value, ativo: true });
         motoristas.sort((a,b) => a.nome.localeCompare(b.nome));
         persistir();
         document.getElementById('nomeCompleto').value = "";
         renderTudo();
+        showToast("✅ Cadastrado!");
     }
 
     function renderTudo() {
@@ -266,11 +183,11 @@
 
     function renderListaExclusao() {
         const container = document.getElementById('listaGeralExclusao');
-        container.innerHTML = "";
+        container.innerHTML = "<b>Excluir do banco:</b>";
         motoristas.forEach((m, idx) => {
             container.innerHTML += `<div class="disp-item">
-                <span style="font-size:0.75rem">${m.nome.split(' ')[0]} (${m.tipo})</span>
-                <button onclick="if(confirm('Excluir?')){motoristas.splice(${idx},1); persistir(); renderTudo();}" style="background:none; color:red; border:none; font-weight:bold;">EXCLUIR</button>
+                <span>${m.nome.split(' ')[0]}</span>
+                <button onclick="motoristas.splice(${idx},1); persistir(); renderTudo(); showToast('🗑️ Removido');" style="color:red; background:none; border:none; font-weight:bold;">X</button>
             </div>`;
         });
     }
@@ -285,23 +202,15 @@
             const d = document.createElement('div');
             d.innerText = `[${m.tipo}] ${m.nome}`;
             d.onclick = () => {
-                motoristaEmEdicao = m;
-                indexEdicao = -1;
-                abrirCamposEdicao(m.nome, "", "");
-                sug.innerHTML = "";
-                document.getElementById('buscaMotorista').value = "";
+                motoristaEmEdicao = m; indexEdicao = -1;
+                document.getElementById('nomeSeleccionado').innerText = m.nome;
+                document.getElementById('rotaInput').value = ""; document.getElementById('romaneioInput').value = "";
+                document.getElementById('camposExtras').style.display = "block";
+                sug.innerHTML = ""; document.getElementById('buscaMotorista').value = "";
+                document.getElementById('rotaInput').focus();
             };
             sug.appendChild(d);
         });
-    }
-
-    function abrirCamposEdicao(nome, rota, romaneio) {
-        document.getElementById('nomeSeleccionado').innerText = nome;
-        document.getElementById('rotaInput').value = rota;
-        document.getElementById('romaneioInput').value = romaneio;
-        document.getElementById('camposExtras').style.display = "block";
-        document.getElementById('btnConfirmar').innerText = indexEdicao === -1 ? "✅ ADICIONAR" : "💾 ATUALIZAR";
-        document.getElementById('rotaInput').focus();
     }
 
     function confirmarAdicao() {
@@ -313,15 +222,14 @@
         };
         if(indexEdicao > -1) escalaAtual[turno][indexEdicao] = dados;
         else escalaAtual[turno].push(dados);
-        
         document.getElementById('camposExtras').style.display = "none";
-        indexEdicao = -1;
         renderRevisao();
+        showToast("✅ Escala atualizada!");
     }
 
     function renderRevisao() {
         const div = document.getElementById('revisaoEscala');
-        div.innerHTML = "<label>Revisão de Escala:</label>";
+        div.innerHTML = "<label>📋 Lista para Hoje:</label>";
         ['AM', 'PM'].forEach(t => {
             escalaAtual[t].forEach((m, idx) => {
                 div.innerHTML += `<div class="item-escala">
@@ -331,7 +239,7 @@
                     </div>
                     <div class="actions">
                         <button class="btn-circle" style="background:var(--warning)" onclick="editarEscalado('${t}', ${idx})">✏️</button>
-                        <button class="btn-circle" style="background:var(--danger)" onclick="escalaAtual['${t}'].splice(${idx}, 1); renderRevisao();">🗑️</button>
+                        <button class="btn-circle" style="background:var(--danger)" onclick="escalaAtual['${t}'].splice(${idx}, 1); renderRevisao(); showToast('🗑️ Retirado');">🗑️</button>
                     </div>
                 </div>`;
             });
@@ -340,10 +248,13 @@
 
     function editarEscalado(turno, idx) {
         const m = escalaAtual[turno][idx];
-        motoristaEmEdicao = m;
-        indexEdicao = idx;
+        motoristaEmEdicao = m; indexEdicao = idx;
         document.getElementById('turnoSelecao').value = turno;
-        abrirCamposEdicao(m.nome, m.rota, m.romaneio);
+        document.getElementById('nomeSeleccionado').innerText = m.nome;
+        document.getElementById('rotaInput').value = m.rota;
+        document.getElementById('romaneioInput').value = m.romaneio;
+        document.getElementById('camposExtras').style.display = "block";
+        document.getElementById('rotaInput').focus();
     }
 
     function gerarTexto(t) {
@@ -355,7 +266,7 @@
                        f.map(m => `• ${m.nome.split(' ')[0]} - ${m.rota} - ${m.romaneio}`).join('\n') + `\n\n`;
             }
         });
-        copy(txt);
+        navigator.clipboard.writeText(txt).then(() => showToast("📋 Texto AM/PM copiado!"));
     }
 
     function gerarTextoDisp() {
@@ -364,17 +275,10 @@
             let f = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === mod).sort((a,b) => a.nome.localeCompare(b.nome));
             if(f.length > 0) txt += `\n*${mod}S:*\n` + f.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n`;
         });
-        copy(txt);
+        navigator.clipboard.writeText(txt).then(() => showToast("✅ Disponibilidade copiada!"));
     }
 
-    function copy(txt) {
-        const res = document.getElementById('resultado');
-        res.innerText = txt;
-        res.style.display = "block";
-        navigator.clipboard.writeText(txt).then(() => alert("Copiado!"));
-    }
-
-    function resetEscala() { if(confirm("Limpar escala?")) { escalaAtual = { AM: [], PM: [] }; renderRevisao(); } }
+    function resetEscala() { escalaAtual = { AM: [], PM: [] }; renderRevisao(); showToast("🧹 Escala limpa!"); }
 
     renderTudo();
 </script>
