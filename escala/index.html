@@ -256,7 +256,7 @@
         ['CARRO', 'FIORINO', 'VUC'].forEach(mod => {
             let f = escalaAtual[t].filter(m => m.modelo === mod).sort((a,b) => a.nome.localeCompare(b.nome));
             if(f.length > 0) {
-                txt += `*${mod === 'CARRO' ? 'AGREGADOS' : mod + 'S'}:*\n` + 
+                txt += `*${mod === 'CARRO' ? 'CARROS' : mod + 'S'}:*\n` + 
                        f.map(m => `• ${m.nome.split(' ')[0]} - ${m.rota} - ${m.romaneio}`).join('\n') + `\n\n`;
             }
         });
