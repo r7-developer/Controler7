@@ -387,28 +387,34 @@
     }
 
     function gerarTextoDisp() {
-        let filtroCidade = prompt("Filtrar Disponibilidade por CIDADE? (Deixe vazio para todos)");
-        filtroCidade = limparTexto(filtroCidade);
-        let amanha = new Date();
-    amanha.setDate(amanha.getDate() + 1);
-    let dataFormatada = amanha.toLocaleDateString('pt-BR');
+    // Calcula a data de amanhã
+    let dataRef = new Date();
+    dataRef.setDate(dataRef.getDate() + 1);
+    
+    // Formata a data com o dia da semana (ex: terça-feira, 18/02/2026)
+    let opções = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
+    let amanhaStr = dataRef.toLocaleDateString('pt-BR', opções);
+    
+    // Deixa a primeira letra do dia da semana em maiúsculo
+    amanhaStr = amanhaStr.charAt(0).toUpperCase() + amanhaStr.slice(1);
 
-    let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 *PARA O DIA: ${dataFormatada}*\n\n`;
-        let encontrou = false;
-        ['FIORINO', 'VUC', 'CARRO'].forEach(tipo => {
-            let lista = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === tipo);
-            if(filtroCidade) lista = lista.filter(m => m.mora.includes(filtroCidade));
-            if(lista.length > 0) {
-                encontrou = true;
-                txt += `*${tipo}S:*\n`;
-                txt += lista.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n\n`;
-            }
-        });
-        if(!encontrou) return alert("Nada encontrado.");
-        navigator.clipboard.writeText(txt);
-        showToast("Disponibilidade Copiada!");
-    }
+    let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 *${amanhaStr}*\n\n`;
+    let encontrou = false;
 
+    ['FIORINO', 'VUC', 'CARRO'].forEach(tipo => {
+        let lista = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === tipo);
+        if(lista.length > 0) {
+            encontrou = true;
+            txt += `*${tipo}S:*\n`;
+            txt += lista.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n\n`;
+        }
+    });
+
+    if(!encontrou) return alert("Nenhum motorista de FROTA cadastrado.");
+
+    navigator.clipboard.writeText(txt);
+    showToast("✅ Disp. de AMANHÃ copiada!");
+}
     function resetGeral() { if(confirm("Apagar TUDO?")) { localStorage.clear(); location.reload(); } }
     function showToast(msg) { const x = document.getElementById("toast"); x.innerText = msg; x.className = "show"; setTimeout(() => { x.className = ""; }, 2000); }
 
