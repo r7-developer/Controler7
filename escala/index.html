@@ -387,22 +387,34 @@
     }
 
     function gerarTextoDisp() {
-    // Calcula a data de amanhã
+    // 1. Pergunta qual cidade quer filtrar (como era antes)
+    let filtroCidade = prompt("Filtrar Disponibilidade por CIDADE? (Deixe vazio para todas)");
+    filtroCidade = limparTexto(filtroCidade);
+
+    // 2. Calcula a data de amanhã com o dia da semana
     let dataRef = new Date();
     dataRef.setDate(dataRef.getDate() + 1);
     
-    // Formata a data com o dia da semana (ex: terça-feira, 18/02/2026)
-    let opções = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
-    let amanhaStr = dataRef.toLocaleDateString('pt-BR', opções);
-    
-    // Deixa a primeira letra do dia da semana em maiúsculo
+    let opcoes = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
+    let amanhaStr = dataRef.toLocaleDateString('pt-BR', opcoes);
     amanhaStr = amanhaStr.charAt(0).toUpperCase() + amanhaStr.slice(1);
 
-    let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 *${amanhaStr}*\n\n`;
+    // 3. Monta o cabeçalho do texto
+    let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 *PARA: ${amanhaStr}*\n`;
+    if(filtroCidade) txt += `🌆 *FILTRO: ${filtroCidade}*\n`;
+    txt += `\n`;
+
     let encontrou = false;
 
+    // 4. Filtra e organiza os motoristas
     ['FIORINO', 'VUC', 'CARRO'].forEach(tipo => {
         let lista = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === tipo);
+        
+        // Aplica o filtro de cidade se o usuário digitou algo
+        if(filtroCidade) {
+            lista = lista.filter(m => m.mora.includes(filtroCidade));
+        }
+
         if(lista.length > 0) {
             encontrou = true;
             txt += `*${tipo}S:*\n`;
@@ -410,11 +422,14 @@
         }
     });
 
-    if(!encontrou) return alert("Nenhum motorista de FROTA cadastrado.");
+    if(!encontrou) return alert("Nada encontrado para este filtro.");
 
+    // 5. Copia para a área de transferência
     navigator.clipboard.writeText(txt);
     showToast("✅ Disp. de AMANHÃ copiada!");
 }
+
+
     function resetGeral() { if(confirm("Apagar TUDO?")) { localStorage.clear(); location.reload(); } }
     function showToast(msg) { const x = document.getElementById("toast"); x.innerText = msg; x.className = "show"; setTimeout(() => { x.className = ""; }, 2000); }
 
