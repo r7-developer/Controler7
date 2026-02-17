@@ -218,7 +218,7 @@
                         localStorage.setItem('ESC_'+b, JSON.stringify(backup.dados['ESC_'+b]));
                     });
                     localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
-                    alert("Dados mesclados!");
+                    alert("Dados mesclados com sucesso!");
                     location.reload();
                 }
             } catch (err) { alert("Arquivo JSON inválido."); }
@@ -260,8 +260,7 @@
     function renderDisp() {
         const div = document.getElementById('listaDisponibilidade');
         div.innerHTML = "";
-        const tipos = ['FIORINO', 'VUC', 'CARRO'];
-        tipos.forEach(t => {
+        ['FIORINO', 'VUC', 'CARRO'].forEach(t => {
             const lista = motoristas.filter(m => m.modelo === t && m.tipo === 'FROTA');
             if(lista.length > 0) {
                 div.innerHTML += `<div class="cat-title">${getIcon(t)} ${t}S</div>`;
@@ -283,13 +282,19 @@
             const realIdx = motoristas.indexOf(m);
             div.innerHTML += `<div class="disp-item">
                 <div style="flex:1">
-                    <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span><br>
-                    <span class="badge-info">${m.tipo} | ${m.mora}</span>
-                    <span class="exp-tag">Experiente: ${m.experiencia || 'NÃO INFORMADO'}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span>${getIcon(m.modelo)} <b>${m.nome}</b></span>
+                        <span class="stars">${getStars(m.estrelas)}</span>
+                    </div>
+                    <div class="badge-row">
+                        <span class="badge badge-tipo">${m.tipo}</span>
+                        <span class="badge badge-mora">${m.mora || 'S/ CIDADE'}</span>
+                        ${m.experiencia ? `<span class="badge badge-exp">EXP: ${m.experiencia}</span>` : ''}
+                    </div>
                 </div>
-                <div>
-                    <button onclick="carregarEdicao(${realIdx})" style="border:none; background:none; font-size:1.2rem;">✏️</button>
-                    <button onclick="motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo(); renderDisp();" style="border:none; background:none; font-size:1.2rem; color:red;">❌</button>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="carregarEdicao(${realIdx})" style="border:none; background:none; font-size:1.3rem; cursor:pointer;">✏️</button>
+                    <button onclick="motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo(); renderDisp();" style="border:none; background:none; font-size:1.3rem; color:red; cursor:pointer;">❌</button>
                 </div>
             </div>`;
         });
@@ -317,7 +322,7 @@
         motoristas.filter(m => m.nome.includes(val.toUpperCase())).forEach(m => {
             const d = document.createElement('div');
             d.className = "disp-item"; d.style.cursor="pointer";
-            d.innerHTML = `${getIcon(m.modelo)} ${m.nome} <span class="stars">${getStars(m.estrelas)}</span>`;
+            d.innerHTML = `<div>${getIcon(m.modelo)} ${m.nome} <span class="stars">${getStars(m.estrelas)}</span><br><small style="color:orange">${m.experiencia || ''}</small></div>`;
             d.onclick = () => {
                 window.selMot = m;
                 document.getElementById('nomeSeleccionado').innerText = m.nome;
@@ -380,7 +385,7 @@
                 txt += `\n`;
             }
         });
-        if(!encontrou) return alert("Nenhum motorista nesta cidade.");
+        if(!encontrou) return alert("Nada encontrado.");
         navigator.clipboard.writeText(txt);
         showToast("Escala Copiada!");
     }
