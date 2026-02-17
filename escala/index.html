@@ -4,35 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gestor operacional - R7</title>
-    <style>
-        :root { --primary: #075e54; --secondary: #25d366; --accent: #007bff; --danger: #ff5252; --warning: #ffa000; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; padding-bottom: 80px; }
-        
-        #toast { visibility: hidden; min-width: 200px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); }
+   <style>
+        :root {
+            --primary: #1e293b; /* Azul Marinho Moderno */
+            --secondary: #10b981; /* Verde Esmeralda */
+            --accent: #3b82f6; /* Azul Royal */
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+        }
+
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main);
+            margin: 0; padding: 15px; padding-bottom: 100px;
+            line-height: 1.5;
+        }
+
+        /* Notificações */
+        #toast { visibility: hidden; min-width: 250px; background: var(--primary); color: #fff; text-align: center; border-radius: 12px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2s; }
+
+        /* Cabeçalhos e Containers */
+        .section-title { font-size: 1rem; font-weight: 700; color: var(--primary); margin: 20px 0 10px 5px; display: flex; align-items: center; gap: 8px; }
+        .header-main { background: var(--primary); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        
+        .card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; border: 1px solid #e2e8f0; }
+
+        /* Formulários */
+        input, select { 
+            width: 100%; height: 48px; padding: 12px; margin-bottom: 12px; 
+            border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; 
+            transition: border-color 0.2s; box-sizing: border-box;
+        }
+        input:focus { border-color: var(--accent); outline: none; }
+
+        /* Botões */
+        button { 
+            width: 100%; min-height: 48px; border: none; border-radius: 10px; 
+            font-weight: 600; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        button:active { transform: scale(0.98); }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-success { background: var(--secondary); color: white; }
+        .btn-outline { background: #fff; border: 1.5px solid #e2e8f0; color: var(--text-main); height: 38px; min-height: 38px; font-size: 0.8rem; }
+        .btn-danger { background: #fee2e2; color: var(--danger); }
+
+        /* Lista de Motoristas (Banco de Dados) */
+        .db-card { 
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 15px; border-radius: 12px; background: #fff;
+            border: 1px solid #f1f5f9; margin-bottom: 10px; transition: 0.2s;
+        }
+        .db-card:hover { border-color: var(--accent); }
+        .db-info b { font-size: 1rem; display: block; margin-bottom: 4px; }
+        
+        /* Badges e Tags */
+        .badge-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
+        .tag-gray { background: #f1f5f9; color: #475569; }
+        .tag-blue { background: #dbeafe; color: #1e40af; }
+        .tag-exp { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+        /* Disponibilidade e Escala */
+        .disp-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; border: none; color: white; font-weight: bold; width: 80px; }
+        .on { background: var(--secondary); }
+        .off { background: var(--danger); }
+        
+        .cat-divider { font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; margin: 15px 0 8px 0; font-weight: 800; border-left: 3px solid var(--accent); padding-left: 8px; }
+
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
-        .base-management { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 2px solid #333; }
-        .header-box { background: var(--primary); color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 1.2rem; }
-        .card { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        h2 { color: var(--primary); font-size: 1.1rem; margin: 0 0 10px 0; border-bottom: 2px solid var(--secondary); padding-bottom: 5px; }
-        
-        input, select { width: 100%; height: 45px; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
-        
-        button { width: 100%; min-height: 48px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-save { background: var(--secondary); color: white; }
-        .btn-edit-mode { background: var(--warning); color: #000; }
-        .btn-action { background: #6c757d; color: white; margin-top: 5px; height: 35px; min-height: 35px; font-size: 0.8rem; }
-        
-        .disp-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
-        .stars { color: #ffca28; font-weight: bold; letter-spacing: 2px; }
-        .item-escala { background: #fffde7; padding: 12px; margin: 8px 0; border-radius: 10px; border-left: 5px solid var(--warning); display: flex; justify-content: space-between; align-items: center; }
-        .badge-info { background: #f8f9fa; color: #666; font-size: 0.75rem; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
-        
-        .cat-title { font-size: 0.85rem; font-weight: bold; color: #333; background: #e9ecef; padding: 8px; border-radius: 6px; margin-top: 15px; display: block; }
-        .btn-status { width: 70px; height: 30px; border-radius: 15px; font-size: 0.7rem; color: white; border: none; font-weight: bold; }
-        .status-on { background: var(--secondary); } .status-off { background: var(--danger); }
     </style>
 </head>
 <body>
