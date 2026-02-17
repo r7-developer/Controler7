@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Logistica PRO - Gestao Total</title>
+    <title>Logistica PRO - Fix</title>
     <style>
         :root { --primary: #075e54; --secondary: #25d366; --accent: #007bff; --danger: #ff5252; --warning: #ffa000; --bg: #f0f2f5; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; padding-bottom: 80px; }
@@ -23,23 +23,12 @@
         button { width: 100%; min-height: 48px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-save { background: var(--secondary); color: white; }
         .btn-edit-mode { background: var(--warning); color: #000; }
-        .btn-copy { background: var(--accent); color: white; margin-top: 10px; }
         .btn-action { background: #6c757d; color: white; margin-top: 5px; height: 35px; min-height: 35px; font-size: 0.8rem; }
-        .btn-clear { background: #333; color: #fff; font-size: 0.7rem; height: 30px; margin-top: 5px; }
-
+        
         .disp-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f1f1f1; }
         .btn-status { width: 65px; height: 30px; border-radius: 15px; font-size: 0.7rem; color: white; border: none; }
         .status-on { background: var(--secondary); } .status-off { background: var(--danger); }
-
-        .item-escala { background: #fffde7; padding: 12px; margin: 8px 0; border-radius: 10px; border-left: 5px solid var(--warning); display: flex; justify-content: space-between; align-items: center; }
-        .btn-circle { width: 35px; height: 35px; border-radius: 50%; color: white; border: none; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
-
-        #camposExtras { background: #e3f2fd; border: 2px solid var(--accent); padding: 15px; border-radius: 12px; margin-top: 10px; }
-        .badge-info { background: #eee; color: #555; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; border: 1px solid #ccc; text-transform: uppercase; }
-        
-        .cat-title { font-size: 0.8rem; font-weight: bold; color: #333; background: #e9ecef; padding: 6px 10px; border-radius: 5px; margin-top: 10px; display: block; }
         .stars { color: #ffca28; font-weight: bold; letter-spacing: 2px; }
-        .btn-edit-small { background: #eee; color: #555; font-size: 0.7rem; padding: 5px; border-radius: 5px; border: 1px solid #ccc; margin-right: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -47,7 +36,7 @@
 <div id="toast"></div>
 
 <div class="base-management">
-    <h2>🏢 Gestao de Bases</h2>
+    <h2>🏢 Gestão de Bases</h2>
     <select id="seletorBase" onchange="mudarBase()"></select>
     <div style="display: flex; gap: 5px;">
         <button class="btn-action" onclick="novaBase()">➕ Criar</button>
@@ -57,7 +46,7 @@
     <div style="display: flex; gap: 5px; margin-top: 10px;">
         <button class="btn-action" style="background:#444" onclick="exportarDados()">📥 Backup (Exportar)</button>
         <input type="file" id="importFile" style="display:none" onchange="importarDados(event)">
-        <button class="btn-action" style="background:#444" onclick="document.getElementById('importFile').click()">📤 Somar Lista (Importar JSON)</button>
+        <button class="btn-action" style="background:#444" onclick="document.getElementById('importFile').click()">📤 Importar JSON</button>
     </div>
 </div>
 
@@ -66,66 +55,44 @@
 <div class="card" id="formCadastro">
     <h2 id="tituloForm">🚚 Cadastro de Motorista</h2>
     <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
-    <input type="text" id="moraArea" placeholder="Cidade (Ex: RIO, NITEROI)">
-    <input type="text" id="experienciaInput" placeholder="Experiência (Ex: Conhece bem Zona Sul)">
+    <input type="text" id="moraArea" placeholder="Cidade">
+    <input type="text" id="experienciaInput" placeholder="Experiência">
     <select id="estrelasInput">
-        <option value="1">⭐ (Novato)</option>
-        <option value="2">⭐⭐</option>
-        <option value="3">⭐⭐⭐ (Médio)</option>
-        <option value="4">⭐⭐⭐⭐</option>
-        <option value="5" selected>⭐⭐⭐⭐⭐ (Antigo/Elite)</option>
+        <option value="1">⭐</option><option value="2">⭐⭐</option><option value="3">⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="5" selected>⭐⭐⭐⭐⭐</option>
     </select>
     <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
     <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
-    
-    <button class="btn-save" id="btnSalvar" onclick="salvarMotorista()">💾 CADASTRAR NESTA BASE</button>
-    <button class="btn-clear" id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top: 10px; background: #666;">❌ CANCELAR / LIMPAR CAMPOS</button>
+    <button class="btn-save" id="btnSalvar" onclick="salvarMotorista()">💾 SALVAR MOTORISTA</button>
+    <button id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top:10px; background:#666; color:white; border:none; border-radius:8px; height:40px; width:100%;">CANCELAR EDIÇÃO</button>
 </div>
 
 <div class="card">
     <h2>📝 Escala Diaria</h2>
     <select id="turnoSelecao"><option value="AM">☀️ TURNO AM</option><option value="PM">🌙 TURNO PM</option></select>
-    <input type="text" id="buscaEscala" placeholder="🔍 Buscar motorista para escala..." oninput="buscarParaEscala(this.value)">
+    <input type="text" id="buscaEscala" placeholder="🔍 Buscar para escala..." oninput="buscarParaEscala(this.value)">
     <div id="listaBuscaEscala"></div>
-    
-    <div id="camposExtras" style="display:none;">
-        <b id="nomeSeleccionado"></b> <span id="infoSeleccionada" class="badge-info"></span>
-        <br><span id="estrelasSeleccionada" class="stars"></span>
-        <br><small id="expSeleccionada" style="color: #666;"></small>
-        <input type="text" id="rotaInput" placeholder="📍 Rota (Ex: ROTA 01)">
-        <input type="text" id="cidadeInput" placeholder="🌆 Cidade (Para Filtro de Cópia)">
+    <div id="camposExtras" style="display:none; background:#e3f2fd; padding:15px; border-radius:12px; margin-top:10px; border:2px solid var(--accent);">
+        <b id="nomeSeleccionado"></b><br>
+        <input type="text" id="rotaInput" placeholder="📍 Rota">
+        <input type="text" id="cidadeInput" placeholder="🌆 Cidade Filtro">
         <input type="text" id="romaneioInput" placeholder="🔢 Romaneio">
-        <button onclick="confirmarAdicao()" style="background:var(--accent); color:white;">✅ CONFIRMAR NA ESCALA</button>
+        <button onclick="confirmarAdicao()" style="background:var(--accent); color:white; width:100%; border:none; border-radius:8px; height:45px;">CONFIRMAR NA ESCALA</button>
     </div>
-    
     <div id="revisaoEscala"></div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-        <button class="btn-copy" onclick="gerarTexto('AM')">☀️ COPIAR AM</button>
-        <button class="btn-copy" onclick="gerarTexto('PM')" style="background:#6610f2">🌙 COPIAR PM</button>
-        <button class="btn-clear" onclick="limparEscala('AM')">🗑️ LIMPAR AM</button>
-        <button class="btn-clear" onclick="limparEscala('PM')">🗑️ LIMPAR PM</button>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
+        <button onclick="gerarTexto('AM')" style="background:var(--accent); color:white; border-radius:8px; height:45px; border:none;">COPIAR AM</button>
+        <button onclick="gerarTexto('PM')" style="background:#6610f2; color:white; border-radius:8px; height:45px; border:none;">COPIAR PM</button>
     </div>
-</div>
-
-<div class="card">
-    <h2>🟢 Disponibilidade (FROTA)</h2>
-    <div id="listaDisponibilidade"></div>
-    <button class="btn-copy" onclick="gerarTextoDisp()" style="background:#28a745">📋 COPIAR DISP. GERAL</button>
 </div>
 
 <div class="card">
     <h2>📂 Banco de Dados Geral</h2>
-    <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar para editar ou remover..." oninput="renderBanco(this.value)">
     <div id="listaBanco"></div>
 </div>
 
-<button onclick="resetGeral()" style="background:none; color:gray; font-size:0.6rem; margin-top:20px; border:1px solid #ccc; width:100px; margin-left:auto; margin-right:auto; display:block;">RESET GERAL</button>
+<button onclick="resetGeral()" style="background:none; color:gray; font-size:0.6rem; margin:20px auto; display:block; border:1px solid #ccc;">RESET TOTAL</button>
 <script>
-    function limparTexto(str) {
-        if(!str) return "";
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
-    }
-
+    function limparTexto(str) { return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim() : ""; }
     const getIcon = (mod) => mod === 'FIORINO' ? '🚐' : (mod === 'VUC' ? '🚚' : '🚗');
     const getStars = (n) => "⭐".repeat(parseInt(n));
 
@@ -135,21 +102,12 @@
     let escalaAtual = { AM: [], PM: [] };
     let editandoIndex = -1;
 
-    function obterDataCompleta() {
-        const d = new Date();
-        const diasSemana = ["DOMINGO", "SEGUNDA-FEIRA", "TERÇA-FEIRA", "QUARTA-FEIRA", "QUINTA-FEIRA", "SEXTA-FEIRA", "SÁBADO"];
-        const dataFormatada = d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', year:'numeric'});
-        return diasSemana[d.getDay()] + " | " + dataFormatada;
-    }
-
     function init() {
         if(!bases.includes(baseAtiva)) baseAtiva = bases[0];
         renderBases();
-        carregarDados();
-        document.getElementById('displayDataHoje').innerText = "📅 " + obterDataCompleta();
+        carregarDadosBase();
+        document.getElementById('displayDataHoje').innerText = "📅 " + (new Date().toLocaleDateString('pt-BR'));
         renderTudo();
-        renderRevisao();
-        renderBanco();
     }
 
     function renderBases() {
@@ -173,19 +131,48 @@
         let n = prompt("Nome da nova base:");
         if(n) {
             n = limparTexto(n);
-            let listaBases = JSON.parse(localStorage.getItem('LOG_BASES_LIST')) || ["MATRIZ"];
-            if(!listaBases.includes(n)) {
-                listaBases.push(n);
-                localStorage.setItem('LOG_BASES_LIST', JSON.stringify(listaBases));
+            if(!bases.includes(n)) {
+                bases.push(n);
+                localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
                 localStorage.setItem('LOG_BASE_ATIVA', n);
-                localStorage.setItem('MOT_' + n, JSON.stringify([]));
-                localStorage.setItem('ESC_' + n, JSON.stringify({ AM: [], PM: [] }));
-                location.reload(); 
+                location.reload();
             }
         }
     }
 
-    function carregarDados() {
+    function renomearBase() {
+        let n = prompt("Novo nome para " + baseAtiva + ":");
+        if(n) {
+            n = limparTexto(n);
+            let idx = bases.indexOf(baseAtiva);
+            if(idx !== -1) {
+                let m = localStorage.getItem('MOT_' + baseAtiva);
+                let e = localStorage.getItem('ESC_' + baseAtiva);
+                localStorage.setItem('MOT_' + n, m);
+                localStorage.setItem('ESC_' + n, e);
+                localStorage.removeItem('MOT_' + baseAtiva);
+                localStorage.removeItem('ESC_' + baseAtiva);
+                bases[idx] = n;
+                localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
+                localStorage.setItem('LOG_BASE_ATIVA', n);
+                location.reload();
+            }
+        }
+    }
+
+    function deletarBase() {
+        if(bases.length <= 1) return alert("Não é possível deletar a única base.");
+        if(confirm("Apagar base " + baseAtiva + " permanentemente?")) {
+            localStorage.removeItem('MOT_' + baseAtiva);
+            localStorage.removeItem('ESC_' + baseAtiva);
+            bases = bases.filter(b => b !== baseAtiva);
+            localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
+            localStorage.setItem('LOG_BASE_ATIVA', bases[0]);
+            location.reload();
+        }
+    }
+
+    function carregarDadosBase() {
         motoristas = JSON.parse(localStorage.getItem('MOT_' + baseAtiva)) || [];
         escalaAtual = JSON.parse(localStorage.getItem('ESC_' + baseAtiva)) || { AM: [], PM: [] };
     }
@@ -196,19 +183,15 @@
     }
 
     function exportarDados() {
-        let dataObjeto = { 
-            LOG_BASES_LIST: JSON.parse(localStorage.getItem('LOG_BASES_LIST')), 
-            LOG_BASE_ATIVA: baseAtiva,
-            CONTEUDO: {} 
-        };
-        dataObjeto.LOG_BASES_LIST.forEach(b => {
-            dataObjeto.CONTEUDO['MOT_'+b] = JSON.parse(localStorage.getItem('MOT_'+b)) || [];
-            dataObjeto.CONTEUDO['ESC_'+b] = JSON.parse(localStorage.getItem('ESC_'+b)) || { AM: [], PM: [] };
+        let backup = { bases: bases, dados: {} };
+        bases.forEach(b => {
+            backup.dados['MOT_'+b] = JSON.parse(localStorage.getItem('MOT_'+b)) || [];
+            backup.dados['ESC_'+b] = JSON.parse(localStorage.getItem('ESC_'+b)) || { AM: [], PM: [] };
         });
-        let blob = new Blob([JSON.stringify(dataObjeto, null, 2)], {type: 'application/json'});
+        let blob = new Blob([JSON.stringify(backup)], {type: 'application/json'});
         let a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'backup_logistica.json';
+        a.download = 'logistica_pro.json';
         a.click();
     }
 
@@ -216,82 +199,74 @@
         let reader = new FileReader();
         reader.onload = function(e) {
             try {
-                let dataImportada = JSON.parse(e.target.result);
-                let listaBasesAtual = JSON.parse(localStorage.getItem('LOG_BASES_LIST')) || ["MATRIZ"];
-                
-                if(dataImportada.LOG_BASES_LIST) {
-                    dataImportada.LOG_BASES_LIST.forEach(nomeBase => {
-                        // Só adiciona se a base não existir
-                        if(!listaBasesAtual.includes(nomeBase)) {
-                            listaBasesAtual.push(nomeBase);
-                        }
-                        // Salva o conteúdo daquela base (mesmo se o nome já existir, ele atualiza os dados dela)
-                        if(dataImportada.CONTEUDO['MOT_'+nomeBase]) {
-                            localStorage.setItem('MOT_'+nomeBase, JSON.stringify(dataImportada.CONTEUDO['MOT_'+nomeBase]));
-                        }
-                        if(dataImportada.CONTEUDO['ESC_'+nomeBase]) {
-                            localStorage.setItem('ESC_'+nomeBase, JSON.stringify(dataImportada.CONTEUDO['ESC_'+nomeBase]));
-                        }
+                let backup = JSON.parse(e.target.result);
+                if(backup.bases) {
+                    backup.bases.forEach(b => {
+                        if(!bases.includes(b)) bases.push(b);
+                        localStorage.setItem('MOT_'+b, JSON.stringify(backup.dados['MOT_'+b]));
+                        localStorage.setItem('ESC_'+b, JSON.stringify(backup.dados['ESC_'+b]));
                     });
-                    
-                    localStorage.setItem('LOG_BASES_LIST', JSON.stringify(listaBasesAtual));
-                    alert("Dados mesclados com sucesso!");
+                    localStorage.setItem('LOG_BASES_LIST', JSON.stringify(bases));
+                    alert("Importação concluída!");
                     location.reload();
                 }
-            } catch (err) { 
-                alert("Erro ao ler JSON: Certifique-se de que o arquivo é um backup válido."); 
-            }
+            } catch (err) { alert("Arquivo JSON inválido."); }
         };
         reader.readAsText(event.target.files[0]);
     }
 
     function salvarMotorista() {
-        const nome = limparTexto(document.getElementById('nomeCompleto').value);
-        const mora = limparTexto(document.getElementById('moraArea').value) || "N/A";
-        const exp = limparTexto(document.getElementById('experienciaInput').value) || "S/EXP";
-        const star = document.getElementById('estrelasInput').value;
-        const mod = document.getElementById('modelo').value;
-        const tip = document.getElementById('tipo').value;
-        if(!nome) return;
-        if(editandoIndex === -1) {
-            motoristas.push({ nome: nome, mora: mora, experiencia: exp, estrelas: star, tipo: tip, modelo: mod, ativo: true });
-        } else {
-            motoristas[editandoIndex] = { ...motoristas[editandoIndex], nome: nome, mora: mora, experiencia: exp, estrelas: star, tipo: tip, modelo: mod };
-        }
+        const m = {
+            nome: limparTexto(document.getElementById('nomeCompleto').value),
+            mora: limparTexto(document.getElementById('moraArea').value),
+            experiencia: limparTexto(document.getElementById('experienciaInput').value),
+            estrelas: document.getElementById('estrelasInput').value,
+            modelo: document.getElementById('modelo').value,
+            tipo: document.getElementById('tipo').value,
+            ativo: true
+        };
+        if(!m.nome) return;
+        if(editandoIndex === -1) motoristas.push(m);
+        else motoristas[editandoIndex] = m;
         motoristas.sort((a,b) => a.nome.localeCompare(b.nome));
         salvarDADOS();
         limparFormulario();
         renderTudo();
-        renderBanco();
-        showToast("Salvo!");
-    }
-
-    function editarMotorista(index) {
-        editandoIndex = index;
-        const m = motoristas[index];
-        document.getElementById('nomeCompleto').value = m.nome;
-        document.getElementById('moraArea').value = m.mora;
-        document.getElementById('experienciaInput').value = m.experiencia;
-        document.getElementById('estrelasInput').value = m.estrelas;
-        document.getElementById('modelo').value = m.modelo;
-        document.getElementById('tipo').value = m.tipo;
-        document.getElementById('tituloForm').innerText = "✏️ Editando: " + m.nome;
-        document.getElementById('btnSalvar').innerText = "💾 SALVAR ALTERAÇÕES";
-        document.getElementById('btnSalvar').className = "btn-save btn-edit-mode";
-        document.getElementById('btnCancelar').style.display = "block";
-        window.scrollTo(0, 0);
+        showToast("Salvo com sucesso!");
     }
 
     function limparFormulario() {
         editandoIndex = -1;
         document.getElementById('nomeCompleto').value = "";
-        document.getElementById('moraArea').value = "";
-        document.getElementById('experienciaInput').value = "";
-        document.getElementById('estrelasInput').value = "5";
         document.getElementById('tituloForm').innerText = "🚚 Cadastro de Motorista";
-        document.getElementById('btnSalvar').innerText = "💾 CADASTRAR NESTA BASE";
-        document.getElementById('btnSalvar').className = "btn-save";
+        document.getElementById('btnSalvar').innerText = "💾 SALVAR MOTORISTA";
         document.getElementById('btnCancelar').style.display = "none";
+    }
+
+    function renderTudo() {
+        const div = document.getElementById('listaBanco');
+        div.innerHTML = "";
+        motoristas.forEach((m, idx) => {
+            div.innerHTML += `<div class="disp-item">
+                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span>
+                <div>
+                    <button onclick="carregarEdicao(${idx})" style="border:none; background:none; color:blue;">✏️</button>
+                    <button onclick="motoristas.splice(${idx},1); salvarDADOS(); renderTudo();" style="border:none; background:none; color:red;">❌</button>
+                </div>
+            </div>`;
+        });
+        renderRevisao();
+    }
+
+    function carregarEdicao(idx) {
+        editandoIndex = idx;
+        const m = motoristas[idx];
+        document.getElementById('nomeCompleto').value = m.nome;
+        document.getElementById('moraArea').value = m.mora;
+        document.getElementById('tituloForm').innerText = "✏️ Editando: " + m.nome;
+        document.getElementById('btnSalvar').innerText = "💾 ATUALIZAR";
+        document.getElementById('btnCancelar').style.display = "block";
+        window.scrollTo(0,0);
     }
 
     function buscarParaEscala(val) {
@@ -301,15 +276,12 @@
         motoristas.filter(m => m.nome.includes(val.toUpperCase())).forEach(m => {
             const d = document.createElement('div');
             d.className = "disp-item"; d.style.cursor="pointer";
-            d.innerHTML = `<span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span>`;
+            d.innerHTML = `${getIcon(m.modelo)} ${m.nome} <span class="stars">${getStars(m.estrelas)}</span>`;
             d.onclick = () => {
-                window.motoristaSelecionado = m;
+                window.selMot = m;
                 document.getElementById('nomeSeleccionado').innerText = m.nome;
-                document.getElementById('infoSeleccionada').innerText = m.tipo + " - " + m.mora;
-                document.getElementById('estrelasSeleccionada').innerText = getStars(m.estrelas);
-                document.getElementById('expSeleccionada').innerText = "EXP: " + m.experiencia;
                 document.getElementById('camposExtras').style.display = "block";
-                sug.innerHTML = ""; document.getElementById('buscaEscala').value = "";
+                sug.innerHTML = "";
             };
             sug.appendChild(d);
         });
@@ -317,17 +289,15 @@
 
     function confirmarAdicao() {
         const turno = document.getElementById('turnoSelecao').value;
-        const dados = { 
-            ...window.motoristaSelecionado, 
-            rota: limparTexto(document.getElementById('rotaInput').value) || "S/R", 
-            cidade: limparTexto(document.getElementById('cidadeInput').value) || "GERAL",
-            romaneio: limparTexto(document.getElementById('romaneioInput').value) || "S/R" 
-        };
-        escalaAtual[turno].push(dados);
+        escalaAtual[turno].push({
+            ...window.selMot,
+            rota: limparTexto(document.getElementById('rotaInput').value),
+            cidade: limparTexto(document.getElementById('cidadeInput').value),
+            romaneio: limparTexto(document.getElementById('romaneioInput').value)
+        });
         salvarDADOS();
         document.getElementById('camposExtras').style.display = "none";
         renderRevisao();
-        showToast("Adicionado!");
     }
 
     function renderRevisao() {
@@ -336,75 +306,21 @@
         ['AM', 'PM'].forEach(t => {
             escalaAtual[t].forEach((m, idx) => {
                 div.innerHTML += `<div class="item-escala">
-                    <div style="font-size:0.8rem"><b>${getIcon(m.modelo)} ${m.nome.split(' ')[0]} [${t}]</b><br>ROTA: ${m.rota}</div>
-                    <button class="btn-circle" style="background:var(--danger)" onclick="escalaAtual['${t}'].splice(${idx}, 1); salvarDADOS(); renderRevisao();">❌</button>
+                    <span><b>[${t}]</b> ${m.nome} - ROTA: ${m.rota}</span>
+                    <button onclick="escalaAtual['${t}'].splice(${idx},1); salvarDADOS(); renderRevisao();" style="border:none; background:none; color:red;">❌</button>
                 </div>`;
             });
         });
     }
 
-    function renderTudo() {
-        const lDisp = document.getElementById('listaDisponibilidade');
-        lDisp.innerHTML = "";
-        const tipos = [{id:'FIORINO', label:'🚐 FIORINOS'}, {id:'VUC', label:'🚚 VUCS'}, {id:'CARRO', label:'🚗 CARROS'}];
-        tipos.forEach(cat => {
-            const filtrados = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === cat.id);
-            if(filtrados.length > 0) {
-                lDisp.innerHTML += `<div class="cat-title">${cat.label}</div>`;
-                filtrados.forEach(m => {
-                    const realIdx = motoristas.indexOf(m);
-                    lDisp.innerHTML += `<div class="disp-item">
-                        <span>${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]} <span class="stars">${getStars(m.estrelas)}</span></span>
-                        <button onclick="motoristas[${realIdx}].ativo=!motoristas[${realIdx}].ativo; salvarDADOS(); renderTudo();" class="btn-status ${m.ativo ? 'status-on' : 'status-off'}">${m.ativo ? 'DISP' : 'FOLGA'}</button>
-                    </div>`;
-                });
-            }
-        });
-        renderBanco();
-    }
-
-    function renderBanco(filtro = "") {
-        const div = document.getElementById('listaBanco');
-        div.innerHTML = "";
-        motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m) => {
-            const realIdx = motoristas.indexOf(m);
-            div.innerHTML += `<div class="disp-item">
-                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span>
-                <div>
-                    <button onclick="editarMotorista(${realIdx})" class="btn-edit-small">✏️</button>
-                    <button onclick="motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo();" style="border:none; color:red; background:none;">❌</button>
-                </div>
-            </div>`;
-        });
-    }
-
     function gerarTexto(t) {
-        let filtroCidade = prompt("Filtrar escala por CIDADE? (Deixe vazio para tudo)");
-        filtroCidade = limparTexto(filtroCidade);
-        let escalaFiltrada = escalaAtual[t];
-        if(filtroCidade) escalaFiltrada = escalaAtual[t].filter(m => m.cidade.includes(filtroCidade));
-        if(escalaFiltrada.length === 0) { alert("Nada encontrado."); return; }
-        let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n📅 ${obterDataCompleta()}\n\n`;
-        escalaFiltrada.forEach(m => { txt += `• ${getIcon(m.modelo)} ${m.nome.split(' ')[0]} - ROTA: ${m.rota} - ROM: ${m.romaneio}\n`; });
+        let txt = `📋 *ESCALA ${t}*\n\n`;
+        escalaAtual[t].forEach(m => { txt += `• ${getIcon(m.modelo)} ${m.nome} - ROTA: ${m.rota}\n`; });
         navigator.clipboard.writeText(txt);
         showToast("Copiado!");
     }
 
-    function gerarTextoDisp() {
-        let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 ${obterDataCompleta()}\n\n`;
-        const tipos = [{id:'FIORINO', label:'🚐 FIORINOS'}, {id:'VUC', label:'🚚 VUCS'}, {id:'CARRO', label:'🚗 CARROS'}];
-        tipos.forEach(cat => {
-            let filtrados = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === cat.id);
-            if(filtrados.length > 0) {
-                txt += `*${cat.label}:*\n` + filtrados.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n\n`;
-            }
-        });
-        navigator.clipboard.writeText(txt);
-        showToast("Copiado!");
-    }
-
-    function limparEscala(t) { if(confirm("Limpar turno " + t + "?")) { escalaAtual[t] = []; salvarDADOS(); renderRevisao(); } }
-    function resetGeral() { if(confirm("APAGAR TUDO?")) { localStorage.clear(); location.reload(); } }
+    function resetGeral() { if(confirm("Apagar tudo?")) { localStorage.clear(); location.reload(); } }
     function showToast(msg) { const x = document.getElementById("toast"); x.innerText = msg; x.className = "show"; setTimeout(() => { x.className = ""; }, 2000); }
 
     window.onload = init;
