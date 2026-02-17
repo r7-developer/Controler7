@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestor operacional - R7</title>
-   <style>
+    <title>Logística PRO | Gestão Inteligente</title>
+    <style>
         :root {
             --primary: #1e293b; /* Azul Marinho Moderno */
             --secondary: #10b981; /* Verde Esmeralda */
@@ -107,52 +107,62 @@
     <div style="font-size: 1.4rem; font-weight: 900; letter-spacing: -1px;">LOGÍSTICA PRO</div>
 </div>
 
-<div class="section-title"> id="formCadastro">
-    <h2 id="tituloForm">🚚 Cadastro de Motorista</h2>
-    <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
-    <input type="text" id="moraArea" placeholder="Cidade onde mora (Ex: RIO, NITEROI)">
-    <input type="text" id="experienciaInput" placeholder="Experiência">
-    <select id="estrelasInput">
-        <option value="1">⭐ (Novato)</option><option value="2">⭐⭐ (Iniciante)</option><option value="3">⭐⭐⭐ (Operacional)</option><option value="4">⭐⭐⭐⭐ (Experiente)</option><option value="5" selected>⭐⭐⭐⭐⭐ (Antigo)</option>
+<div class="section-title">🚚 CADASTRO DE MOTORISTA</div>
+<div class="card">
+    <input type="text" id="nomeCompleto" placeholder="Nome Completo">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <input type="text" id="moraArea" placeholder="Cidade/Base">
+        <select id="estrelasInput">
+            <option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option>
+            <option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option>
+        </select>
+    </div>
+    <input type="text" id="experienciaInput" placeholder="Experiência (Ex: Conhece bem o Centro)">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
+        <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
+    </div>
+    <button class="btn-success" id="btnSalvar" onclick="salvarMotorista()">💾 SALVAR NO SISTEMA</button>
+    <button id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top:10px;" class="btn-outline">CANCELAR EDIÇÃO</button>
+</div>
+
+<div class="section-title">📝 ESCALA DIÁRIA</div>
+<div class="card">
+    <select id="turnoSelecao" style="background: #f1f5f9; font-weight: bold; border: none;">
+        <option value="AM">☀️ TURNO MANHÃ (AM)</option>
+        <option value="PM">🌙 TURNO TARDE (PM)</option>
     </select>
-    <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
-    <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
-    <button class="btn-save" id="btnSalvar" onclick="salvarMotorista()">💾 SALVAR MOTORISTA</button>
-    <button id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top:10px; background:#666; color:white; border:none; border-radius:8px; height:40px; width:100%;">CANCELAR / LIMPAR</button>
-</div>
-
-<div class="card">
-    <h2>📝 Escala Diaria</h2>
-    <select id="turnoSelecao"><option value="AM">☀️ TURNO AM</option><option value="PM">🌙 TURNO PM</option></select>
-    <input type="text" id="buscaEscala" placeholder="🔍 Buscar para escala..." oninput="buscarParaEscala(this.value)">
+    <input type="text" id="buscaEscala" placeholder="🔍 Digite o nome para escalar..." oninput="buscarParaEscala(this.value)">
     <div id="listaBuscaEscala"></div>
-    <div id="camposExtras" style="display:none; background:#e3f2fd; padding:15px; border-radius:12px; margin-top:10px; border:2px solid var(--accent);">
-        <b id="nomeSeleccionado"></b><br>
-        <input type="text" id="rotaInput" placeholder="📍 Rota">
-        <input type="text" id="cidadeInput" placeholder="🌆 Cidade Filtro">
-        <input type="text" id="romaneioInput" placeholder="🔢 Romaneio">
-        <button onclick="confirmarAdicao()" style="background:var(--accent); color:white; width:100%; border:none; border-radius:8px; height:45px;">CONFIRMAR NA ESCALA</button>
+    
+    <div id="camposExtras" style="display:none; background: #f0f7ff; padding: 15px; border-radius: 12px; border: 2px solid var(--accent); margin: 10px 0;">
+        <div id="nomeSeleccionado" style="font-weight: 900; color: var(--accent); margin-bottom: 10px;"></div>
+        <input type="text" id="rotaInput" placeholder="📍 Qual a Rota?">
+        <input type="text" id="romaneioInput" placeholder="🔢 Nº Romaneio">
+        <button onclick="confirmarAdicao()" class="btn-primary">CONFIRMAR ESCALA</button>
     </div>
+
     <div id="revisaoEscala"></div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
-        <button onclick="gerarTexto('AM')" style="background:var(--accent); color:white; border-radius:8px; height:45px; border:none;">COPIAR AM</button>
-        <button onclick="gerarTexto('PM')" style="background:#6610f2; color:white; border-radius:8px; height:45px; border:none;">COPIAR PM</button>
+    
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;">
+        <button onclick="gerarTexto('AM')" class="btn-primary" style="height: 55px;">📋 COPIAR AM</button>
+        <button onclick="gerarTexto('PM')" class="btn-primary" style="height: 55px; background: #6366f1;">📋 COPIAR PM</button>
     </div>
 </div>
 
+<div class="section-title">🟢 DISPONIBILIDADE FROTA</div>
 <div class="card">
-    <h2>🟢 Disponibilidade (FROTA)</h2>
     <div id="listaDisponibilidade"></div>
-    <button onclick="gerarTextoDisp()" style="background:var(--secondary); color:white; border-radius:8px; height:45px; border:none; margin-top:10px; font-weight:bold;">📋 COPIAR DISPONIBILIDADE</button>
+    <button onclick="gerarTextoDisp()" class="btn-success" style="margin-top: 15px; background: #059669;">📋 COPIAR LISTA DISP.</button>
 </div>
 
+<div class="section-title">📂 BANCO DE DADOS GERAL</div>
 <div class="card">
-    <h2>📂 Banco de Dados Geral</h2>
-    <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar no banco..." oninput="renderTudo(this.value)">
+    <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar motorista..." oninput="renderTudo(this.value)">
     <div id="listaBanco"></div>
 </div>
 
-<button onclick="resetGeral()" style="background:none; color:gray; font-size:0.6rem; margin:20px auto; display:block; border:1px solid #ccc;">RESET TOTAL</button>
+<button onclick="resetGeral()" style="background:none; color:#cbd5e1; font-size:0.7rem; margin:40px auto; display:block; border:none; text-decoration: underline;">LIMPAR TODO O SISTEMA</button>
 <script>
     const limparTexto = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim() : "";
     const getIcon = (mod) => mod === 'FIORINO' ? '🚐' : (mod === 'VUC' ? '🚚' : '🚗');
