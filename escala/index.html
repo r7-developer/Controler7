@@ -57,7 +57,7 @@
     <div style="display: flex; gap: 5px; margin-top: 10px;">
         <button class="btn-action" style="background:#444" onclick="exportarDados()">📥 Backup (Exportar)</button>
         <input type="file" id="importFile" style="display:none" onchange="importarDados(event)">
-        <button class="btn-action" style="background:#444" onclick="document.getElementById('importFile').click()">📤 Carregar (Importar)</button>
+        <button class="btn-action" style="background:#444" onclick="document.getElementById('importFile').click()">📤 Somar Lista (Importar JSON)</button>
     </div>
 </div>
 
@@ -185,36 +185,6 @@
         }
     }
 
-    function renomearBase() {
-        let n = prompt("Novo nome para " + baseAtiva + ":");
-        if(n) {
-            n = limparTexto(n);
-            let listaBases = JSON.parse(localStorage.getItem('LOG_BASES_LIST'));
-            let idx = listaBases.indexOf(baseAtiva);
-            let m = localStorage.getItem('MOT_' + baseAtiva);
-            let e = localStorage.getItem('ESC_' + baseAtiva);
-            localStorage.setItem('MOT_' + n, m);
-            localStorage.setItem('ESC_' + n, e);
-            localStorage.removeItem('MOT_' + baseAtiva);
-            localStorage.removeItem('ESC_' + baseAtiva);
-            listaBases[idx] = n;
-            localStorage.setItem('LOG_BASES_LIST', JSON.stringify(listaBases));
-            localStorage.setItem('LOG_BASE_ATIVA', n);
-            location.reload();
-        }
-    }
-
-    function deletarBase() {
-        if(confirm("Deseja apagar a base " + baseAtiva + "?") && bases.length > 1) {
-            let listaBases = JSON.parse(localStorage.getItem('LOG_BASES_LIST')).filter(b => b !== baseAtiva);
-            localStorage.removeItem('MOT_' + baseAtiva);
-            localStorage.removeItem('ESC_' + baseAtiva);
-            localStorage.setItem('LOG_BASES_LIST', JSON.stringify(listaBases));
-            localStorage.setItem('LOG_BASE_ATIVA', listaBases[0]);
-            location.reload();
-        }
-    }
-
     function carregarDados() {
         motoristas = JSON.parse(localStorage.getItem('MOT_' + baseAtiva)) || [];
         escalaAtual = JSON.parse(localStorage.getItem('ESC_' + baseAtiva)) || { AM: [], PM: [] };
@@ -226,15 +196,19 @@
     }
 
     function exportarDados() {
-        let data = { LOG_BASES_LIST: localStorage.getItem('LOG_BASES_LIST'), LOG_BASE_ATIVA: baseAtiva };
-        bases.forEach(b => {
-            data['MOT_'+b] = localStorage.getItem('MOT_'+b);
-            data['ESC_'+b] = localStorage.getItem('ESC_'+b);
+        let dataObjeto = { 
+            LOG_BASES_LIST: JSON.parse(localStorage.getItem('LOG_BASES_LIST')), 
+            LOG_BASE_ATIVA: baseAtiva,
+            CONTEUDO: {} 
+        };
+        dataObjeto.LOG_BASES_LIST.forEach(b => {
+            dataObjeto.CONTEUDO['MOT_'+b] = JSON.parse(localStorage.getItem('MOT_'+b)) || [];
+            dataObjeto.CONTEUDO['ESC_'+b] = JSON.parse(localStorage.getItem('ESC_'+b)) || { AM: [], PM: [] };
         });
-        let blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        let blob = new Blob([JSON.stringify(dataObjeto, null, 2)], {type: 'application/json'});
         let a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'backup_logistica_' + baseAtiva + '.json';
+        a.download = 'backup_logistica.json';
         a.click();
     }
 
@@ -242,10 +216,31 @@
         let reader = new FileReader();
         reader.onload = function(e) {
             try {
-                let data = JSON.parse(e.target.result);
-                Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
-                location.reload();
-            } catch (err) { alert("Arquivo invalido."); }
+                let dataImportada = JSON.parse(e.target.result);
+                let listaBasesAtual = JSON.parse(localStorage.getItem('LOG_BASES_LIST')) || ["MATRIZ"];
+                
+                if(dataImportada.LOG_BASES_LIST) {
+                    dataImportada.LOG_BASES_LIST.forEach(nomeBase => {
+                        // Só adiciona se a base não existir
+                        if(!listaBasesAtual.includes(nomeBase)) {
+                            listaBasesAtual.push(nomeBase);
+                        }
+                        // Salva o conteúdo daquela base (mesmo se o nome já existir, ele atualiza os dados dela)
+                        if(dataImportada.CONTEUDO['MOT_'+nomeBase]) {
+                            localStorage.setItem('MOT_'+nomeBase, JSON.stringify(dataImportada.CONTEUDO['MOT_'+nomeBase]));
+                        }
+                        if(dataImportada.CONTEUDO['ESC_'+nomeBase]) {
+                            localStorage.setItem('ESC_'+nomeBase, JSON.stringify(dataImportada.CONTEUDO['ESC_'+nomeBase]));
+                        }
+                    });
+                    
+                    localStorage.setItem('LOG_BASES_LIST', JSON.stringify(listaBasesAtual));
+                    alert("Dados mesclados com sucesso!");
+                    location.reload();
+                }
+            } catch (err) { 
+                alert("Erro ao ler JSON: Certifique-se de que o arquivo é um backup válido."); 
+            }
         };
         reader.readAsText(event.target.files[0]);
     }
@@ -257,22 +252,18 @@
         const star = document.getElementById('estrelasInput').value;
         const mod = document.getElementById('modelo').value;
         const tip = document.getElementById('tipo').value;
-        
         if(!nome) return;
-
         if(editandoIndex === -1) {
             motoristas.push({ nome: nome, mora: mora, experiencia: exp, estrelas: star, tipo: tip, modelo: mod, ativo: true });
-            showToast("Cadastrado!");
         } else {
             motoristas[editandoIndex] = { ...motoristas[editandoIndex], nome: nome, mora: mora, experiencia: exp, estrelas: star, tipo: tip, modelo: mod };
-            showToast("Atualizado!");
         }
-
         motoristas.sort((a,b) => a.nome.localeCompare(b.nome));
         salvarDADOS();
         limparFormulario();
         renderTudo();
         renderBanco();
+        showToast("Salvo!");
     }
 
     function editarMotorista(index) {
@@ -284,13 +275,11 @@
         document.getElementById('estrelasInput').value = m.estrelas;
         document.getElementById('modelo').value = m.modelo;
         document.getElementById('tipo').value = m.tipo;
-        
         document.getElementById('tituloForm').innerText = "✏️ Editando: " + m.nome;
         document.getElementById('btnSalvar').innerText = "💾 SALVAR ALTERAÇÕES";
         document.getElementById('btnSalvar').className = "btn-save btn-edit-mode";
         document.getElementById('btnCancelar').style.display = "block";
-        
-        window.scrollTo(0, document.getElementById('formCadastro').offsetTop - 20);
+        window.scrollTo(0, 0);
     }
 
     function limparFormulario() {
@@ -299,9 +288,6 @@
         document.getElementById('moraArea').value = "";
         document.getElementById('experienciaInput').value = "";
         document.getElementById('estrelasInput').value = "5";
-        document.getElementById('modelo').value = "FIORINO";
-        document.getElementById('tipo').value = "FROTA";
-        
         document.getElementById('tituloForm').innerText = "🚚 Cadastro de Motorista";
         document.getElementById('btnSalvar').innerText = "💾 CADASTRAR NESTA BASE";
         document.getElementById('btnSalvar').className = "btn-save";
@@ -315,7 +301,7 @@
         motoristas.filter(m => m.nome.includes(val.toUpperCase())).forEach(m => {
             const d = document.createElement('div');
             d.className = "disp-item"; d.style.cursor="pointer";
-            d.innerHTML = `<span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span> <br><small>${m.tipo} | ${m.mora}</small></span>`;
+            d.innerHTML = `<span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span>`;
             d.onclick = () => {
                 window.motoristaSelecionado = m;
                 document.getElementById('nomeSeleccionado').innerText = m.nome;
@@ -350,7 +336,7 @@
         ['AM', 'PM'].forEach(t => {
             escalaAtual[t].forEach((m, idx) => {
                 div.innerHTML += `<div class="item-escala">
-                    <div style="font-size:0.8rem"><b>${getIcon(m.modelo)} ${m.nome.split(' ')[0]} [${t}]</b> <span class="stars">${getStars(m.estrelas)}</span><br>ROTA: ${m.rota} | CIDADE: ${m.cidade}<br><small>EXP: ${m.experiencia}</small></div>
+                    <div style="font-size:0.8rem"><b>${getIcon(m.modelo)} ${m.nome.split(' ')[0]} [${t}]</b><br>ROTA: ${m.rota}</div>
                     <button class="btn-circle" style="background:var(--danger)" onclick="escalaAtual['${t}'].splice(${idx}, 1); salvarDADOS(); renderRevisao();">❌</button>
                 </div>`;
             });
@@ -361,7 +347,6 @@
         const lDisp = document.getElementById('listaDisponibilidade');
         lDisp.innerHTML = "";
         const tipos = [{id:'FIORINO', label:'🚐 FIORINOS'}, {id:'VUC', label:'🚚 VUCS'}, {id:'CARRO', label:'🚗 CARROS'}];
-        
         tipos.forEach(cat => {
             const filtrados = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === cat.id);
             if(filtrados.length > 0) {
@@ -384,68 +369,36 @@
         motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m) => {
             const realIdx = motoristas.indexOf(m);
             div.innerHTML += `<div class="disp-item">
-                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span> <br> <small>${m.tipo} | ${m.mora}</small></span>
+                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span></span>
                 <div>
-                    <button onclick="editarMotorista(${realIdx})" class="btn-edit-small">✏️ EDITAR</button>
-                    <button onclick="excluirMotorista(${realIdx})" style="background:none; border:none; color:red; font-size:1.2rem; cursor:pointer;">❌</button>
+                    <button onclick="editarMotorista(${realIdx})" class="btn-edit-small">✏️</button>
+                    <button onclick="motoristas.splice(${realIdx},1); salvarDADOS(); renderTudo();" style="border:none; color:red; background:none;">❌</button>
                 </div>
             </div>`;
         });
     }
 
-    function excluirMotorista(index) {
-        if(confirm("Excluir este motorista permanentemente?")) {
-            motoristas.splice(index, 1);
-            salvarDADOS();
-            renderTudo();
-            renderBanco();
-            showToast("Excluido!");
-        }
-    }
-
     function gerarTexto(t) {
         let filtroCidade = prompt("Filtrar escala por CIDADE? (Deixe vazio para tudo)");
         filtroCidade = limparTexto(filtroCidade);
-
         let escalaFiltrada = escalaAtual[t];
-        if(filtroCidade) {
-            escalaFiltrada = escalaAtual[t].filter(m => m.cidade.includes(filtroCidade));
-        }
-
-        if(escalaFiltrada.length === 0) {
-            alert("Nada encontrado.");
-            return;
-        }
-
-        let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n`;
-        txt += `📅 ${obterDataCompleta()}\n\n`;
-        escalaFiltrada.forEach(m => {
-            txt += `• ${getIcon(m.modelo)} ${m.nome.split(' ')[0]} - ROTA: ${m.rota} - ROM: ${m.romaneio}\n`;
-        });
+        if(filtroCidade) escalaFiltrada = escalaAtual[t].filter(m => m.cidade.includes(filtroCidade));
+        if(escalaFiltrada.length === 0) { alert("Nada encontrado."); return; }
+        let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n📅 ${obterDataCompleta()}\n\n`;
+        escalaFiltrada.forEach(m => { txt += `• ${getIcon(m.modelo)} ${m.nome.split(' ')[0]} - ROTA: ${m.rota} - ROM: ${m.romaneio}\n`; });
         navigator.clipboard.writeText(txt);
         showToast("Copiado!");
     }
 
     function gerarTextoDisp() {
-        let filtroCidade = prompt("Filtrar disponibilidade por CIDADE? (Deixe vazio para tudo)");
-        filtroCidade = limparTexto(filtroCidade);
-
-        let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n`;
-        txt += `📅 ${obterDataCompleta()}\n\n`;
+        let txt = `✅ *DISP. FROTA - ${baseAtiva}*\n📅 ${obterDataCompleta()}\n\n`;
         const tipos = [{id:'FIORINO', label:'🚐 FIORINOS'}, {id:'VUC', label:'🚚 VUCS'}, {id:'CARRO', label:'🚗 CARROS'}];
-        let encontrouAlgo = false;
         tipos.forEach(cat => {
             let filtrados = motoristas.filter(m => m.tipo === 'FROTA' && m.modelo === cat.id);
-            if(filtroCidade) {
-                filtrados = filtrados.filter(m => m.mora.includes(filtroCidade));
-            }
             if(filtrados.length > 0) {
-                encontrouAlgo = true;
-                txt += `*${cat.label}:*\n`;
-                txt += filtrados.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n\n`;
+                txt += `*${cat.label}:*\n` + filtrados.map(m => `${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]}`).join('\n') + `\n\n`;
             }
         });
-        if(!encontrouAlgo) { alert("Nada encontrado."); return; }
         navigator.clipboard.writeText(txt);
         showToast("Copiado!");
     }
