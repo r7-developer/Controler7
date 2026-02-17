@@ -22,6 +22,7 @@
         
         button { width: 100%; min-height: 48px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .btn-save { background: var(--secondary); color: white; }
+        .btn-edit-mode { background: var(--warning); color: #000; }
         .btn-copy { background: var(--accent); color: white; margin-top: 10px; }
         .btn-action { background: #6c757d; color: white; margin-top: 5px; height: 35px; min-height: 35px; font-size: 0.8rem; }
         .btn-clear { background: #333; color: #fff; font-size: 0.7rem; height: 30px; margin-top: 5px; }
@@ -38,6 +39,7 @@
         
         .cat-title { font-size: 0.8rem; font-weight: bold; color: #333; background: #e9ecef; padding: 6px 10px; border-radius: 5px; margin-top: 10px; display: block; }
         .stars { color: #ffca28; font-weight: bold; letter-spacing: 2px; }
+        .btn-edit-small { background: #eee; color: #555; font-size: 0.7rem; padding: 5px; border-radius: 5px; border: 1px solid #ccc; margin-right: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -61,8 +63,8 @@
 
 <div class="header-box"><div id="displayDataHoje"></div></div>
 
-<div class="card">
-    <h2>🚚 Cadastro de Motorista</h2>
+<div class="card" id="formCadastro">
+    <h2 id="tituloForm">🚚 Cadastro de Motorista</h2>
     <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
     <input type="text" id="moraArea" placeholder="Cidade (Ex: RIO, NITEROI)">
     <input type="text" id="experienciaInput" placeholder="Experiência (Ex: Conhece bem Zona Sul)">
@@ -75,7 +77,9 @@
     </select>
     <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
     <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
-    <button class="btn-save" onclick="salvarMotorista()">💾 CADASTRAR NESTA BASE</button>
+    
+    <button class="btn-save" id="btnSalvar" onclick="salvarMotorista()">💾 CADASTRAR NESTA BASE</button>
+    <button class="btn-clear" id="btnCancelar" onclick="limparFormulario()" style="display:none; margin-top: 10px; background: #666;">❌ CANCELAR / LIMPAR CAMPOS</button>
 </div>
 
 <div class="card">
@@ -110,8 +114,8 @@
 </div>
 
 <div class="card">
-    <h2>📂 Banco de Dados Geral (Excluir)</h2>
-    <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar para remover..." oninput="renderBanco(this.value)">
+    <h2>📂 Banco de Dados Geral</h2>
+    <input type="text" id="buscaBanco" placeholder="🔎 Pesquisar para editar ou remover..." oninput="renderBanco(this.value)">
     <div id="listaBanco"></div>
 </div>
 
@@ -129,6 +133,7 @@
     let baseAtiva = localStorage.getItem('LOG_BASE_ATIVA') || "MATRIZ";
     let motoristas = [];
     let escalaAtual = { AM: [], PM: [] };
+    let editandoIndex = -1;
 
     function obterDataCompleta() {
         const d = new Date();
@@ -252,16 +257,55 @@
         const star = document.getElementById('estrelasInput').value;
         const mod = document.getElementById('modelo').value;
         const tip = document.getElementById('tipo').value;
+        
         if(!nome) return;
-        motoristas.push({ nome: nome, mora: mora, experiencia: exp, estrelas: star, tipo: tip, modelo: mod, ativo: true });
+
+        if(editandoIndex === -1) {
+            motoristas.push({ nome: nome, mora: mora, experiencia: exp, estrelas: star, tipo: tip, modelo: mod, ativo: true });
+            showToast("Cadastrado!");
+        } else {
+            motoristas[editandoIndex] = { ...motoristas[editandoIndex], nome: nome, mora: mora, experiencia: exp, estrelas: star, tipo: tip, modelo: mod };
+            showToast("Atualizado!");
+        }
+
         motoristas.sort((a,b) => a.nome.localeCompare(b.nome));
         salvarDADOS();
+        limparFormulario();
+        renderTudo();
+        renderBanco();
+    }
+
+    function editarMotorista(index) {
+        editandoIndex = index;
+        const m = motoristas[index];
+        document.getElementById('nomeCompleto').value = m.nome;
+        document.getElementById('moraArea').value = m.mora;
+        document.getElementById('experienciaInput').value = m.experiencia;
+        document.getElementById('estrelasInput').value = m.estrelas;
+        document.getElementById('modelo').value = m.modelo;
+        document.getElementById('tipo').value = m.tipo;
+        
+        document.getElementById('tituloForm').innerText = "✏️ Editando: " + m.nome;
+        document.getElementById('btnSalvar').innerText = "💾 SALVAR ALTERAÇÕES";
+        document.getElementById('btnSalvar').className = "btn-save btn-edit-mode";
+        document.getElementById('btnCancelar').style.display = "block";
+        
+        window.scrollTo(0, document.getElementById('formCadastro').offsetTop - 20);
+    }
+
+    function limparFormulario() {
+        editandoIndex = -1;
         document.getElementById('nomeCompleto').value = "";
         document.getElementById('moraArea').value = "";
         document.getElementById('experienciaInput').value = "";
-        renderTudo();
-        renderBanco();
-        showToast("Salvo!");
+        document.getElementById('estrelasInput').value = "5";
+        document.getElementById('modelo').value = "FIORINO";
+        document.getElementById('tipo').value = "FROTA";
+        
+        document.getElementById('tituloForm').innerText = "🚚 Cadastro de Motorista";
+        document.getElementById('btnSalvar').innerText = "💾 CADASTRAR NESTA BASE";
+        document.getElementById('btnSalvar').className = "btn-save";
+        document.getElementById('btnCancelar').style.display = "none";
     }
 
     function buscarParaEscala(val) {
@@ -340,22 +384,22 @@
         motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m) => {
             const realIdx = motoristas.indexOf(m);
             div.innerHTML += `<div class="disp-item">
-                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span> <br> <small>${m.tipo} | ${m.mora} | EXP: ${m.experiencia}</small></span>
-                <button onclick="excluirMotorista(${realIdx})" style="background:none; border:none; color:red; font-size:1.2rem;">❌</button>
+                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span> <br> <small>${m.tipo} | ${m.mora}</small></span>
+                <div>
+                    <button onclick="editarMotorista(${realIdx})" class="btn-edit-small">✏️ EDITAR</button>
+                    <button onclick="excluirMotorista(${realIdx})" style="background:none; border:none; color:red; font-size:1.2rem; cursor:pointer;">❌</button>
+                </div>
             </div>`;
         });
     }
 
     function excluirMotorista(index) {
-        if(confirm("Excluir este motorista permanentemente do banco e da escala?")) {
-            const motoristaRemovido = motoristas[index];
-            escalaAtual.AM = escalaAtual.AM.filter(m => m.nome !== motoristaRemovido.nome);
-            escalaAtual.PM = escalaAtual.PM.filter(m => m.nome !== motoristaRemovido.nome);
+        if(confirm("Excluir este motorista permanentemente?")) {
             motoristas.splice(index, 1);
             salvarDADOS();
             renderTudo();
-            renderRevisao();
-            showToast("Excluido de tudo!");
+            renderBanco();
+            showToast("Excluido!");
         }
     }
 
@@ -376,7 +420,6 @@
         let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n`;
         txt += `📅 ${obterDataCompleta()}\n\n`;
         escalaFiltrada.forEach(m => {
-            // As estrelas e experiência não vão para o WhatsApp para o cliente não ver
             txt += `• ${getIcon(m.modelo)} ${m.nome.split(' ')[0]} - ROTA: ${m.rota} - ROM: ${m.romaneio}\n`;
         });
         navigator.clipboard.writeText(txt);
