@@ -37,6 +37,7 @@
         .badge-info { background: #eee; color: #555; font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; border: 1px solid #ccc; text-transform: uppercase; }
         
         .cat-title { font-size: 0.8rem; font-weight: bold; color: #333; background: #e9ecef; padding: 6px 10px; border-radius: 5px; margin-top: 10px; display: block; }
+        .stars { color: #ffca28; font-weight: bold; letter-spacing: 2px; }
     </style>
 </head>
 <body>
@@ -65,6 +66,13 @@
     <input type="text" id="nomeCompleto" placeholder="Nome do motorista">
     <input type="text" id="moraArea" placeholder="Cidade (Ex: RIO, NITEROI)">
     <input type="text" id="experienciaInput" placeholder="Experiência (Ex: Conhece bem Zona Sul)">
+    <select id="estrelasInput">
+        <option value="1">⭐ (Novato)</option>
+        <option value="2">⭐⭐</option>
+        <option value="3">⭐⭐⭐ (Médio)</option>
+        <option value="4">⭐⭐⭐⭐</option>
+        <option value="5" selected>⭐⭐⭐⭐⭐ (Antigo/Elite)</option>
+    </select>
     <select id="modelo"><option value="FIORINO">🚐 FIORINO</option><option value="VUC">🚚 VUC</option><option value="CARRO">🚗 CARRO</option></select>
     <select id="tipo"><option value="FROTA">🏢 FROTA</option><option value="AGREGADO">🤝 AGREGADO</option></select>
     <button class="btn-save" onclick="salvarMotorista()">💾 CADASTRAR NESTA BASE</button>
@@ -78,6 +86,7 @@
     
     <div id="camposExtras" style="display:none;">
         <b id="nomeSeleccionado"></b> <span id="infoSeleccionada" class="badge-info"></span>
+        <br><span id="estrelasSeleccionada" class="stars"></span>
         <br><small id="expSeleccionada" style="color: #666;"></small>
         <input type="text" id="rotaInput" placeholder="📍 Rota (Ex: ROTA 01)">
         <input type="text" id="cidadeInput" placeholder="🌆 Cidade (Para Filtro de Cópia)">
@@ -114,6 +123,7 @@
     }
 
     const getIcon = (mod) => mod === 'FIORINO' ? '🚐' : (mod === 'VUC' ? '🚚' : '🚗');
+    const getStars = (n) => "⭐".repeat(parseInt(n));
 
     let bases = JSON.parse(localStorage.getItem('LOG_BASES_LIST')) || ["MATRIZ"];
     let baseAtiva = localStorage.getItem('LOG_BASE_ATIVA') || "MATRIZ";
@@ -239,10 +249,11 @@
         const nome = limparTexto(document.getElementById('nomeCompleto').value);
         const mora = limparTexto(document.getElementById('moraArea').value) || "N/A";
         const exp = limparTexto(document.getElementById('experienciaInput').value) || "S/EXP";
+        const star = document.getElementById('estrelasInput').value;
         const mod = document.getElementById('modelo').value;
         const tip = document.getElementById('tipo').value;
         if(!nome) return;
-        motoristas.push({ nome: nome, mora: mora, experiencia: exp, tipo: tip, modelo: mod, ativo: true });
+        motoristas.push({ nome: nome, mora: mora, experiencia: exp, estrelas: star, tipo: tip, modelo: mod, ativo: true });
         motoristas.sort((a,b) => a.nome.localeCompare(b.nome));
         salvarDADOS();
         document.getElementById('nomeCompleto').value = "";
@@ -260,11 +271,12 @@
         motoristas.filter(m => m.nome.includes(val.toUpperCase())).forEach(m => {
             const d = document.createElement('div');
             d.className = "disp-item"; d.style.cursor="pointer";
-            d.innerHTML = `<span>${getIcon(m.modelo)} <b>${m.nome}</b> <br><small>${m.tipo} | ${m.mora} | EXP: ${m.experiencia}</small></span>`;
+            d.innerHTML = `<span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span> <br><small>${m.tipo} | ${m.mora}</small></span>`;
             d.onclick = () => {
                 window.motoristaSelecionado = m;
                 document.getElementById('nomeSeleccionado').innerText = m.nome;
                 document.getElementById('infoSeleccionada').innerText = m.tipo + " - " + m.mora;
+                document.getElementById('estrelasSeleccionada').innerText = getStars(m.estrelas);
                 document.getElementById('expSeleccionada').innerText = "EXP: " + m.experiencia;
                 document.getElementById('camposExtras').style.display = "block";
                 sug.innerHTML = ""; document.getElementById('buscaEscala').value = "";
@@ -294,7 +306,7 @@
         ['AM', 'PM'].forEach(t => {
             escalaAtual[t].forEach((m, idx) => {
                 div.innerHTML += `<div class="item-escala">
-                    <div style="font-size:0.8rem"><b>${getIcon(m.modelo)} ${m.nome.split(' ')[0]} [${t}]</b><br>ROTA: ${m.rota} | CIDADE: ${m.cidade}<br><small>EXP: ${m.experiencia}</small></div>
+                    <div style="font-size:0.8rem"><b>${getIcon(m.modelo)} ${m.nome.split(' ')[0]} [${t}]</b> <span class="stars">${getStars(m.estrelas)}</span><br>ROTA: ${m.rota} | CIDADE: ${m.cidade}<br><small>EXP: ${m.experiencia}</small></div>
                     <button class="btn-circle" style="background:var(--danger)" onclick="escalaAtual['${t}'].splice(${idx}, 1); salvarDADOS(); renderRevisao();">❌</button>
                 </div>`;
             });
@@ -313,7 +325,7 @@
                 filtrados.forEach(m => {
                     const realIdx = motoristas.indexOf(m);
                     lDisp.innerHTML += `<div class="disp-item">
-                        <span>${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]} <small>(${m.mora})</small></span>
+                        <span>${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]} <span class="stars">${getStars(m.estrelas)}</span></span>
                         <button onclick="motoristas[${realIdx}].ativo=!motoristas[${realIdx}].ativo; salvarDADOS(); renderTudo();" class="btn-status ${m.ativo ? 'status-on' : 'status-off'}">${m.ativo ? 'DISP' : 'FOLGA'}</button>
                     </div>`;
                 });
@@ -328,7 +340,7 @@
         motoristas.filter(m => m.nome.includes(filtro.toUpperCase())).forEach((m) => {
             const realIdx = motoristas.indexOf(m);
             div.innerHTML += `<div class="disp-item">
-                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <br> <small>${m.tipo} | ${m.mora} | EXP: ${m.experiencia}</small></span>
+                <span>${getIcon(m.modelo)} <b>${m.nome}</b> <span class="stars">${getStars(m.estrelas)}</span> <br> <small>${m.tipo} | ${m.mora} | EXP: ${m.experiencia}</small></span>
                 <button onclick="excluirMotorista(${realIdx})" style="background:none; border:none; color:red; font-size:1.2rem;">❌</button>
             </div>`;
         });
@@ -364,6 +376,7 @@
         let txt = `📋 *ESCALA ${t} - ${baseAtiva}*\n`;
         txt += `📅 ${obterDataCompleta()}\n\n`;
         escalaFiltrada.forEach(m => {
+            // As estrelas e experiência não vão para o WhatsApp para o cliente não ver
             txt += `• ${getIcon(m.modelo)} ${m.nome.split(' ')[0]} - ROTA: ${m.rota} - ROM: ${m.romaneio}\n`;
         });
         navigator.clipboard.writeText(txt);
