@@ -300,7 +300,7 @@
         const m = motoristas[idx];
         document.getElementById('nomeCompleto').value = m.nome;
         document.getElementById('moraArea').value = m.mora;
-        document.getElementById('experienciaInput').value = m.experiencia;
+        document.getElementById('experienciaInput').value = m.experiencia || "";
         document.getElementById('estrelasInput').value = m.estrelas;
         document.getElementById('modelo').value = m.modelo;
         document.getElementById('tipo').value = m.tipo;
