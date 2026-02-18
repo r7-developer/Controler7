@@ -268,7 +268,8 @@
                 lista.forEach(m => {
                     const realIdx = motoristas.indexOf(m);
                     div.innerHTML += `<div class="disp-item">
-                        <span>${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]} <span class="stars">${getStars(m.estrelas)}</span></span>
+                        <span>${m.ativo ? '🟢' : '🔴'} ${m.nome.split(' ')[0]} <span class="stars">${getStars(m.estrelas)}</span></span><br>
+                    <span class="badge-info">${m.tipo} | ${m.mora}</span><br>${m.experiencia ? `<span class="badge-info">"EXP: "${m.experiencia}</span>
                         <button onclick="motoristas[${realIdx}].ativo=!motoristas[${realIdx}].ativo; salvarDADOS(); renderDisp(); renderTudo();" class="btn-status ${m.ativo ? 'status-on' : 'status-off'}">${m.ativo ? 'DISP' : 'FOLGA'}</button>
                     </div>`;
                 });
