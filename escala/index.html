@@ -107,7 +107,7 @@
     const getIcon = (mod) => mod === 'FIORINO' ? '🚐' : (mod === 'VUC' ? '🚚' : '🚗');
     const getStars = (n) => "⭐".repeat(parseInt(n));
 
-    let bases = JSON.parse(localStorage.getItem('LOG_BASES_LIST')) || ["MATRIZ"];
+    let bases = JSON.parse(localStorage.getItem('LOG_BASES_LIST')) || ["Service"];
     let baseAtiva = localStorage.getItem('LOG_BASE_ATIVA') || "Service";
     let motoristas = [];
     let escalaAtual = { AM: [], PM: [] };
