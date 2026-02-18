@@ -108,7 +108,7 @@
     const getStars = (n) => "⭐".repeat(parseInt(n));
 
     let bases = JSON.parse(localStorage.getItem('LOG_BASES_LIST')) || ["MATRIZ"];
-    let baseAtiva = localStorage.getItem('LOG_BASE_ATIVA') || "MATRIZ";
+    let baseAtiva = localStorage.getItem('LOG_BASE_ATIVA') || "Service";
     let motoristas = [];
     let escalaAtual = { AM: [], PM: [] };
     let editandoIndex = -1;
