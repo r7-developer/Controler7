@@ -313,6 +313,7 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
 </style>
 </head>
 <body>
+    
 <div class="backdrop" id="backdrop" onclick="fecharModais()"></div>
 
 <div id="delete-modal">
@@ -374,6 +375,227 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
 </div>
 
 <div class="container">
+    <style>/* Container fixo no canto da tela */
+.fab-container {
+    position: fixed;
+    bottom: 90px; /* Fica um pouco acima do seu botão de + se ele estiver no fundo */
+    right: 20px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Botão Redondo Principal */
+.fab-main {
+    width: 50px;
+    height: 50px;
+    background-color: #333; /* Cor neutra para o menu */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* Ícone de 3 traços (Hamburger) */
+.hamburger-icon {
+    width: 20px;
+    height: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hamburger-icon span {
+    display: block;
+    height: 2px;
+    width: 100%;
+    background-color: white;
+    border-radius: 2px;
+}
+
+/* Menu de Opções (Escondido por padrão) */
+.fab-options {
+    display: none;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-bottom: 15px;
+    gap: 12px;
+}
+
+.fab-options.active {
+    display: flex;
+}
+
+/* Cada item do menu */
+.fab-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.fab-item:hover { transform: scale(1.05); }
+
+.fab-label {
+    background: white;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    color: #333;
+}
+
+.fab-icon {
+    width: 40px;
+    height: 40px;
+    background: #2980b9; /* Azul para importar */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.export .fab-icon { background: #27ae60; } /* Verde para exportar */
+
+</style>
+<div class="fab-container">
+    <div class="fab-options" id="fabOptions">
+        <label for="input-importar" class="fab-item import">
+            <span class="fab-label">Importar JSON</span>
+            <span class="fab-icon">📤</span>
+        </label>
+        <input type="file" id="input-importar" accept=".json" onchange="importarDeJSON(event)" style="display: none;">
+
+        <div class="fab-item export" onclick="exportarParaJSON()">
+            <span class="fab-label">Exportar JSON</span>
+            <span class="fab-icon">📥</span>
+        </div>
+    </div>
+
+    <div class="fab-main" onclick="toggleFabMenu()">
+        <div class="hamburger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</div>
+<script>function toggleFabMenu() {
+    const menu = document.getElementById('fabOptions');
+    menu.classList.toggle('active');
+    
+    // Opcional: Efeito visual no botão principal ao abrir
+    const mainBtn = document.querySelector('.fab-main');
+    if (menu.classList.contains('active')) {
+        mainBtn.style.transform = 'rotate(90deg)';
+    } else {
+        mainBtn.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Fecha o menu se clicar fora dele
+document.addEventListener('click', function(event) {
+    const container = document.querySelector('.fab-container');
+    const menu = document.getElementById('fabOptions');
+    if (!container.contains(event.target)) {
+        menu.classList.remove('active');
+        document.querySelector('.fab-main').style.transform = 'rotate(0deg)';
+    }
+});
+
+function exportarParaJSON() {
+    let backupGeral = {};
+    let encontrouDados = false;
+
+    // Varre todas as chaves que existem no localStorage do seu site
+    for (let i = 0; i < localStorage.length; i++) {
+        const chave = localStorage.key(i);
+        const valor = localStorage.getItem(chave);
+        
+        // Filtra apenas as chaves que pertencem ao seu sistema
+        // Adicionei os termos que você listou
+        if (chave.includes('financas') || 
+            chave.includes('contas') || 
+            chave.includes('lancamentos') || 
+            chave.includes('dados_financeiros') ||
+            chave.includes('dash')) {
+            
+            try {
+                // Tenta salvar como objeto JSON para o arquivo ficar limpo
+                backupGeral[chave] = JSON.parse(valor);
+            } catch (e) {
+                // Se não for JSON (for texto puro), salva como está
+                backupGeral[chave] = valor;
+            }
+            encontrouDados = true;
+        }
+    }
+
+    if (!encontrouDados) {
+        alert("⚠️ Nenhum dado encontrado no armazenamento do site!");
+        return;
+    }
+
+    // Cria o arquivo
+    const dataStr = JSON.stringify(backupGeral, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `R7_Backup_Controle_Financeiro.json`;
+    document.body.appendChild(link); // Necessário para alguns navegadores
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+function importarDeJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const dadosImportados = JSON.parse(e.target.result);
+            
+            if (confirm("🚨 Confirmar restauração? Isso atualizará todos os seus dados.")) {
+                
+                // Limpa o que for importante antes (opcional, mas recomendado)
+                // localStorage.clear(); 
+
+                for (let chave in dadosImportados) {
+                    let valor = dadosImportados[chave];
+                    // Se o valor for um objeto (veio do JSON.parse no exportar), 
+                    // precisamos converter de volta para String antes de salvar
+                    if (typeof valor === 'object') {
+                        valor = JSON.stringify(valor);
+                    }
+                    localStorage.setItem(chave, valor);
+                }
+
+                alert("✅ Dados restaurados com sucesso!");
+                window.location.reload();
+            }
+        } catch (err) {
+            alert("❌ O arquivo selecionado não é um backup válido.");
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
+}
+
+
+</script>
+
     <header>
         <h2>Gestor Financeiro - R7</h2>
         <i class="fas fa-adjust" onclick="toggleTheme()" style="cursor:pointer"></i>
