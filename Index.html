@@ -295,6 +295,51 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
     .btn-fab { position: fixed; bottom: 20px; right: 20px; background: var(--blue); color: white; border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.5rem; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     .btn-delete-option { width: 100%; padding: 12px; margin-bottom: 8px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 </style>
+<style>/* Container das sugestões com limite de 4 a 5 linhas */
+.autocomplete-items {
+    position: absolute;
+    border: 1px solid var(--blue);
+    border-top: none;
+    z-index: 9999;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card);
+    border-radius: 0 0 10px 10px;
+    
+    /* Limitação de altura para aproximadamente 4 itens */
+    max-height: 160px; 
+    overflow-y: auto;
+    
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+}
+
+/* Estilização do Scrollbar para ficar discreto */
+.autocomplete-items::-webkit-scrollbar {
+    width: 4px;
+}
+.autocomplete-items::-webkit-scrollbar-thumb {
+    background: var(--blue);
+    border-radius: 10px;
+}
+
+.autocomplete-items div {
+    padding: 10px 15px;
+    cursor: pointer;
+    color: var(--text);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.05);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Corta texto muito longo */
+}
+
+.autocomplete-items div:hover {
+    background-color: rgba(0, 212, 255, 0.15);
+    color: var(--blue);
+}
+</style>
 <style>
     /* Novos Estilos para Gamificação e Protocolos */
     .ai-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
@@ -352,7 +397,13 @@ pointer-events: none; /* Deixa os cliques passarem por ela quando escondida */
             <option value="tag">🏷️ Outros</option>
         </select>
     </div>
-    <input type="text" id="desc" placeholder="Nome / Descrição">
+    <div class="input-group" style="position: relative;">
+    <input type="text" id="desc" placeholder="Nome / Descrição" autocomplete="off">
+    <div id="autocomplete-list" class="autocomplete-items" style="display:none;"></div>
+</div>
+
+
+<datalist id="historico-nomes"></datalist>
     <input type="date" id="data-lancto">
     <input type="text" id="valor-brl" placeholder="R$ 0,00" oninput="formatarMoeda(this); atualizarExemploParcelas()">
     
@@ -676,7 +727,7 @@ function importarDeJSON(event) {
     <div id="lista"></div>
 </div>
 <button class="btn-fab" onclick="abrirNovo()"><i class="fas fa-plus"></i></button>
-<script>//const economyTips =[];</script><script src="js/dicas.js"></script>
+<script>const economyTips =[];</script><script src="js/dicas.js"></script>
 <script>
 // Recupera o estado de visibilidade do localStorage ou define como falso por padrão
 let valoresOcultos = localStorage.getItem('financas_oculto') === 'true';
@@ -1248,7 +1299,12 @@ let htmlResumo = `
         document.getElementById('delete-modal').style.display='none'; document.getElementById('edit-id').value="";
     }
 
-    function salvarDB(){ localStorage.setItem('financas_v51_db',JSON.stringify(dados)); render(); }
+    function salvarDB(){ 
+    localStorage.setItem('financas_v51_db', JSON.stringify(dados)); 
+    render(); 
+    atualizarSugestoesAutocomplete(); // <--- Adicione esta linha aqui
+}
+
     function formatarMoeda(i){ let v=i.value.replace(/\D/g,''); v=(v/100).toFixed(2)+''; i.value="R$ "+v.replace(".",",").replace(/(\d)(\d{3}),/g,"$1.$2,"); }
     function handleSwipe(el){ const a=el.classList.contains('slide-active'); document.querySelectorAll('.item-body').forEach(b=>b.classList.remove('slide-active')); if(!a)el.classList.add('slide-active'); }
 function toggleTheme() {
@@ -1357,6 +1413,49 @@ function toggleTheme() {
         document.getElementById('backdrop').style.display='block'; 
         document.getElementById('form-modal').style.display='block';
     }
+    const inputDesc = document.getElementById("desc");
+const suggestionsBox = document.getElementById("autocomplete-list");
+
+inputDesc.addEventListener("input", function() {
+    const val = this.value;
+    fecharSugestoes();
+    if (!val || val.length < 1) return false;
+
+    // Obtém nomes únicos das descrições já salvas no seu sistema
+    const historico = [...new Set(dados.map(item => item.desc))];
+    
+    // Filtra os nomes que contêm o texto digitado
+    const filtrados = historico.filter(nome => 
+        nome.toLowerCase().includes(val.toLowerCase())
+    );
+
+    if (filtrados.length > 0) {
+        suggestionsBox.style.display = "block";
+        filtrados.forEach(nome => {
+            const div = document.createElement("div");
+            // Destaca a parte digitada
+            div.innerHTML = nome.replace(new RegExp(val, "gi"), (match) => `<strong>${match}</strong>`);
+            
+            div.addEventListener("click", function() {
+                inputDesc.value = nome;
+                fecharSugestoes();
+            });
+            suggestionsBox.appendChild(div);
+        });
+    }
+});
+
+function fecharSugestoes() {
+    suggestionsBox.innerHTML = "";
+    suggestionsBox.style.display = "none";
+}
+
+// Fecha a lista se o usuário clicar fora do campo
+document.addEventListener("click", function (e) {
+    if (e.target !== inputDesc) fecharSugestoes();
+});
+
+
     carregarTema(); initFiltros(); render();
 </script>
 </body>
