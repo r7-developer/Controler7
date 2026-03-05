@@ -1302,7 +1302,6 @@ let htmlResumo = `
     function salvarDB(){ 
     localStorage.setItem('financas_v51_db', JSON.stringify(dados)); 
     render(); 
-    atualizarSugestoesAutocomplete(); // <--- Adicione esta linha aqui
 }
 
     function formatarMoeda(i){ let v=i.value.replace(/\D/g,''); v=(v/100).toFixed(2)+''; i.value="R$ "+v.replace(".",",").replace(/(\d)(\d{3}),/g,"$1.$2,"); }
