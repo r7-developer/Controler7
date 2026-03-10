@@ -925,6 +925,16 @@ function calcularGamificacao(receitas, pago, pendente) {
     lista.innerHTML='';
     
     const f = dados.filter(i => i.mes === dataFiltro.getMonth() && i.ano === dataFiltro.getFullYear());
+
+// ADICIONE ESTE BLOCO ABAIXO:
+f.sort((a, b) => {
+    // Primeiro, comparamos o dia
+    if (a.dia !== b.dia) {
+        return a.dia - b.dia;
+    }
+    // Se o dia for igual, ordenamos por nome (opcional)
+    return a.desc.localeCompare(b.desc);
+});
     
     // NOVO BLOCO: Calcula o total restante por grupo (parcelas futuras)
 const totalRestantePorGrupo = {};
