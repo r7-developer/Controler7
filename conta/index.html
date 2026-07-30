@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Contábil - Simulador Universal PF & PJ</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --tab-bg: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .header h2 {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Sistema de Abas em Grade (Grid) para caber todas as opções */
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: var(--tab-bg);
+            border-radius: 8px;
+            padding: 6px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 8px 4px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #0f172a;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        .results {
+            margin-top: 16px;
+            border-top: 1px solid var(--border);
+            padding-top: 14px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .result-item label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+
+        .result-item span {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .alert-box {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .is-obligated {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .is-free {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .btn-print {
+            width: 100%;
+            margin-top: 18px;
+            padding: 12px;
+            background-color: var(--primary);
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .btn-print:hover {
+            filter: brightness(1.1);
+        }
+
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .container { border: 1px solid #ccc !important; box-shadow: none !important; background: #fff !important; color: #000 !important; max-width: 100% !important; }
+            .tabs, .btn-print { display: none !important; }
+            input, select { background: #fff !important; color: #000 !important; border: 1px solid #999 !important; }
+            label, .result-item label { color: #333 !important; }
+            .result-item span, .header h2 { color: #000 !important; }
+            .alert-box { border: 1px solid #000 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Simulador Contábil Multi-Perfil</h2>
+        <p>Atendimento Completo: PF, CLT, MEI, Simples Nacional, Lucro Presumido e Autônomos</p>
+    </div>
+
+    <!-- Navegação por Abas (6 opções) -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="mudarAba(event, 'aba-mei')">1. MEI</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-clt')">2. CLT</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-simples')">3. Simples Nac.</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-presumido')">4. Lucro Pres.</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-carne')">5. Autônomo</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-geral')">6. Tabela IRPF</button>
+    </div>
+
+    <!-- 1. MEI x IRPF -->
+    <div id="aba-mei" class="tab-content active">
+        <div class="form-group">
+            <label>Tipo de Atividade (Isenção Presumida)</label>
+            <select id="meiAtividade" onchange="calcularMei()">
+                <option value="0.32" selected>Serviços / Transporte de Cargas e Passageiros (32%)</option>
+                <option value="0.16">Transporte de Passageiros - App/Táxi (16%)</option>
+                <option value="0.08">Comércio, Indústria e Transporte Geral (8%)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Faturamento Anual Bruto (R$)</label>
+            <input type="number" id="meiFaturamento" value="30000.00" step="0.01" oninput="calcularMei()">
+        </div>
+        <div class="form-group">
+            <label>Despesas Operacionais Comprovadas (R$)</label>
+            <input type="number" id="meiDespesas" value="5000.00" step="0.01" oninput="calcularMei()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Lucro Isento:</label><span id="meiLucroIsento">R$ 0,00</span></div>
+            <div class="result-item"><label>Lucro Líquido Real:</label><span id="meiLucroLiquido">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Rendimento Tributável:</label><span id="meiTributavel" style="color:var(--primary);">R$ 0,00</span></div>
+        </div>
+        <div id="meiAlert" class="alert-box"></div>
+    </div>
+
+    <!-- 2. CLT (Funcionário com Carteira Assinada) -->
+    <div id="aba-clt" class="tab-content">
+        <div class="form-group">
+            <label>Salário Bruto Mensal (R$)</label>
+            <input type="number" id="cltBruto" value="4500.00" step="0.01" oninput="calcularClt()">
+        </div>
+        <div class="form-group">
+            <label>Outras Deduções Mensais (Dependentes / Pensão) (R$)</label>
+            <input type="number" id="cltDeducoes" value="0.00" step="0.01" oninput="calcularClt()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Desconto INSS (Estimado):</label><span id="cltInss">R$ 0,00</span></div>
+            <div class="result-item"><label>Desconto IRRF na Fonte:</label><span id="cltIrrf">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Salário Líquido Estimado:</label><span id="cltLiquido" style="color:var(--success);">R$ 0,00</span></div>
+        </div>
+        <div class="alert-box is-free">Simulação líquida mensal para trabalhador celetista.</div>
+    </div>
+
+    <!-- 3. Simples Nacional (Micro/Pequena Empresa) -->
+    <div id="aba-simples" class="tab-content">
+        <div class="form-group">
+            <label>Faturamento Bruto Mensal da PJ (R$)</label>
+            <input type="number" id="simpFat" value="20000.00" step="0.01" oninput="calcularSimples()">
+        </div>
+        <div class="form-group">
+            <label>Anexo / Atividade do Simples</label>
+            <select id="simpAnexo" onchange="calcularSimples()">
+                <option value="0.06">Anexo III - Serviços (Início em 6%)</option>
+                <option value="0.155">Anexo V - Serviços Intelectuais/Fator R (Início em 15.5%)</option>
+                <option value="0.04">Anexo I - Comércio (Início em 4%)</option>
+            </select>
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Imposto Mensal Estimado (DAS):</label><span id="simpImposto" style="color:var(--danger);">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Faturamento Líquido pós-imposto:</label><span id="simpLiquido" style="color:var(--primary);">R$ 0,00</span></div>
+        </div>
+        <div class="alert-box is-free">Alíquota inicial orientativa baseada na primeira faixa do faturamento.</div>
+    </div>
+
+    <!-- 4. Lucro Presumido (Empresas de Médio/Alto Faturamento) -->
+    <div id="aba-presumido" class="tab-content">
+        <div class="form-group">
+            <label>Faturamento Bruto Mensal (R$)</label>
+            <input type="number" id="presFat" value="60000.00" step="0.01" oninput="calcularPresumido()">
+        </div>
+        <div class="form-group">
+            <label>Segmento da Empresa</label>
+            <select id="presTipo" onchange="calcularPresumido()">
+                <option value="servico">Prestação de Serviços (Carga tributária aprox. 16.33%)</option>
+                <option value="comercio">Comércio / Revenda (Carga tributária aprox. 8.33%)</option>
+            </select>
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Total de Impostos Federais/Municipais:</label><span id="presImpostos" style="color:var(--danger);">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Disponível para Lucro / Custos:</label><span id="presLiquido" style="color:var(--primary);">R$ 0,00</span></div>
+        </div>
+        <div class="alert-box is-free">Estimativa focada em PIS, COFINS, IRPJ, CSLL e ISS/ICMS médios.</div>
+    </div>
+
+    <!-- 5. Autônomo / Carnê-Leão (PF Pura) -->
+    <div id="aba-carne" class="tab-content">
+        <div class="form-group">
+            <label>Receita Bruta Mensal (R$)</label>
+            <input type="number" id="autReceita" value="8000.00" step="0.01" oninput="calcularAutonomo()">
+        </div>
+        <div class="form-group">
+            <label>Despesas Dedutíveis / Livro-Caixa (R$)</label>
+            <input type="number" id="autDespesas" value="1500.00" step="0.01" oninput="calcularAutonomo()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Base de Cálculo (Líquido):</label><span id="autBase">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Imposto Devido (Carnê-Leão):</label><span id="autImposto" style="color:var(--danger);">R$ 0,00</span></div>
+        </div>
+        <div class="alert-box is-free">Calculado conforme a tabela progressiva vigente da Receita Federal.</div>
+    </div>
+
+    <!-- 6. Simulador Geral de Alíquota IRPF (PF) -->
+    <div id="aba-geral" class="tab-content">
+        <div class="form-group">
+            <label>Rendimento Tributável Anual Total (R$)</label>
+            <input type="number" id="geralRendimento" value="45000.00" step="0.01" oninput="calcularGeral()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Imposto Anual Calculado:</label><span id="geralImposto" style="color:var(--danger);">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Alíquota Efetiva Aplicada:</label><span id="geralAliquota" style="color:var(--primary);">0,00%</span></div>
+        </div>
+        <div id="geralAlert" class="alert-box"></div>
+    </div>
+
+    <button class="btn-print" onclick="window.print()">
+        📄 Imprimir / Salvar Relatório em PDF
+    </button>
+</div>
+
+<script>
+    const LIMITE_IRPF = 35584.00;
+
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function mudarAba(evt, idAba) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(idAba).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    // 1. MEI
+    function calcularMei() {
+        const perc = parseFloat(document.getElementById('meiAtividade').value);
+        const fat = parseFloat(document.getElementById('meiFaturamento').value) || 0;
+        const desp = parseFloat(document.getElementById('meiDespesas').value) || 0;
+        const lucroIsento = fat * perc;
+        const lucroLiq = fat - desp;
+        let trib = lucroLiq - lucroIsento;
+        if (trib < 0) trib = 0;
+
+        document.getElementById('meiLucroIsento').innerText = formatarMoeda(lucroIsento);
+        document.getElementById('meiLucroLiquido').innerText = formatarMoeda(lucroLiq);
+        document.getElementById('meiTributavel').innerText = formatarMoeda(trib);
+
+        const alertBox = document.getElementById('meiAlert');
+        if (trib > LIMITE_IRPF) {
+            alertBox.className = 'alert-box is-obligated';
+            alertBox.innerText = `Obrigatório declarar IRPF (Acima de ${formatarMoeda(LIMITE_IRPF)})`;
+        } else {
+            alertBox.className = 'alert-box is-free';
+            alertBox.innerText = `Abaixo do limite de obrigatoriedade (${formatarMoeda(LIMITE_IRPF)})`;
+        }
+    }
+
+    // 2. CLT
+    function calcularClt() {
+        const bruto = parseFloat(document.getElementById('cltBruto').value) || 0;
+        const ded = parseFloat(document.getElementById('cltDeducoes').value) || 0;
+
+        // Teto e faixas simplificadas de INSS
+        let inss = 0;
+        if (bruto <= 1412) inss = bruto * 0.075;
+        else if (bruto <= 2666.68) inss = bruto * 0.09;
+        else if (bruto <= 4000.03) inss = bruto * 0.12;
+        else if (bruto <= 7786.02) inss = bruto * 0.14;
+        else inss = 908.85; // Teto aproximado
+
+        const baseIrrf = bruto - inss - ded;
+        let irrf = 0;
+        if (baseIrrf > 4664.68) irrf = (baseIrrf * 0.275) - 869.36;
+        else if (baseIrrf > 3751.06) irrf = (baseIrrf * 0.225) - 636.13;
+        else if (baseIrrf > 2826.66) irrf = (baseIrrf * 0.15) - 381.44;
+        else if (baseIrrf > 2259.20) irrf = (baseIrrf * 0.075) - 169.44;
+        if (irrf < 0) irrf = 0;
+
+        const liquido = bruto - inss - irrf;
+
+        document.getElementById('cltInss').innerText = formatarMoeda(inss);
+        document.getElementById('cltIrrf').innerText = formatarMoeda(irrf);
+        document.getElementById('cltLiquido').innerText = formatarMoeda(liquido);
+    }
+
+    // 3. Simples Nacional
+    function calcularSimples() {
+        const fat = parseFloat(document.getElementById('simpFat').value) || 0;
+        const aliq = parseFloat(document.getElementById('simpAnexo').value) || 0.06;
+        const imposto = fat * aliq;
+        const liquido = fat - imposto;
+
+        document.getElementById('simpImposto').innerText = formatarMoeda(imposto);
+        document.getElementById('simpLiquido').innerText = formatarMoeda(liquido);
+    }
+
+    // 4. Lucro Presumido
+    function calcularPresumido() {
+        const fat = parseFloat(document.getElementById('presFat').value) || 0;
+        const tipo = document.getElementById('presTipo').value;
+        const cargaMédia = tipo === 'servico' ? 0.1633 : 0.0833;
+        const imposto = fat * cargaMédia;
+        const liquido = fat - imposto;
+
+        document.getElementById('presImpostos').innerText = formatarMoeda(imposto);
+        document.getElementById('presLiquido').innerText = formatarMoeda(liquido);
+    }
+
+    // 5. Autônomo / Carnê-Leão
+    function calcularAutonomo() {
+        const rec = parseFloat(document.getElementById('autReceita').value) || 0;
+        const desp = parseFloat(document.getElementById('autDespesas').value) || 0;
+        const base = Math.max(0, rec - desp);
+
+        let imposto = 0;
+        if (base > 4664.68) imposto = (base * 0.275) - 869.36;
+        else if (base > 3751.06) imposto = (base * 0.225) - 636.13;
+        else if (base > 2826.66) imposto = (base * 0.15) - 381.44;
+        else if (base > 2259.20) imposto = (base * 0.075) - 169.44;
+        if (imposto < 0) imposto = 0;
+
+        document.getElementById('autBase').innerText = formatarMoeda(base);
+        document.getElementById('autImposto').innerText = formatarMoeda(imposto);
+    }
+
+    // 6. IRPF Geral Anual
+    function calcularGeral() {
+        const rend = parseFloat(document.getElementById('geralRendimento').value) || 0;
+        // Tabela anual simplificada aproximada
+        let imposto = 0;
+        if (rend > 55951.68) imposto = (rend * 0.275) - 10432.32;
+        else if (rend > 45012.72) imposto = (rend * 0.225) - 7633.56;
+        else if (rend > 33919.92) imposto = (rend * 0.15) - 4577.28;
+        else if (rend > 27110.40) imposto = (rend * 0.075) - 2033.28;
+        if (imposto < 0) imposto = 0;
+
+        const aliquotaEfetiva = rend > 0 ? (imposto / rend) * 100 : 0;
+
+        document.getElementById('geralImposto').innerText = formatarMoeda(imposto);
+        document.getElementById('geralAliquota').innerText = aliquotaEfetiva.toFixed(2).replace('.', ',') + '%';
+
+        const alertBox = document.getElementById('geralAlert');
+        if (rend > LIMITE_IRPF) {
+            alertBox.className = 'alert-box is-obligated';
+            alertBox.innerText = `Obrigatório declarar IRPF (Acima de ${formatarMoeda(LIMITE_IRPF)})`;
+        } else {
+            alertBox.className = 'alert-box is-free';
+            alertBox.innerText = `Abaixo do limite de obrigatoriedade de ${formatarMoeda(LIMITE_IRPF)}`;
+        }
+    }
+
+    // Inicialização ao carregar
+    calcularMei();
+    calcularClt();
+    calcularSimples();
+    calcularPresumido();
+    calcularAutonomo();
+    calcularGeral();
+</script>
+
+</body>
+</html>
