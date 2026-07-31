@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Contábil - Simulador Universal & Planejamento</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --tab-bg: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .header h2 {
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            background: var(--tab-bg);
+            border-radius: 8px;
+            padding: 6px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 7px 2px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.65rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #0f172a;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        .results {
+            margin-top: 14px;
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .result-item label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+
+        .result-item span {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .alert-box {
+            margin-top: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.82rem;
+        }
+
+        .is-obligated {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .is-free {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .btn-print {
+            width: 100%;
+            margin-top: 18px;
+            padding: 12px;
+            background-color: var(--primary);
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .btn-print:hover {
+            filter: brightness(1.1);
+        }
+
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .container { border: 1px solid #ccc !important; box-shadow: none !important; background: #fff !important; color: #000 !important; max-width: 100% !important; }
+            .tabs, .btn-print { display: none !important; }
+            input, select { background: #fff !important; color: #000 !important; border: 1px solid #999 !important; }
+            label, .result-item label { color: #333 !important; }
+            .result-item span, .header h2 { color: #000 !important; }
+            .alert-box { border: 1px solid #000 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>Simulador Contábil & Estratégico</h2>
+        <p>PF, PJ, CLT, Rescisão e Planejamento Tributário Legal</p>
+    </div>
+
+    <!-- Navegação por Abas -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="mudarAba(event, 'aba-mei')">1. MEI</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-clt')">2. CLT</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-rescisao')">3. Rescisão</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-simples')">4. Simples</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-presumido')">5. Lucro Pres.</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-carne')">6. Autônomo</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-geral')">7. IRPF</button>
+        <button class="tab-btn" onclick="mudarAba(event, 'aba-economia')" style="color:var(--primary);">💡 8. Planeja</button>
+    </div>
+
+    <!-- 1. MEI -->
+    <div id="aba-mei" class="tab-content active">
+        <div class="form-group">
+            <label>Tipo de Atividade (Isenção Presumida)</label>
+            <select id="meiAtividade" onchange="calcularMei()">
+                <option value="0.32" selected>Serviços / Transporte de Cargas e Passageiros (32%)</option>
+                <option value="0.16">Transporte de Passageiros - App/Táxi (16%)</option>
+                <option value="0.08">Comércio, Indústria e Transporte Geral (8%)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Faturamento Anual Bruto (R$)</label>
+            <input type="number" id="meiFaturamento" placeholder="Digite o valor..." step="0.01" oninput="calcularMei()">
+        </div>
+        <div class="form-group">
+            <label>Despesas Operacionais Comprovadas (R$)</label>
+            <input type="number" id="meiDespesas" placeholder="0,00" step="0.01" oninput="calcularMei()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Lucro Isento:</label><span id="meiLucroIsento">R$ 0,00</span></div>
+            <div class="result-item"><label>Lucro Líquido Real:</label><span id="meiLucroLiquido">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Rendimento Tributável:</label><span id="meiTributavel" style="color:var(--primary);">R$ 0,00</span></div>
+        </div>
+        <div id="meiAlert" class="alert-box"></div>
+    </div>
+    <!-- 2. CLT -->
+    <div id="aba-clt" class="tab-content">
+        <div class="form-group">
+            <label>Salário Bruto Mensal (R$)</label>
+            <input type="number" id="cltBruto" placeholder="Digite o salário..." step="0.01" oninput="calcularClt()">
+        </div>
+        <div class="form-group">
+            <label>Outras Deduções Mensais (Dependentes / Pensão) (R$)</label>
+            <input type="number" id="cltDeducoes" placeholder="0,00" step="0.01" oninput="calcularClt()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Desconto INSS (Estimado):</label><span id="cltInss">R$ 0,00</span></div>
+            <div class="result-item"><label>Desconto IRRF na Fonte:</label><span id="cltIrrf">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Salário Líquido Estimado:</label><span id="cltLiquido" style="color:var(--success);">R$ 0,00</span></div>
+        </div>
+        <div class="alert-box is-free">Simulação líquida mensal para trabalhador celetista.</div>
+    </div>
+
+    <!-- 3. Rescisão Trabalhista -->
+    <div id="aba-rescisao" class="tab-content">
+        <div class="form-group">
+            <label>Último Salário Bruto (R$)</label>
+            <input type="number" id="rescSalario" placeholder="Digite o salário..." step="0.01" oninput="calcularRescisao()">
+        </div>
+        <div class="form-group">
+            <label>Tempo de Empresa (Anos completos)</label>
+            <input type="number" id="rescAnos" placeholder="0" min="0" oninput="calcularRescisao()">
+        </div>
+        <div class="form-group">
+            <label>Meses trabalhados no ano atual (1 a 12)</label>
+            <input type="number" id="rescMesesAno" placeholder="0" min="1" max="12" oninput="calcularRescisao()">
+        </div>
+        <div class="form-group">
+            <label>Saldo de dias trabalhados no mês da demissão (1 a 31)</label>
+            <input type="number" id="rescDiasTrab" placeholder="0" min="1" max="31" oninput="calcularRescisao()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Saldo de Salário:</label><span id="resSaldoSalario">R$ 0,00</span></div>
+            <div class="result-item"><label>Aviso Prévio Indenizado:</label><span id="resAvisoPrevio">R$ 0,00</span></div>
+            <div class="result-item"><label>13º Salário Proporcional:</label><span id="res13Prop">R$ 0,00</span></div>
+            <div class="result-item"><label>Férias Prop. + 1/3:</label><span id="resFeriasProp">R$ 0,00</span></div>
+            <div class="result-item"><label>Multa 40% do FGTS (Aprox.):</label><span id="resMultaFgts">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Total Rescisório Estimado:</label><span id="resTotal" style="color:var(--primary); font-size:1.1rem;">R$ 0,00</span></div>
+        </div>
+        <div class="alert-box is-free">Cálculo estimativo para demissão sem justa causa.</div>
+    </div>
+
+    <!-- 4. Simples Nacional & Fator R -->
+    <div id="aba-simples" class="tab-content">
+        <div class="form-group">
+            <label>Faturamento Bruto Mensal da PJ (R$)</label>
+            <input type="number" id="simpFat" placeholder="Digite o faturamento..." step="0.01" oninput="calcularSimples()">
+        </div>
+        <div class="form-group">
+            <label>Pró-labore Retirado Mensalmente (R$)</label>
+            <input type="number" id="simpProlabore" placeholder="Digite o pró-labore..." step="0.01" oninput="calcularSimples()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Fator R (Folha / Faturamento):</label><span id="simpFatorR" style="color:var(--primary);">0,00%</span></div>
+            <div class="result-item"><label>Anexo Aplicado:</label><span id="simpAnexoNome">-</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Imposto Mensal Estimado (DAS):</label><span id="simpImposto" style="color:var(--danger);">R$ 0,00</span></div>
+        </div>
+        <div id="simpAlert" class="alert-box"></div>
+    </div>
+
+    <!-- 5. Lucro Presumido -->
+    <div id="aba-presumido" class="tab-content">
+        <div class="form-group">
+            <label>Faturamento Bruto Mensal (R$)</label>
+            <input type="number" id="presFat" placeholder="Digite o faturamento..." step="0.01" oninput="calcularPresumido()">
+        </div>
+        <div class="form-group">
+            <label>Segmento da Empresa</label>
+            <select id="presTipo" onchange="calcularPresumido()">
+                <option value="servico">Prestação de Serviços (Carga aprox. 16.33%)</option>
+                <option value="comercio">Comércio / Revenda (Carga aprox. 8.33%)</option>
+            </select>
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Total de Impostos Federais/Municipais:</label><span id="presImpostos" style="color:var(--danger);">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Disponível para Lucro / Custos:</label><span id="presLiquido" style="color:var(--primary);">R$ 0,00</span></div>
+        </div>
+        <div class="alert-box is-free">Estimativa focada em PIS, COFINS, IRPJ, CSLL e ISS/ICMS.</div>
+    </div>
+
+    <!-- 6. Autônomo / Carnê-Leão -->
+    <div id="aba-carne" class="tab-content">
+        <div class="form-group">
+            <label>Receita Bruta Mensal (R$)</label>
+            <input type="number" id="autReceita" placeholder="Digite a receita..." step="0.01" oninput="calcularAutonomo()">
+        </div>
+        <div class="form-group">
+            <label>Despesas Dedutíveis / Livro-Caixa (R$)</label>
+            <input type="number" id="autDespesas" placeholder="0,00" step="0.01" oninput="calcularAutonomo()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Base de Cálculo Reduzida:</label><span id="autBase">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Imposto Devido (Carnê-Leão):</label><span id="autImposto" style="color:var(--danger);">R$ 0,00</span></div>
+        </div>
+        <div class="alert-box is-free">Abater despesas legítimas diminui a base de cálculo do IRPF.</div>
+    </div>
+
+    <!-- 7. IRPF Geral Anual -->
+    <div id="aba-geral" class="tab-content">
+        <div class="form-group">
+            <label>Rendimento Tributável Anual Total (R$)</label>
+            <input type="number" id="geralRendimento" placeholder="Digite o rendimento anual..." step="0.01" oninput="calcularGeral()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Imposto Anual Calculado:</label><span id="geralImposto" style="color:var(--danger);">R$ 0,00</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Alíquota Efetiva Aplicada:</label><span id="geralAliquota" style="color:var(--primary);">0,00%</span></div>
+        </div>
+        <div id="geralAlert" class="alert-box"></div>
+    </div>
+
+    <!-- 8. Painel de Planejamento Tributário Legal -->
+    <div id="aba-economia" class="tab-content">
+        <div class="form-group">
+            <label>Selecione seu Perfil Atual</label>
+            <select id="ecoCenario" onchange="calcularEconomia()">
+                <option value="mei">Estou no MEI (Próximo ao teto)</option>
+                <option value="autonomo">Sou Autônomo (Pessoa Física)</option>
+                <option value="pj">Sou PJ no Simples Nacional (Serviços)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Faturamento Mensal Médio (R$)</label>
+            <input type="number" id="ecoFatMensal" placeholder="Digite o faturamento mensal..." step="0.01" oninput="calcularEconomia()">
+        </div>
+        <div class="results">
+            <div class="result-item"><label>Carga Tributária Otimizada:</label><span id="ecoImpostoOtimizado" style="color:var(--success);">R$ 0,00 /mês</span></div>
+            <div class="result-item" style="border-bottom:none;"><label>Economia Anual Estimada:</label><span id="ecoEconomiaAnual" style="color:var(--primary); font-size:1.1rem;">R$ 0,00</span></div>
+        </div>
+        <div id="ecoDica" class="alert-box is-free" style="margin-top: 14px; text-align: left; line-height: 1.4; font-weight: normal;"></div>
+    </div>
+
+    <button class="btn-print" onclick="window.print()">
+        📄 Imprimir / Salvar Relatório em PDF
+    </button>
+</div>
+
+<script>
+    const LIMITE_IRPF = 35584.00;
+
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function mudarAba(evt, idAba) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(idAba).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    // 1. MEI
+    function calcularMei() {
+        const perc = parseFloat(document.getElementById('meiAtividade').value);
+        const fat = parseFloat(document.getElementById('meiFaturamento').value) || 0;
+        const desp = parseFloat(document.getElementById('meiDespesas').value) || 0;
+        const lucroIsento = fat * perc;
+        const lucroLiq = fat - desp;
+        let trib = lucroLiq - lucroIsento;
+        if (trib < 0) trib = 0;
+
+        document.getElementById('meiLucroIsento').innerText = formatarMoeda(lucroIsento);
+        document.getElementById('meiLucroLiquido').innerText = formatarMoeda(lucroLiq);
+        document.getElementById('meiTributavel').innerText = formatarMoeda(trib);
+
+        const alertBox = document.getElementById('meiAlert');
+        if (!document.getElementById('meiFaturamento').value) {
+            alertBox.className = 'alert-box is-free';
+            alertBox.innerText = `Digite o seu faturamento anual para ver os cálculos.`;
+        } else if (fat > 81000) {
+            alertBox.className = 'alert-box is-obligated';
+            alertBox.innerText = `Atenção: Faturamento acima do limite do MEI (R$ 81.000,00)! Risco de desenquadramento.`;
+        } else {
+            alertBox.className = 'alert-box is-free';
+            alertBox.innerText = `Dentro do limite anual do MEI. Isenção legal de lucros garantida.`;
+        }
+    }
+
+    // 2. CLT
+    function calcularClt() {
+        const bruto = parseFloat(document.getElementById('cltBruto').value) || 0;
+        const ded = parseFloat(document.getElementById('cltDeducoes').value) || 0;
+
+        let inss = 0;
+        if (bruto > 0) {
+            if (bruto <= 1412) inss = bruto * 0.075;
+            else if (bruto <= 2666.68) inss = bruto * 0.09;
+            else if (bruto <= 4000.03) inss = bruto * 0.12;
+            else if (bruto <= 7786.02) inss = bruto * 0.14;
+            else inss = 908.85;
+        }
+
+        const baseIrrf = bruto - inss - ded;
+        let irrf = 0;
+        if (baseIrrf > 4664.68) irrf = (baseIrrf * 0.275) - 869.36;
+        else if (baseIrrf > 3751.06) irrf = (baseIrrf * 0.225) - 636.13;
+        else if (baseIrrf > 2826.66) irrf = (baseIrrf * 0.15) - 381.44;
+        else if (baseIrrf > 2259.20) irrf = (baseIrrf * 0.075) - 169.44;
+        if (irrf < 0) irrf = 0;
+
+        const liquido = bruto - inss - irrf;
+
+        document.getElementById('cltInss').innerText = formatarMoeda(inss);
+        document.getElementById('cltIrrf').innerText = formatarMoeda(irrf);
+        document.getElementById('cltLiquido').innerText = formatarMoeda(liquido);
+    }
+
+    // 3. Rescisão
+    function calcularRescisao() {
+        const salario = parseFloat(document.getElementById('rescSalario').value) || 0;
+        const anos = parseInt(document.getElementById('rescAnos').value) || 0;
+        const mesesAno = parseInt(document.getElementById('rescMesesAno').value) || 0;
+        const diasTrab = parseInt(document.getElementById('rescDiasTrab').value) || 0;
+
+        const saldoSalario = (salario / 30) * diasTrab;
+        const diasAviso = 30 + (Math.min(anos, 20) * 3);
+        const avisoPrevio = (salario / 30) * diasAviso;
+        const decimoProp = (salario / 12) * mesesAno;
+        const feriasPropBruta = (salario / 12) * mesesAno;
+        const feriasProp = feriasPropBruta + (feriasPropBruta / 3);
+
+        const totalMesesTrabalhados = (anos * 12) + mesesAno;
+        const fgtsAcumulado = (salario * 0.08) * totalMesesTrabalhados;
+        const multaFgts = fgtsAcumulado * 0.40;
+
+        const totalRescisao = saldoSalario + avisoPrevio + decimoProp + feriasProp + multaFgts;
+
+        document.getElementById('resSaldoSalario').innerText = formatarMoeda(saldoSalario);
+        document.getElementById('resAvisoPrevio').innerText = formatarMoeda(avisoPrevio);
+        document.getElementById('res13Prop').innerText = formatarMoeda(decimoProp);
+        document.getElementById('resFeriasProp').innerText = formatarMoeda(feriasProp);
+        document.getElementById('resMultaFgts').innerText = formatarMoeda(multaFgts);
+        document.getElementById('resTotal').innerText = formatarMoeda(totalRescisao);
+    }
+
+    // 4. Simples Nacional & Fator R
+    function calcularSimples() {
+        const fat = parseFloat(document.getElementById('simpFat').value) || 0;
+        const prolabore = parseFloat(document.getElementById('simpProlabore').value) || 0;
+
+        const fatorR = fat > 0 ? (prolabore / fat) * 100 : 0;
+        let aliq = 0.06;
+        let nomeAnexo = "Anexo III (6%)";
+
+        if (fat === 0) {
+            nomeAnexo = "-";
+        } else if (fatorR < 28) {
+            aliq = 0.155;
+            nomeAnexo = "⚠️ Anexo V (15.5% - Ajuste pró-labore para ≥ 28%)";
+        }
+
+        const imposto = fat * aliq;
+
+        document.getElementById('simpFatorR').innerText = fatorR.toFixed(2).replace('.', ',') + '%';
+        document.getElementById('simpAnexoNome').innerText = nomeAnexo;
+        document.getElementById('simpImposto').innerText = formatarMoeda(imposto);
+
+        const alertBox = document.getElementById('simpAlert');
+        if (!document.getElementById('simpFat').value) {
+            alertBox.className = 'alert-box is-free';
+            alertBox.innerText = `Digite o faturamento e o pró-labore para simular o Simples Nacional.`;
+        } else if (fatorR < 28) {
+            alertBox.className = 'alert-box is-obligated';
+            alertBox.innerText = `Dica de Economia: Ajustando o pró-labore para atingir 28%, você ativa o Fator R e reduz o imposto de 15,5% para 6%!`;
+        } else {
+            alertBox.className = 'alert-box is-free';
+            alertBox.innerText = `Fator R otimizado com sucesso (≥ 28%), garantindo a menor alíquota.`;
+        }
+    }
+
+    // 5. Lucro Presumido
+    function calcularPresumido() {
+        const fat = parseFloat(document.getElementById('presFat').value) || 0;
+        const tipo = document.getElementById('presTipo').value;
+        const cargaMédia = tipo === 'servico' ? 0.1633 : 0.0833;
+        const imposto = fat * cargaMédia;
+        const liquido = fat - imposto;
+
+        document.getElementById('presImpostos').innerText = formatarMoeda(imposto);
+        document.getElementById('presLiquido').innerText = formatarMoeda(liquido);
+    }
+
+    // 6. Autônomo / Carnê-Leão
+    function calcularAutonomo() {
+        const rec = parseFloat(document.getElementById('autReceita').value) || 0;
+        const desp = parseFloat(document.getElementById('autDespesas').value) || 0;
+        const base = Math.max(0, rec - desp);
+
+        let imposto = 0;
+        if (base > 4664.68) imposto = (base * 0.275) - 869.36;
+        else if (base > 3751.06) imposto = (base * 0.225) - 636.13;
+        else if (base > 2826.66) imposto = (base * 0.15) - 381.44;
+        else if (base > 2259.20) imposto = (base * 0.075) - 169.44;
+        if (imposto < 0) imposto = 0;
+
+        document.getElementById('autBase').innerText = formatarMoeda(base);
+        document.getElementById('autImposto').innerText = formatarMoeda(imposto);
+    }
+
+    // 7. IRPF Geral Anual
+    function calcularGeral() {
+        const rend = parseFloat(document.getElementById('geralRendimento').value) || 0;
+        let imposto = 0;
+        if (rend > 55951.68) imposto = (rend * 0.275) - 10432.32;
+        else if (rend > 45012.72) imposto = (rend * 0.225) - 7633.56;
+        else if (rend > 33919.92) imposto = (rend * 0.15) - 4577.28;
+        else if (rend > 27110.40) imposto = (rend * 0.075) - 2033.28;
+        if (imposto < 0) imposto = 0;
+
+        const aliquotaEfetiva = rend > 0 ? (imposto / rend) * 100 : 0;
+
+        document.getElementById('geralImposto').innerText = formatarMoeda(imposto);
+        document.getElementById('geralAliquota').innerText = aliquotaEfetiva.toFixed(2).replace('.', ',') + '%';
+
+        const alertBox = document.getElementById('geralAlert');
+        if (!document.getElementById('geralRendimento').value) {
+            alertBox.className = 'alert-box is-free';
+            alertBox.innerText = `Digite o rendimento anual para verificar a obrigatoriedade.`;
+        } else if (rend > LIMITE_IRPF) {
+            alertBox.className = 'alert-box is-obligated';
+            alertBox.innerText = `Obrigatório declarar IRPF (Acima de ${formatarMoeda(LIMITE_IRPF)})`;
+        } else {
+            alertBox.className = 'alert-box is-free';
+            alertBox.innerText = `Abaixo do limite de obrigatoriedade de ${formatarMoeda(LIMITE_IRPF)}`;
+        }
+    }
+
+    // 8. Planejamento Tributário Legal
+    function calcularEconomia() {
+        const cenario = document.getElementById('ecoCenario').value;
+        const fatMensal = parseFloat(document.getElementById('ecoFatMensal').value) || 0;
+        const fatAnual = fatMensal * 12;
+
+        let impostoMes = 0;
+        let economiaAnual = 0;
+        let dicaTexto = "";
+
+        if (!document.getElementById('ecoFatMensal').value) {
+            dicaTexto = `<strong>Planejamento:</strong> Digite o faturamento mensal médio para visualizar as simulações e dicas de economia tributária.`;
+        } else if (cenario === 'mei') {
+            impostoMes = 75.00;
+            if (fatAnual > 81000) {
+                economiaAnual = (fatMensal * 0.15) * 12;
+                dicaTexto = `<strong>Planejamento:</strong> Faturamento acima do teto do MEI. A transição preventiva para Microempresa (ME) evita multas por desenquadramento extemporâneo.`;
+            } else {
+                economiaAnual = (fatMensal * 0.06) * 12;
+                dicaTexto = `<strong>Planejamento:</strong> O MEI garante uma economia expressiva de cerca de ${formatarMoeda(economiaAnual)} por ano frente a empresas tradicionais.`;
+            }
+        } else if (cenario === 'autonomo') {
+            impostoMes = fatMensal * 0.20;
+            const comCaixa = fatMensal * 0.60;
+            let impostoComCaixa = 0;
+            if (comCaixa > 4664.68) impostoComCaixa = (comCaixa * 0.275) - 869.36;
+            else if (comCaixa > 2826.66) impostoComCaixa = (comCaixa * 0.15) - 381.44;
+            
+            economiaAnual = (impostoMes - impostoComCaixa) * 12;
+            impostoMes = impostoComCaixa;
+            dicaTexto = `<strong>Planejamento:</strong> Lançar despesas operacionais no Livro-Caixa reduz legalmente a base de cálculo, evitando pagar imposto sobre custos do trabalho.`;
+        } else {
+            impostoMes = fatMensal * 0.06;
+            economiaAnual = fatMensal * (0.155 - 0.06) * 12;
+            dicaTexto = `<strong>Planejamento:</strong> Gestão ativa do pró-labore para manter o Fator R em 28%, blindando a empresa contra a alíquota pesada de 15,5%.`;
+        }
+
+        document.getElementById('ecoImpostoOtimizado').innerText = formatarMoeda(impostoMes) + ' /mês';
+        document.getElementById('ecoEconomiaAnual').innerText = formatarMoeda(economiaAnual);
+        document.getElementById('ecoDica').innerHTML = dicaTexto;
+    }
+
+    // Inicialização sem forçar valores estáticos
+    calcularMei();
+    calcularClt();
+    calcularRescisao();
+    calcularSimples();
+    calcularPresumido();
+    calcularAutonomo();
+    calcularGeral();
+    calcularEconomia();
+</script>
+
+</body>
+</html>
