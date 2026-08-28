@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Atalhos de NFS-e por Ano</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #2563eb;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --hover-bg: #dbeafe;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+        }
+
+        header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .year-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 28px;
+        }
+
+        .year-selector label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .year-selector input[type="number"] {
+            width: 110px;
+            padding: 8px 12px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+            border: 2px solid var(--primary-light);
+            border-radius: 6px;
+            text-align: center;
+            outline: none;
+        }
+
+        .year-selector input[type="number"]:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .grid-months {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .month-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 16px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .month-btn:hover {
+            border-color: var(--primary-light);
+            background-color: var(--hover-bg);
+            transform: translateY(-2px);
+        }
+
+        .month-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .month-dates {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .icon-link {
+            font-size: 12px;
+            margin-top: 6px;
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Atalhos Rápidos de Consulta NFS-e</h1>
+        <p class="subtitle">Selecione o ano e clique no mês para abrir no Portal Nacional da NFS-e</p>
+    </header>
+
+    <div class="year-selector">
+        <label for="ano">Ano de Consulta:</label>
+        <input type="number" id="ano" value="2026" min="2020" max="2035" onchange="atualizarAtalhos()" onkeyup="atualizarAtalhos()">
+    </div>
+
+    <div class="grid-months" id="grid-meses">
+        <!-- Gerado via JS -->
+    </div>
+
+    <footer>
+        💡 Dica: Certifique-se de estar logado no site da NFS-e antes de clicar nos meses para carregar a busca diretamente.
+    </footer>
+</div>
+
+<script>
+    const meses = [
+        { nome: "Janeiro", num: "01", dias: 31 },
+        { nome: "Fevereiro", num: "02", dias: 28 }, // calculado dinamicamente se bissexto
+        { nome: "Março", num: "03", dias: 31 },
+        { nome: "Abril", num: "04", dias: 30 },
+        { nome: "Maio", num: "05", dias: 31 },
+        { nome: "Junho", num: "06", dias: 30 },
+        { nome: "Julho", num: "07", dias: 31 },
+        { nome: "Agosto", num: "08", dias: 31 },
+        { nome: "Setembro", num: "09", dias: 30 },
+        { nome: "Outubro", num: "10", dias: 31 },
+        { nome: "Novembro", num: "11", dias: 30 },
+        { nome: "Dezembro", num: "12", dias: 31 }
+    ];
+
+    function ehBissexto(ano) {
+        return (ano % 4 === 0 && ano % 100 !== 0) || (ano % 400 === 0);
+    }
+
+    function atualizarAtalhos() {
+        const anoInput = document.getElementById('ano').value;
+        const ano = parseInt(anoInput, 10) || 2026;
+        const grid = document.getElementById('grid-meses');
+        grid.innerHTML = '';
+
+        meses.forEach(mes => {
+            let totalDias = mes.dias;
+            if (mes.num === "02") {
+                totalDias = ehBissexto(ano) ? 29 : 28;
+            }
+
+            const dataInicio = `01/${mes.num}/${ano}`;
+            const dataFim = `${totalDias}/${mes.num}/${ano}`;
+
+            // Encoding para URL
+            const url = `https://www.nfse.gov.br/EmissorNacional/Notas/Emitidas?busca=&datainicio=${encodeURIComponent(dataInicio)}&datafim=${encodeURIComponent(dataFim)}`;
+
+            const card = document.createElement('a');
+            card.className = 'month-btn';
+            card.href = url;
+            card.target = '_blank'; // Abre em nova aba
+            card.innerHTML = `
+                <span class="month-name">${mes.nome}</span>
+                <span class="month-dates">${dataInicio} a ${dataFim}</span>
+                <span class="icon-link">Abrir Mês ↗</span>
+            `;
+
+            grid.appendChild(card);
+        });
+    }
+
+    // Inicializar no carregamento
+    atualizarAtalhos();
+</script>
+
+</body>
+</html>
