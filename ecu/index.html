@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R7 - Configurador Athlon ECU - Gerador de Mapa .MM</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para visualização visual dos mapas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        athlon: {
+                            orange: '#FF5500',
+                            red: '#E60000',
+                            dark: '#0F1115',
+                            card: '#181B22',
+                            border: '#2A2F3D',
+                            accent: '#00E5FF'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #0A0C10;
+            color: #E2E8F0;
+        }
+        .glow-orange {
+            box-shadow: 0 0 15px rgba(255, 85, 0, 0.3);
+        }
+        .glow-accent {
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F1115;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A2F3D;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF5500;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- HEADER -->
+    <header class="bg-athlon-card border-b border-athlon-border sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-athlon-orange to-athlon-red flex items-center justify-center font-black text-xl text-white shadow-lg">
+                    A
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-wider text-white flex items-center gap-2">
+                        R7 <span class="text-athlon-orange text-xs px-2 py-0.5 rounded bg-athlon-orange/10 border border-athlon-orange/30">MAPPER PRO</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">Gerador Rápido de Arquivos .MM</p>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-6 text-sm">
+                <span class="flex items-center gap-2 text-emerald-400">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> App Athlon Ready
+                </span>
+                <button onclick="resetForm()" class="text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Reiniciar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        
+        <!-- STEP PROGRESS BAR -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between max-w-3xl mx-auto mb-3">
+                <div class="step-indicator flex flex-col items-center" id="step-tab-1">
+                    <div class="w-10 h-10 rounded-full bg-athlon-orange text-white font-bold flex items-center justify-center mb-1 shadow-lg shadow-athlon-orange/20 transition-all">
+                        1
+                    </div>
+                    <span class="text-xs font-semibold text-athlon-orange">Moto & Motor</span>
+                </div>
+                <div class="h-1 flex-1 mx-2 bg-athlon-border rounded transition-all" id="line-1"></div>
+                <div class="step-indicator flex flex-col items-center opacity-50" id="step-tab-2">
+                    <div class="w-10 h-10 rounded-full bg-athlon-border text-gray-400 font-bold flex items-center justify-center mb-1 transition-all">
+                        2
+                    </div>
+                    <span class="text-xs font-semibold text-gray-400">Objetivo</span>
+                </div>
+                <div class="h-1 flex-1 mx-2 bg-athlon-border rounded transition-all" id="line-2"></div>
+                <div class="step-indicator flex flex-col items-center opacity-50" id="step-tab-3">
+                    <div class="w-10 h-10 rounded-full bg-athlon-border text-gray-400 font-bold flex items-center justify-center mb-1 transition-all">
+                        3
+                    </div>
+                    <span class="text-xs font-semibold text-gray-400">Pipoco & Corte</span>
+                </div>
+                <div class="h-1 flex-1 mx-2 bg-athlon-border rounded transition-all" id="line-3"></div>
+                <div class="step-indicator flex flex-col items-center opacity-50" id="step-tab-4">
+                    <div class="w-10 h-10 rounded-full bg-athlon-border text-gray-400 font-bold flex items-center justify-center mb-1 transition-all">
+                        4
+                    </div>
+                    <span class="text-xs font-semibold text-gray-400">Mapa & Exportar</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM & DASHBOARD CONTAINER -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT COLUMN: WIZARD STEPS (7 COLS) -->
+            <div class="lg:col-span-7 bg-athlon-card border border-athlon-border rounded-2xl p-6 shadow-xl relative min-h-[500px] flex flex-col justify-between">
+                
+                <!-- STEP 1: MOTO & PREPARATION -->
+                <div id="step-1" class="step-content space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-motorcycle text-athlon-orange"></i> Qual é a sua motocicleta?
+                        </h2>
+                        <p class="text-sm text-gray-400 mt-1">Selecione o modelo base e os componentes instalados na moto.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Modelo / Categoria</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <button type="button" onclick="selectBike('Titan / Fan 150/160', 160)" class="bike-btn active p-3 rounded-xl border border-athlon-orange bg-athlon-orange/10 text-left hover:border-athlon-orange transition">
+                                    <div class="font-bold text-white text-sm">Honda 150cc/160cc</div>
+                                    <div class="text-xs text-gray-400">Titan, Fan, Start, Bros</div>
+                                </button>
+                                <button type="button" onclick="selectBike('CB 250 / Twister / XRE 300', 300)" class="bike-btn p-3 rounded-xl border border-athlon-border bg-athlon-dark text-left hover:border-athlon-orange transition">
+                                    <div class="font-bold text-white text-sm">Monocilíndrica 250-300</div>
+                                    <div class="text-xs text-gray-400">Twister, XRE, Lander, Fazer</div>
+                                </button>
+                                <button type="button" onclick="selectBike('4 Cilindros / Esportiva', 600)" class="bike-btn p-3 rounded-xl border border-athlon-border bg-athlon-dark text-left hover:border-athlon-orange transition">
+                                    <div class="font-bold text-white text-sm">Multi-Cilíndrica</div>
+                                    <div class="text-xs text-gray-400">Hornet, XJ6, MT-07, Z900</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Escapamento</label>
+                                <select id="exhaust-type" onchange="updateConfig()" class="w-full bg-athlon-dark border border-athlon-border rounded-xl px-4 py-3 text-white focus:border-athlon-orange focus:outline-none">
+                                    <option value="original">Original com Catalisador</option>
+                                    <option value="esportivo" selected>Esportivo (Dore, Fortuna, Disarsz, etc)</option>
+                                    <option value="direto">Direto / Coletor Dimensionado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Filtro de Ar</label>
+                                <select id="filter-type" onchange="updateConfig()" class="w-full bg-athlon-dark border border-athlon-border rounded-xl px-4 py-3 text-white focus:border-athlon-orange focus:outline-none">
+                                    <option value="original">Original em Caixa</option>
+                                    <option value="esportivo" selected>Esportivo K&N / Lavável</option>
+                                    <option value="sem">Sem Filtro / Velocity Stack</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Nível de Preparação do Motor</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="cursor-pointer border border-athlon-border bg-athlon-dark p-3 rounded-xl flex flex-col items-center hover:border-athlon-orange transition has-[:checked]:border-athlon-orange has-[:checked]:bg-athlon-orange/10">
+                                    <input type="radio" name="prep-level" value="original" onchange="updateConfig()" class="hidden" checked>
+                                    <span class="font-bold text-sm text-white">Original</span>
+                                    <span class="text-[10px] text-gray-400 text-center">Motor Standard</span>
+                                </label>
+                                <label class="cursor-pointer border border-athlon-border bg-athlon-dark p-3 rounded-xl flex flex-col items-center hover:border-athlon-orange transition has-[:checked]:border-athlon-orange has-[:checked]:bg-athlon-orange/10">
+                                    <input type="radio" name="prep-level" value="comando" onchange="updateConfig()" class="hidden">
+                                    <span class="font-bold text-sm text-white">Comando Preparado</span>
+                                    <span class="text-[10px] text-gray-400 text-center">Comando Bravo/WGP</span>
+                                </label>
+                                <label class="cursor-pointer border border-athlon-border bg-athlon-dark p-3 rounded-xl flex flex-col items-center hover:border-athlon-orange transition has-[:checked]:border-athlon-orange has-[:checked]:bg-athlon-orange/10">
+                                    <input type="radio" name="prep-level" value="kit" onchange="updateConfig()" class="hidden">
+                                    <span class="font-bold text-sm text-white">Kit Aumento (CC)</span>
+                                    <span class="text-[10px] text-gray-400 text-center">Pistão Maior / Bico Alagado</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: PERFORMANCE & FUEL MODE -->
+                <div id="step-2" class="step-content space-y-6 hidden">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-gauge-high text-athlon-accent"></i> Qual é o seu objetivo principal?
+                        </h2>
+                        <p class="text-sm text-gray-400 mt-1">Ajustaremos a mistura ar/combustível e os avanços de ignição.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div onclick="setGoal('performance')" id="goal-performance" class="cursor-pointer border-2 border-athlon-orange bg-athlon-orange/10 p-5 rounded-2xl hover:bg-athlon-orange/20 transition space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="p-2 rounded-lg bg-athlon-orange text-white text-lg"><i class="fa-solid fa-bolt"></i></span>
+                                <span class="badge-active text-xs bg-athlon-orange text-white font-bold px-2.5 py-1 rounded-full">SELECIONADO</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white text-lg">Modo Performance / Arrancada</h3>
+                                <p class="text-xs text-gray-300 mt-1">Mistura mais rica em alta (WOT), resposta imediata de acelerador, foco em potência máxima e aceleração rápida.</p>
+                            </div>
+                        </div>
+
+                        <div onclick="setGoal('economy')" id="goal-economy" class="cursor-pointer border-2 border-athlon-border bg-athlon-dark p-5 rounded-2xl hover:border-gray-500 transition space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="p-2 rounded-lg bg-emerald-500 text-white text-lg"><i class="fa-solid fa-leaf"></i></span>
+                                <span class="badge-active hidden text-xs bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-full">SELECIONADO</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white text-lg">Modo Economia / Uso Diário</h3>
+                                <p class="text-xs text-gray-300 mt-1">Mistura otimizada para cruzeiro estequiométrico (14.7), desaceleração suave sem engasgos e menor consumo.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Combustível Utilizado</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button type="button" onclick="setFuel('gasolina')" id="fuel-gasolina" class="fuel-btn active p-3 rounded-xl border border-athlon-orange bg-athlon-orange/10 font-semibold text-sm text-white">Gasolina Comum / Aditivada</button>
+                                <button type="button" onclick="setFuel('pODIUM')" id="fuel-podium" class="fuel-btn p-3 rounded-xl border border-athlon-border bg-athlon-dark font-semibold text-sm text-white">Gasolina Octanagem Alta</button>
+                                <button type="button" onclick="setFuel('etanol')" id="fuel-etanol" class="fuel-btn p-3 rounded-xl border border-athlon-border bg-athlon-dark font-semibold text-sm text-white">Etanol (Álcool)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: CUT & POP & BANG -->
+                <div id="step-3" class="step-content space-y-6 hidden">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-fire text-athlon-red"></i> Ajuste de Corte & Pipocos (Pop & Bang)
+                        </h2>
+                        <p class="text-sm text-gray-400 mt-1">Configure o estilo de corte de giro e retardo de ignição em desaceleração.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Estilo de Pipoco / Retardo em Desaceleração</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <label class="cursor-pointer border border-athlon-border bg-athlon-dark p-4 rounded-xl text-center hover:border-athlon-red transition has-[:checked]:border-athlon-red has-[:checked]:bg-athlon-red/10">
+                                    <input type="radio" name="pop-style" value="none" onchange="updateConfig()" class="hidden">
+                                    <div class="font-bold text-sm text-white mb-1">Suave / Sem Pipoco</div>
+                                    <div class="text-[11px] text-gray-400">Sem estouros, motor liso na desaceleração</div>
+                                </label>
+                                <label class="cursor-pointer border border-athlon-border bg-athlon-dark p-4 rounded-xl text-center hover:border-athlon-red transition has-[:checked]:border-athlon-red has-[:checked]:bg-athlon-red/10">
+                                    <input type="radio" name="pop-style" value="light" onchange="updateConfig()" class="hidden">
+                                    <div class="font-bold text-sm text-white mb-1">Pipoco Moderado</div>
+                                    <div class="text-[11px] text-gray-400">Pequenas pipocadas graves ao soltar o cabo</div>
+                                </label>
+                                <label class="cursor-pointer border border-athlon-border bg-athlon-dark p-4 rounded-xl text-center hover:border-athlon-red transition has-[:checked]:border-athlon-red has-[:checked]:bg-athlon-red/10">
+                                    <input type="radio" name="pop-style" value="extreme" onchange="updateConfig()" class="hidden" checked>
+                                    <div class="font-bold text-sm text-white mb-1">Corte para Pipoco (Fogo)</div>
+                                    <div class="text-[11px] text-gray-400">Atraso agressivo de ignição em desaceleração</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-sm font-medium text-gray-300">RPM Limite de Corte</label>
+                                    <span id="rpm-display" class="font-bold text-athlon-orange text-sm">10.500 RPM</span>
+                                </div>
+                                <input type="range" id="rpm-limit" min="8000" max="13500" step="250" value="10500" oninput="updateConfig()" class="w-full accent-athlon-orange bg-athlon-dark cursor-pointer">
+                                <div class="flex justify-between text-[10px] text-gray-500 mt-1">
+                                    <span>8.000 RPM</span>
+                                    <span>10.500 RPM</span>
+                                    <span>13.500 RPM</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Modo de Corte de Giro</label>
+                                <select id="cut-type" onchange="updateConfig()" class="w-full bg-athlon-dark border border-athlon-border rounded-xl px-4 py-3 text-white focus:border-athlon-orange focus:outline-none text-sm">
+                                    <option value="hard">Corte Rápido & Seco (Hard Cut)</option>
+                                    <option value="soft">Corte Progressivo (Soft Cut)</option>
+                                    <option value="pop_cut">Corte Agressivo para Pipoco</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- ADVANCED OPTIONS -->
+                        <div class="bg-athlon-dark/60 p-4 rounded-xl border border-athlon-border/50 space-y-3">
+                            <span class="text-xs font-bold text-athlon-accent tracking-wider uppercase flex items-center gap-1">
+                                <i class="fa-solid fa-sliders"></i> Funções Especiais Athlon
+                            </span>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-sm font-semibold text-white">Quickshifter / Corte de Marcha</div>
+                                    <div class="text-xs text-gray-400">Corta ignição por tempo programado ao trocar marcha</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="qs-enable" onchange="updateConfig()" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-athlon-orange"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between pt-2 border-t border-athlon-border/30">
+                                <div>
+                                    <div class="text-sm font-semibold text-white">Controle de Largada (2-Step)</div>
+                                    <div class="text-xs text-gray-400">Limita RPM fixo com botão acionado para largadas</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="twostep-enable" onchange="updateConfig()" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-athlon-accent"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: PREVIEW & EXPORT -->
+                <div id="step-4" class="step-content space-y-6 hidden">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-file-code text-emerald-400"></i> Mapa Gerado Prontinho
+                        </h2>
+                        <p class="text-sm text-gray-400 mt-1">Seu arquivo <code class="text-athlon-orange font-bold">.MM</code> foi compilado e está pronto para salvar ou transferir para o app da Athlon.</p>
+                    </div>
+
+                    <div class="bg-athlon-dark p-4 rounded-xl border border-athlon-border space-y-3">
+                        <div class="flex justify-between items-center text-xs text-gray-400 border-b border-athlon-border pb-2">
+                            <span><i class="fa-solid fa-microchip"></i> Formato: ECU Athlon (.mm)</span>
+                            <span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> Sem erros detectados</span>
+                        </div>
+                        
+                        <div class="font-mono text-xs text-gray-300 bg-black/60 p-3 rounded-lg overflow-x-auto max-h-48 scrollbar-thin" id="mm-preview">
+                            <!-- PREVIEW CONTENT GENERATED HERE -->
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button onclick="downloadMMFile()" class="flex-1 bg-gradient-to-r from-athlon-orange to-athlon-red hover:brightness-110 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg flex items-center justify-center gap-2 transition glow-orange">
+                            <i class="fa-solid fa-download text-lg"></i> Baixar Arquivo .MM
+                        </button>
+                        <button onclick="copyToClipboard()" class="bg-athlon-dark hover:bg-athlon-border border border-athlon-border text-white font-semibold py-3.5 px-5 rounded-xl flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-copy"></i> Copiar Código
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION BUTTONS -->
+                <div class="flex justify-between items-center pt-6 border-t border-athlon-border mt-6">
+                    <button id="prev-btn" onclick="changeStep(-1)" class="px-5 py-2.5 rounded-xl border border-athlon-border text-gray-400 hover:text-white hover:border-gray-500 transition disabled:opacity-30 disabled:cursor-not-allowed text-sm font-semibold">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Anterior
+                    </button>
+                    
+                    <button id="next-btn" onclick="changeStep(1)" class="px-6 py-2.5 rounded-xl bg-athlon-orange hover:bg-opacity-90 text-white font-bold text-sm flex items-center gap-2 shadow-md transition">
+                        Próximo <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: DASHBOARD & LIVE GRAPH (5 COLS) -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- SUMMARY PANEL -->
+                <div class="bg-athlon-card border border-athlon-border rounded-2xl p-5 shadow-xl space-y-4">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Resumo do Mapa</span>
+                        <span class="text-xs bg-athlon-dark px-2 py-0.5 rounded border border-athlon-border text-athlon-orange font-mono" id="status-badge">PRÉ-CONFIGURADO</span>
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-athlon-dark p-3 rounded-xl border border-athlon-border/50">
+                            <span class="text-[11px] text-gray-400 block">Motor / Cilindrada</span>
+                            <span class="font-bold text-white text-sm" id="sum-bike">Honda 160cc</span>
+                        </div>
+                        <div class="bg-athlon-dark p-3 rounded-xl border border-athlon-border/50">
+                            <span class="text-[11px] text-gray-400 block">Corte Limite</span>
+                            <span class="font-bold text-athlon-orange text-sm" id="sum-rpm">10.500 RPM</span>
+                        </div>
+                        <div class="bg-athlon-dark p-3 rounded-xl border border-athlon-border/50">
+                            <span class="text-[11px] text-gray-400 block">Perfil de Mistura</span>
+                            <span class="font-bold text-athlon-accent text-sm" id="sum-goal">Performance</span>
+                        </div>
+                        <div class="bg-athlon-dark p-3 rounded-xl border border-athlon-border/50">
+                            <span class="text-[11px] text-gray-400 block">Efeito Desaceleração</span>
+                            <span class="font-bold text-athlon-red text-sm" id="sum-pop">Pipoco / Fogo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DYNAMIC MAP GRAPH -->
+                <div class="bg-athlon-card border border-athlon-border rounded-2xl p-5 shadow-xl space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-athlon-orange"></i> Curva Estimada de Avanço / Injeção
+                        </h3>
+                        <span class="text-[10px] text-gray-400">RPM vs TPS (100%)</span>
+                    </div>
+
+                    <div class="h-56 relative w-full">
+                        <canvas id="mapChart"></canvas>
+                    </div>
+
+                    <div class="text-[11px] text-gray-400 flex items-center justify-around border-t border-athlon-border/50 pt-3">
+                        <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-athlon-orange inline-block"></span> Injeção (%)</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-athlon-accent inline-block"></span> Avanço Ipn. (º)</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-0.5 bg-athlon-red inline-block"></span> Zona de Corte</span>
+                    </div>
+                </div>
+
+                <!-- HELP / APP TIP -->
+                <div class="bg-gradient-to-r from-athlon-dark to-athlon-card border border-athlon-border p-4 rounded-2xl flex items-start gap-3">
+                    <div class="p-2.5 rounded-xl bg-athlon-orange/10 border border-athlon-orange/30 text-athlon-orange text-lg shrink-0">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                    </div>
+                    <div class="text-xs text-gray-300 leading-relaxed">
+                        <strong class="text-white block mb-0.5">Como usar no App da Athlon:</strong>
+                        1. Baixe o arquivo <code class="text-athlon-orange font-bold">.mm</code> gerado neste site.<br>
+                        2. Abra o aplicativo oficial <strong>Athlon ECU</strong> no seu celular por Bluetooth.<br>
+                        3. Vá em <em>"Gerenciador de Mapas" &rarr; "Importar (.mm)"</em> e selecione o arquivo!
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-athlon-card border-t border-athlon-border py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-500">
+            Athlon ECU Map Builder &copy; 2026 - Ferramenta simplificada de acerto rápido. Sempre faça testes controlados.
+        </div>
+    </footer>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-emerald-500 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-check text-xl"></i>
+        <span id="toast-msg" class="text-sm font-semibold">Configuração salva com sucesso!</span>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // APP STATE
+        let currentStep = 1;
+        let config = {
+            bikeName: 'Titan / Fan 150/160',
+            cc: 160,
+            exhaust: 'esportivo',
+            filter: 'esportivo',
+            prep: 'original',
+            goal: 'performance',
+            fuel: 'gasolina',
+            popStyle: 'extreme',
+            rpmLimit: 10500,
+            cutType: 'pop_cut',
+            quickshifter: true,
+            twoStep: false
+        };
+
+        let mapChart = null;
+
+        // INITIALIZATION
+        window.onload = function() {
+            initChart();
+            updateConfig();
+        };
+
+        // STEP NAVIGATION
+        function changeStep(delta) {
+            const newStep = currentStep + delta;
+            if (newStep < 1 || newStep > 4) return;
+
+            document.getElementById(`step-${currentStep}`).classList.add('hidden');
+            document.getElementById(`step-${newStep}`).classList.remove('hidden');
+
+            currentStep = newStep;
+            updateStepUI();
+        }
+
+        function updateStepUI() {
+            // Update steppers
+            for (let i = 1; i <= 4; i++) {
+                const tab = document.getElementById(`step-tab-${i}`);
+                const circle = tab.querySelector('div');
+                const label = tab.querySelector('span');
+
+                if (i <= currentStep) {
+                    tab.classList.remove('opacity-50');
+                    circle.classList.remove('bg-athlon-border', 'text-gray-400');
+                    circle.classList.add('bg-athlon-orange', 'text-white');
+                    label.classList.remove('text-gray-400');
+                    label.classList.add('text-athlon-orange');
+                } else {
+                    tab.classList.add('opacity-50');
+                    circle.classList.add('bg-athlon-border', 'text-gray-400');
+                    circle.classList.remove('bg-athlon-orange', 'text-white');
+                    label.classList.add('text-gray-400');
+                    label.classList.remove('text-athlon-orange');
+                }
+            }
+
+            // Update lines
+            for (let i = 1; i <= 3; i++) {
+                const line = document.getElementById(`line-${i}`);
+                if (i < currentStep) {
+                    line.classList.add('bg-athlon-orange');
+                    line.classList.remove('bg-athlon-border');
+                } else {
+                    line.classList.remove('bg-athlon-orange');
+                    line.classList.add('bg-athlon-border');
+                }
+            }
+
+            // Buttons
+            document.getElementById('prev-btn').disabled = (currentStep === 1);
+            const nextBtn = document.getElementById('next-btn');
+            
+            if (currentStep === 4) {
+                nextBtn.innerHTML = '<i class="fa-solid fa-check"></i> Concluído';
+                nextBtn.classList.add('bg-emerald-500');
+                nextBtn.classList.remove('bg-athlon-orange');
+            } else {
+                nextBtn.innerHTML = 'Próximo <i class="fa-solid fa-arrow-right"></i>';
+                nextBtn.classList.remove('bg-emerald-500');
+                nextBtn.classList.add('bg-athlon-orange');
+            }
+        }
+
+        // BIKE SELECTION
+        function selectBike(name, cc) {
+            config.bikeName = name;
+            config.cc = cc;
+            
+            document.querySelectorAll('.bike-btn').forEach(btn => {
+                btn.classList.remove('border-athlon-orange', 'bg-athlon-orange/10');
+                btn.classList.add('border-athlon-border', 'bg-athlon-dark');
+            });
+            event.currentTarget.classList.add('border-athlon-orange', 'bg-athlon-orange/10');
+            event.currentTarget.classList.remove('border-athlon-border', 'bg-athlon-dark');
+            
+            // Adjust RPM limit default based on bike
+            if (cc >= 600) {
+                config.rpmLimit = 12500;
+            } else if (cc >= 300) {
+                config.rpmLimit = 9500;
+            } else {
+                config.rpmLimit = 10500;
+            }
+            document.getElementById('rpm-limit').value = config.rpmLimit;
+
+            updateConfig();
+        }
+
+        // GOAL SELECTION
+        function setGoal(goal) {
+            config.goal = goal;
+            const perfCard = document.getElementById('goal-performance');
+            const ecoCard = document.getElementById('goal-economy');
+
+            if (goal === 'performance') {
+                perfCard.className = "cursor-pointer border-2 border-athlon-orange bg-athlon-orange/10 p-5 rounded-2xl hover:bg-athlon-orange/20 transition space-y-3";
+                perfCard.querySelector('.badge-active').classList.remove('hidden');
+                
+                ecoCard.className = "cursor-pointer border-2 border-athlon-border bg-athlon-dark p-5 rounded-2xl hover:border-gray-500 transition space-y-3";
+                ecoCard.querySelector('.badge-active').classList.add('hidden');
+            } else {
+                ecoCard.className = "cursor-pointer border-2 border-emerald-500 bg-emerald-500/10 p-5 rounded-2xl hover:bg-emerald-500/20 transition space-y-3";
+                ecoCard.querySelector('.badge-active').classList.remove('hidden');
+
+                perfCard.className = "cursor-pointer border-2 border-athlon-border bg-athlon-dark p-5 rounded-2xl hover:border-gray-500 transition space-y-3";
+                perfCard.querySelector('.badge-active').classList.add('hidden');
+            }
+
+            updateConfig();
+        }
+
+        // FUEL SELECTION
+        function setFuel(fuel) {
+            config.fuel = fuel;
+            document.querySelectorAll('.fuel-btn').forEach(btn => {
+                btn.classList.remove('border-athlon-orange', 'bg-athlon-orange/10');
+                btn.classList.add('border-athlon-border', 'bg-athlon-dark');
+            });
+            event.currentTarget.classList.add('border-athlon-orange', 'bg-athlon-orange/10');
+            event.currentTarget.classList.remove('border-athlon-border', 'bg-athlon-dark');
+            updateConfig();
+        }
+
+        // UPDATE ALL CONFIG & UI READOUTS
+        function updateConfig() {
+            // Read form controls
+            config.exhaust = document.getElementById('exhaust-type').value;
+            config.filter = document.getElementById('filter-type').value;
+            
+            const selectedPrep = document.querySelector('input[name="prep-level"]:checked');
+            if (selectedPrep) config.prep = selectedPrep.value;
+
+            const selectedPop = document.querySelector('input[name="pop-style"]:checked');
+            if (selectedPop) config.popStyle = selectedPop.value;
+
+            config.rpmLimit = parseInt(document.getElementById('rpm-limit').value);
+            config.cutType = document.getElementById('cut-type').value;
+            config.quickshifter = document.getElementById('qs-enable').checked;
+            config.twoStep = document.getElementById('twostep-enable').checked;
+
+            // Update Labels
+            document.getElementById('rpm-display').innerText = `${config.rpmLimit.toLocaleString()} RPM`;
+            
+            // Summary Dashboard Update
+            document.getElementById('sum-bike').innerText = config.bikeName;
+            document.getElementById('sum-rpm').innerText = `${config.rpmLimit.toLocaleString()} RPM`;
+            document.getElementById('sum-goal').innerText = config.goal === 'performance' ? 'Performance / Raça' : 'Economia';
+            
+            let popText = 'Suave';
+            if (config.popStyle === 'light') popText = 'Pipoco Leve';
+            if (config.popStyle === 'extreme') popText = 'Corte Pipoco (Fogo)';
+            document.getElementById('sum-pop').innerText = popText;
+
+            // Generate .MM Preview Code
+            generateMMCode();
+
+            // Refresh Dynamic Graph
+            updateChart();
+        }
+
+        // CHART GENERATION
+        function initChart() {
+            const ctx = document.getElementById('mapChart').getContext('2d');
+            mapChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1000', '3000', '5000', '7000', '9000', '10500', '12000'],
+                    datasets: [
+                        {
+                            label: 'Tempo Injeção (%)',
+                            data: [20, 45, 65, 85, 95, 98, 0],
+                            borderColor: '#FF5500',
+                            backgroundColor: 'rgba(255, 85, 0, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Avanço Ignição (º)',
+                            data: [10, 18, 28, 34, 32, 15, 0],
+                            borderColor: '#00E5FF',
+                            borderDash: [5, 5],
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94A3B8', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94A3B8', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!mapChart) return;
+
+            const limit = config.rpmLimit;
+            const labels = ['1000', '3000', '5000', '7000', '9000', `${limit}`, `${limit + 1000}`];
+            
+            let fuelFactor = config.goal === 'performance' ? 1.15 : 0.95;
+            if (config.exhaust === 'direto') fuelFactor += 0.08;
+            if (config.prep === 'kit') fuelFactor += 0.12;
+
+            let fuelData = [
+                Math.round(15 * fuelFactor),
+                Math.round(40 * fuelFactor),
+                Math.round(60 * fuelFactor),
+                Math.round(80 * fuelFactor),
+                Math.round(92 * fuelFactor),
+                Math.round(98 * fuelFactor),
+                0 // Cut off
+            ];
+
+            let ignData = [10, 20, 30, 35, 33, 28, 0];
+            if (config.popStyle === 'extreme') {
+                ignData[5] = -12; // Ignition Retard for pops!
+            } else if (config.popStyle === 'light') {
+                ignData[5] = 2;
+            }
+
+            mapChart.data.labels = labels;
+            mapChart.data.datasets[0].data = fuelData;
+            mapChart.data.datasets[1].data = ignData;
+            mapChart.update();
+        }
+
+        // ATHLON .MM FILE FORMAT GENERATOR (JSON/ATHLON STRUCT)
+        function generateMMCode() {
+            const date = new Date().toISOString().split('T')[0];
+
+            let ignitionRetardPop = 0;
+            if (config.popStyle === 'light') ignitionRetardPop = -8;
+            if (config.popStyle === 'extreme') ignitionRetardPop = -22; // Extreme retard creates flames/pops
+
+            let trimFuel = 0;
+            if (config.exhaust === 'esportivo') trimFuel += 6;
+            if (config.exhaust === 'direto') trimFuel += 12;
+            if (config.filter === 'esportivo') trimFuel += 4;
+            if (config.prep === 'kit') trimFuel += 18;
+
+            const mmObject = {
+                "ATHLON_HEADER": {
+                    "FILE_VERSION": "3.2.0",
+                    "CREATOR": "R7 Pro Mapper Web",
+                    "DATE": date,
+                    "TARGET_ECU": "ATHLON_M300_PRO"
+                },
+                "MOTOR_CONFIG": {
+                    "BIKE_NAME": config.bikeName,
+                    "DISPLACEMENT_CC": config.cc,
+                    "FUEL_TYPE": config.fuel.toUpperCase(),
+                    "PREPARATION": config.prep.toUpperCase()
+                },
+                "LIMITERS_AND_CUT": {
+                    "RPM_LIMIT": config.rpmLimit,
+                    "CUT_MODE": config.cutType.toUpperCase(),
+                    "CUT_DELAY_MS": config.cutType === 'hard' ? 30 : 60,
+                    "POP_AND_BANG_ENABLE": config.popStyle !== 'none',
+                    "POP_IGNITION_RETARD_DEG": ignitionRetardPop,
+                    "POP_FUEL_ENRICHMENT_PERCENT": config.popStyle === 'extreme' ? 18 : 8
+                },
+                "FUNCTIONS": {
+                    "QUICKSHIFTER_ENABLED": config.quickshifter,
+                    "QUICKSHIFTER_CUT_TIME_MS": 55,
+                    "TWO_STEP_ENABLED": config.twoStep,
+                    "TWO_STEP_RPM": 5500
+                },
+                "MAP_CORRECTIONS": {
+                    "GLOBAL_FUEL_TRIM_PERCENT": trimFuel,
+                    "WOT_ENRICHMENT_PERCENT": config.goal === 'performance' ? 14 : 2,
+                    "IGNITION_ADVANCE_BASE": config.goal === 'performance' ? 34 : 30
+                }
+            };
+
+            const jsonStr = JSON.stringify(mmObject, null, 4);
+            document.getElementById('mm-preview').innerText = jsonStr;
+        }
+
+        // DOWNLOAD FILE
+        function downloadMMFile() {
+            const content = document.getElementById('mm-preview').innerText;
+            const fileName = `Mapa_Athlon_${config.bikeName.replace(/[^a-zA-Z0-9]/g, '_')}_${config.rpmLimit}RPM.mm`;
+            
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast("Download do arquivo .MM iniciado!");
+        }
+
+        // COPY TO CLIPBOARD
+        function copyToClipboard() {
+            const content = document.getElementById('mm-preview').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = content;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            showToast("Código .MM copiado para a área de transferência!");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function resetForm() {
+            currentStep = 1;
+            updateStepUI();
+            document.querySelectorAll('.step-content').forEach((el, idx) => {
+                if (idx === 0) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+            showToast("Configuração reiniciada.");
+        }
+    </script>
+</body>
+</html>
