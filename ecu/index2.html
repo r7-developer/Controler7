@@ -1,697 +1,882 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R7 ECU - Configurador Híbrido</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Chart.js -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>R7Mapper - Configurador Nativo .MM</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f1115;
+            --panel-bg: rgba(22, 26, 34, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-orange: #ff5500;
+            --accent-blue: #00d2ff;
+            --accent-green: #00ff88;
+            --accent-red: #ff4444;
+            --accent-yellow: #ffbb00;
+            --text-main: #f0f2f5;
+            --text-muted: #8a94a6;
+        }
 
-    <!-- Tailwind Config for Custom Colors -->
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        athlon: {
-                            dark: '#0a0a0c',
-                            panel: 'rgba(20, 24, 34, 0.75)',
-                            orange: '#ff4500',
-                            blue: '#00d2ff',
-                            red: '#ff003c',
-                            green: '#00ff66',
-                            border: 'rgba(255, 255, 255, 0.08)'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace']
-                    }
-                }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            touch-action: pan-y;
+        }
+
+        header {
+            background: rgba(15, 17, 21, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-badge {
+            background: var(--accent-orange);
+            color: #fff;
+            font-weight: 900;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .logo-title {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--accent-orange);
+            border-color: var(--accent-orange);
+            color: #fff;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .main-container > div {
+            min-width: 0;
+            width: 100%;
+        }
+
+        @media (min-width: 992px) {
+            .main-container {
+                grid-template-columns: 1fr 400px;
             }
         }
-    </script>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap');
-
-        html {
-            background-color: #0a0a0c;
-            color: #E2E8F0;
-            scroll-behavior: smooth;
+        .tabs-nav {
+            display: flex;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 4px;
+            gap: 4px;
+            margin-bottom: 12px;
+            overflow-x: auto;
         }
 
-        body {
-            background-color: #0a0a0c;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(255, 69, 0, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 210, 255, 0.08) 0%, transparent 40%);
-            background-attachment: fixed;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto; /* Garante rolagem vertical completa */
+        .tab-btn {
+            flex: 1;
+            padding: 10px 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
-        .glass-panel {
-            background: var(--tw-colors-athlon-panel, rgba(20, 24, 34, 0.75));
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        .tab-btn.active {
+            background: rgba(255, 85, 0, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(255, 85, 0, 0.3);
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ff4500; }
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            min-width: 0;
+            overflow: hidden;
+        }
 
-        /* Sliders Customizados */
-        input[type=range] {
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .form-value {
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            touch-action: pan-y;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            cursor: pointer;
+        }
+
+        .matrix-container {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        table.matrix {
+            width: max-content;
+            border-collapse: collapse;
+            font-size: 0.68rem;
+            text-align: center;
+        }
+
+        table.matrix th {
+            padding: 6px 2px;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            min-width: 38px;
+        }
+
+        table.matrix td {
+            padding: 2px;
+            border: 1px solid var(--border-color);
+            min-width: 38px;
+        }
+
+        table.matrix input {
             width: 100%;
             background: transparent;
+            border: none;
+            color: var(--accent-blue);
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.72rem;
+            padding: 4px 0;
         }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: #cbd5e1;
-            cursor: pointer;
-            margin-top: -6px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-            transition: transform 0.1s, background-color 0.2s;
+
+        .terminal {
+            background: #050608;
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            max-height: 520px;
+            overflow-y: auto;
         }
-        input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.2); }
-        input[type=range]::-webkit-slider-runnable-track {
+
+        .chart-box {
+            position: relative;
+            height: 140px;
             width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: #334155;
-            border-radius: 2px;
         }
 
-        /* Cores de destaque para sliders */
-        input[type=range].slider-orange::-webkit-slider-thumb { background: #ff4500; box-shadow: 0 0 10px rgba(255, 69, 0, 0.6); }
-        input[type=range].slider-blue::-webkit-slider-thumb { background: #00d2ff; box-shadow: 0 0 10px rgba(0, 210, 255, 0.6); }
-        input[type=range].slider-yellow::-webkit-slider-thumb { background: #fbbf24; box-shadow: 0 0 10px rgba(251, 191, 36, 0.6); }
-        input[type=range].slider-red::-webkit-slider-thumb { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
-        input[type=range].slider-purple::-webkit-slider-thumb { background: #a855f7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6); }
-
-        /* Terminal Cursor */
-        .typing-cursor::after {
-            content: '█';
-            animation: blink 1s step-end infinite;
-            margin-left: 2px;
-            color: #ff4500;
+        .toast {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: #161a22;
+            border: 1px solid var(--accent-blue);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            display: none;
+            z-index: 1000;
         }
-        @keyframes blink { 50% { opacity: 0; } }
 
-        /* Aba Ativa */
-        .tab-btn.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-bottom: 2px solid #ff4500;
-            color: white;
-        }
+        #fileInput { display: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans text-sm">
+<body>
 
-    <nav class="glass-panel border-b border-white/5 sticky top-0 z-50 h-16 shrink-0">
-        <div class="max-w-[1500px] mx-auto px-4 h-full flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff4500] to-[#b30000] flex items-center justify-center font-black text-xl text-white shadow-[0_0_15px_rgba(255,69,0,0.4)]">
-                    A
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-lg tracking-wide text-white leading-tight">R7Mapper <span class="text-athlon-blue">PRO</span></h1>
-                    <p class="text-[10px] text-gray-400 uppercase tracking-widest">Advanced Hybrid Tuner</p>
+    <header>
+        <div class="logo-container">
+            <div class="logo-badge">A</div>
+            <div class="logo-title">R7Mapper PRO</div>
+        </div>
+        <div class="header-actions">
+            <button class="btn" onclick="document.getElementById('fileInput').click()">📂 Abrir</button>
+            <button class="btn btn-primary" onclick="downloadMM()">💾 Baixar .MM</button>
+            <input type="file" id="fileInput" accept=".mm,.json,.txt" onchange="importMMFile(event)">
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div>
+            <div class="tabs-nav">
+                <button class="tab-btn active" onclick="switchTab('rapido')">⚡ Rápido</button>
+                <button class="tab-btn" onclick="switchTab('detalhado')">🎛️ Detalhado</button>
+                <button class="tab-btn" onclick="switchTab('performance')">🚀 Performance</button>
+                <button class="tab-btn" onclick="switchTab('matriz')">📊 Matriz 32P</button>
+            </div>
+
+            <!-- TAB RÁPIDO -->
+            <div id="tab-rapido">
+                <div class="panel">
+                    <div class="panel-title">Configuração do Motor & Peças</div>
+                    <div class="form-group">
+                        <label class="form-label">Modelo da Moto</label>
+                        <select id="quick-moto" onchange="updateAll()">
+                            <option value="cg160">Honda CG 160 / Fan / Titan</option>
+                            <option value="cg150">Honda CG 150 / Fan</option>
+                            <option value="cb300">Honda CB 300 / XRE 300</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Escapamento</label>
+                        <select id="setup-exhaust" onchange="updateAll()">
+                            <option value="original">Original com Catalisador</option>
+                            <option value="sport_kat">Esportivo / Direto (com DB Killer)</option>
+                            <option value="sport_open">Esportivo / Direto Totalmente Aberto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Comando de Válvulas</label>
+                        <select id="setup-camshaft" onchange="updateAll()">
+                            <option value="original">Original</option>
+                            <option value="medium">Comando Preparado Médio (280° a 296°)</option>
+                            <option value="high">Comando Preparado Graudão / Alta (300°+)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bico Injetor</label>
+                        <select id="setup-injector" onchange="updateAll()">
+                            <option value="original">Original</option>
+                            <option value="cb500">Bico de Maior Vazão (ex: CB 500 / 10 Furos)</option>
+                            <option value="high_flow">Bico de Altíssima Vazão (Alta Lts/h)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Combustível</label>
+                        <select id="quick-fuel" onchange="applyQuickPreset()">
+                            <option value="ethanol">Etanol</option>
+                            <option value="gasoline">Gasolina</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div>
-                <button onclick="exportConfig()" class="bg-gradient-to-r from-athlon-orange to-red-600 hover:from-orange-500 hover:to-red-500 text-white text-sm font-bold py-2 px-5 rounded-lg shadow-[0_0_15px_rgba(255,69,0,0.4)] transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-download"></i> Baixar Mapa .MM
-                </button>
+
+            <!-- TAB DETALHADO -->
+            <div id="tab-detalhado" style="display: none;">
+                <div class="panel">
+                    <div class="panel-title">Injeção Global</div>
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>Vazão Global (x0240)</span>
+                            <span class="form-value" id="val-fuel-global">100%</span>
+                        </div>
+                        <input type="range" id="slider-fuel-global" min="70" max="140" value="100" oninput="updateFuelGlobal(this.value)">
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">Avanço de Ignição (Ângulo BTDC)</div>
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>Avanço Baixa RPM</span>
+                            <span class="form-value" id="val-ign-low">10.0°</span>
+                        </div>
+                        <input type="range" id="slider-ign-low" min="0" max="40" step="0.5" value="10" oninput="updateIgnitionZone('low', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>Avanço Média RPM</span>
+                            <span class="form-value" id="val-ign-mid">22.0°</span>
+                        </div>
+                        <input type="range" id="slider-ign-mid" min="0" max="45" step="0.5" value="22" oninput="updateIgnitionZone('mid', this.value)">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>Avanço Alta RPM</span>
+                            <span class="form-value" id="val-ign-high">30.0°</span>
+                        </div>
+                        <input type="range" id="slider-ign-high" min="0" max="50" step="0.5" value="30" oninput="updateIgnitionZone('high', this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB PERFORMANCE -->
+            <div id="tab-performance" style="display: none;">
+                <div class="panel">
+                    <div class="panel-title">Limites e Resposta</div>
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>Corte de Giro (Limitador)</span>
+                            <span class="form-value" id="val-rpm-limit">10.500 RPM</span>
+                        </div>
+                        <input type="range" id="slider-rpm-limit" min="9000" max="12500" step="100" value="10500" oninput="updateRPMLimit(this.value)">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>Injeção de Aceleração Rápida</span>
+                            <span class="form-value" id="val-accel-enrich">+15%</span>
+                        </div>
+                        <input type="range" id="slider-accel-enrich" min="0" max="50" step="1" value="15" oninput="updateAccelEnrich(this.value)">
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">Pop & Bang / Pipoco</div>
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>RPM Mínimo para Ativação</span>
+                            <span class="form-value" id="val-pop-rpm">8.300 RPM</span>
+                        </div>
+                        <input type="range" id="slider-pop-rpm" min="4000" max="11000" step="100" value="8300" oninput="updatePopRPM(this.value)">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>Atraso de Ponto (Graus)</span>
+                            <span class="form-value" id="val-pop-deg">-20.0°</span>
+                        </div>
+                        <input type="range" id="slider-pop-deg" min="-30" max="0" step="0.5" value="-20" oninput="updatePopDegrees(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB MATRIZ -->
+            <div id="tab-matriz" style="display: none;">
+                <div class="panel">
+                    <div class="panel-title">Injeção (x0240)</div>
+                    <div class="matrix-container">
+                        <table class="matrix">
+                            <thead><tr id="matrix-rpm-header"></tr></thead>
+                            <tbody><tr id="matrix-fuel-row"></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">Ignição (x0280)</div>
+                    <div class="matrix-container">
+                        <table class="matrix">
+                            <thead><tr id="matrix-rpm-header-2"></tr></thead>
+                            <tbody><tr id="matrix-ign-row"></tr></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
 
-    <main class="flex-1 max-w-[1500px] mx-auto w-full flex flex-col lg:flex-row gap-6 p-4 my-auto">
-        
-        <!-- PAINEL ESQUERDO: CONFIGURAÇÕES -->
-        <aside class="w-full lg:w-[420px] xl:w-[460px] shrink-0 glass-panel rounded-2xl flex flex-col border border-athlon-border">
-            
-            <!-- Tabs -->
-            <div class="flex border-b border-white/10 shrink-0">
-                <button id="tab-quick-btn" class="tab-btn active flex-1 py-3 text-xs font-bold text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2" onclick="switchTab('quick')">
-                    <i class="fa-solid fa-bolt"></i> Preparação Rápida
-                </button>
-                <button id="tab-detailed-btn" class="tab-btn flex-1 py-3 text-xs font-bold text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2" onclick="switchTab('detailed')">
-                    <i class="fa-solid fa-sliders"></i> Ajuste Fino Detalhado
-                </button>
+        <!-- PAINEL LATERAL: DIAGNÓSTICO E GRÁFICOS -->
+        <div>
+            <div class="panel">
+                <div class="panel-title">🤖 Diagnóstico IA & Riscos</div>
+                <div class="terminal" id="terminal-content">Analisando mapa e peças...</div>
             </div>
             
-            <!-- Conteúdo com espaçamento e fluxo natural para rolagem -->
-            <div class="p-5 space-y-6">
-                
-                <!-- CONTEÚDO: PREPARAÇÃO RÁPIDA -->
-                <div id="tab-quick" class="space-y-6">
-                    <div class="p-4 rounded-xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 mb-2">
-                        <p class="text-xs text-gray-400 leading-relaxed text-center">
-                            Selecione as características gerais da moto. O sistema irá <span class="text-athlon-blue font-bold">preencher automaticamente</span> todos os parâmetros finos com base no seu objetivo.
-                        </p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2"><i class="fa-solid fa-motorcycle text-athlon-orange mr-1"></i> Cilindrada Base</label>
-                            <select id="q-engine" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:border-athlon-orange focus:outline-none focus:ring-1 focus:ring-athlon-orange transition">
-                                <option value="160">150cc - 160cc (CG, Bros, Factor)</option>
-                                <option value="300">250cc - 300cc (Twister, XRE, Ninja 300)</option>
-                                <option value="600">600cc ou mais (Hornet, MT-07, Z900)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2"><i class="fa-solid fa-wrench text-gray-400 mr-1"></i> Nível de Preparação</label>
-                            <select id="q-mod" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:border-athlon-orange focus:outline-none focus:ring-1 focus:ring-athlon-orange transition">
-                                <option value="stock">Motor Original de Fábrica</option>
-                                <option value="exhaust">Só Escapamento Esportivo / Filtro</option>
-                                <option value="cam">Comando Preparado + Escape</option>
-                                <option value="kit">Kit Cilindro / Pistão (Big Bore)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2"><i class="fa-solid fa-gas-pump text-green-500 mr-1"></i> Combustível Utilizado</label>
-                            <select id="q-fuel" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:border-athlon-orange focus:outline-none focus:ring-1 focus:ring-athlon-orange transition">
-                                <option value="gasoline">Gasolina Comum / Aditivada</option>
-                                <option value="ethanol">Etanol (Álcool)</option>
-                                <option value="methanol">Metanol (Competição)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-300 mb-2"><i class="fa-solid fa-bullseye text-red-500 mr-1"></i> Objetivo Principal</label>
-                            <select id="q-goal" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:border-athlon-orange focus:outline-none focus:ring-1 focus:ring-athlon-orange transition">
-                                <option value="daily">Uso Diário (Segurança e Economia)</option>
-                                <option value="track">Performance / Trackday (Força linear)</option>
-                                <option value="drag">Arrancada (Torque, 2-Step ativo)</option>
-                                <option value="pop">Pipoco Máximo (Pop & Bang Agressivo)</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <button onclick="applyQuickSetup()" class="w-full mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold py-3 rounded-lg transition-all text-xs flex justify-center items-center gap-2">
-                        <i class="fa-solid fa-rotate"></i> Aplicar e Gerar Mapa
-                    </button>
-                </div>
-
-                <!-- CONTEÚDO: PREPARAÇÃO DETALHADA (Oculto por padrão) -->
-                <div id="tab-detailed" class="space-y-6 hidden">
-                    
-                    <!-- Combustível -->
-                    <div class="space-y-3">
-                        <h3 class="text-[10px] uppercase font-bold text-athlon-blue border-b border-white/10 pb-1 mb-3"><i class="fa-solid fa-gas-pump"></i> Injeção de Combustível</h3>
-                        <div>
-                            <div class="flex justify-between items-end mb-1">
-                                <label class="text-[11px] text-gray-400">Tempo de Injeção (Trim Global)</label>
-                                <span id="lbl-fuelTrim" class="text-xs font-mono font-bold text-white">100%</span>
-                            </div>
-                            <input type="range" id="d-fuelTrim" class="slider-blue" min="50" max="250" step="5" value="100">
-                        </div>
-                    </div>
-
-                    <!-- Ignição -->
-                    <div class="space-y-3">
-                        <h3 class="text-[10px] uppercase font-bold text-yellow-400 border-b border-white/10 pb-1 mb-3 mt-5"><i class="fa-solid fa-bolt"></i> Ponto de Ignição</h3>
-                        <div>
-                            <div class="flex justify-between items-end mb-1">
-                                <label class="text-[11px] text-gray-400">Ponto Baixa RPM (1k-4k)</label>
-                                <span id="lbl-ignLow" class="text-xs font-mono font-bold text-white">15°</span>
-                            </div>
-                            <input type="range" id="d-ignLow" class="slider-yellow" min="5" max="35" step="1" value="15">
-                        </div>
-                        <div class="mt-2">
-                            <div class="flex justify-between items-end mb-1">
-                                <label class="text-[11px] text-gray-400">Ponto Alta RPM (WOT)</label>
-                                <span id="lbl-ignHigh" class="text-xs font-mono font-bold text-white">32°</span>
-                            </div>
-                            <input type="range" id="d-ignHigh" class="slider-yellow" min="15" max="50" step="1" value="32">
-                        </div>
-                    </div>
-
-                    <!-- Limites e Cortes -->
-                    <div class="space-y-3">
-                        <h3 class="text-[10px] uppercase font-bold text-athlon-red border-b border-white/10 pb-1 mb-3 mt-5"><i class="fa-solid fa-fire"></i> Limites e Cortes</h3>
-                        <div>
-                            <div class="flex justify-between items-end mb-1">
-                                <label class="text-[11px] text-gray-400">RPM de Corte de Giro Final</label>
-                                <span id="lbl-rpmLimit" class="text-xs font-mono font-bold text-white">10000</span>
-                            </div>
-                            <input type="range" id="d-rpmLimit" class="slider-red" min="7000" max="14000" step="100" value="10000">
-                        </div>
-                        
-                        <div class="p-3 bg-red-900/10 border border-red-500/20 rounded-lg space-y-3 mt-2">
-                            <div class="text-[10px] font-bold text-red-400">Ajustes Pop & Bang (Pré-Corte)</div>
-                            <div>
-                                <div class="flex justify-between items-end mb-1">
-                                    <label class="text-[10px] text-gray-400">Início do Pré-Corte (RPM)</label>
-                                    <span id="lbl-rpmPre" class="text-[10px] font-mono font-bold text-white">9500</span>
-                                </div>
-                                <input type="range" id="d-rpmPre" class="slider-orange" min="6500" max="13500" step="100" value="9500">
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-end mb-1">
-                                    <label class="text-[10px] text-gray-400">Atraso de Ponto (Graus)</label>
-                                    <span id="lbl-preRetard" class="text-[10px] font-mono font-bold text-white">-5°</span>
-                                </div>
-                                <input type="range" id="d-preRetard" class="slider-orange" min="-30" max="15" step="1" value="-5">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Funções Especiais -->
-                    <div class="space-y-4">
-                        <h3 class="text-[10px] uppercase font-bold text-purple-400 border-b border-white/10 pb-1 mb-3 mt-5"><i class="fa-solid fa-microchip"></i> Funções Especiais</h3>
-                        
-                        <!-- Quickshifter -->
-                        <div>
-                            <div class="flex justify-between items-end mb-1">
-                                <label class="text-[11px] text-gray-400">Tempo Quickshifter (0 = Desativado)</label>
-                                <span id="lbl-qsTime" class="text-xs font-mono font-bold text-white">0ms</span>
-                            </div>
-                            <input type="range" id="d-qsTime" class="slider-purple" min="0" max="150" step="5" value="0">
-                        </div>
-                        
-                        <!-- Two Step -->
-                        <div class="mt-2">
-                            <div class="flex justify-between items-end mb-1">
-                                <label class="text-[11px] text-gray-400">Two-Step RPM (0 = Desativado)</label>
-                                <span id="lbl-tsRpm" class="text-xs font-mono font-bold text-white">0</span>
-                            </div>
-                            <input type="range" id="d-tsRpm" class="slider-purple" min="0" max="10000" step="100" value="0">
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </aside>
-
-        <!-- PAINEL DIREITO: GRÁFICOS & IA -->
-        <section class="flex-1 flex flex-col gap-6">
-            
-            <!-- Gráficos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                
-                <!-- Potência -->
-                <div class="glass-panel rounded-xl p-4 flex flex-col border border-white/5 h-[260px]">
-                    <h3 class="text-[10px] font-bold text-gray-300 uppercase flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-chart-line text-athlon-green"></i> Curva de Potência (Est.)
-                    </h3>
-                    <div class="flex-1 relative w-full h-full">
-                        <canvas id="chartPower"></canvas>
-                    </div>
-                </div>
-
-                <!-- Ignição -->
-                <div class="glass-panel rounded-xl p-4 flex flex-col border border-white/5 h-[260px]">
-                    <h3 class="text-[10px] font-bold text-gray-300 uppercase flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-bolt text-yellow-400"></i> Mapa de Ponto
-                    </h3>
-                    <div class="flex-1 relative w-full h-full">
-                        <canvas id="chartIgnition"></canvas>
-                    </div>
-                </div>
-
-                <!-- Injeção -->
-                <div class="glass-panel rounded-xl p-4 flex flex-col border border-white/5 md:col-span-2 lg:col-span-1 h-[260px]">
-                    <h3 class="text-[10px] font-bold text-gray-300 uppercase flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-gas-pump text-athlon-blue"></i> Mapa de Injeção
-                    </h3>
-                    <div class="flex-1 relative w-full h-full">
-                        <canvas id="chartFuel"></canvas>
-                    </div>
-                </div>
+            <div class="panel">
+                <div class="panel-title">Curva de Injeção (Vazão)</div>
+                <div class="chart-box"><canvas id="chartFuel"></canvas></div>
             </div>
 
-            <!-- Terminal IA -->
-            <div class="glass-panel border border-athlon-border rounded-xl flex flex-col shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden min-h-[220px]">
-                <div class="bg-black/80 px-4 py-3 border-b border-white/5 flex justify-between items-center shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="flex gap-1.5">
-                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                        </div>
-                        <span class="text-xs font-mono text-gray-400 flex items-center gap-2">
-                            <i class="fa-solid fa-microchip text-athlon-blue animate-pulse"></i> Analista IA Athlon
-                        </span>
-                    </div>
-                    <span id="ai-status" class="text-[10px] font-bold px-2 py-1 rounded bg-green-900/50 text-green-400 border border-green-500/30">SEGURO</span>
-                </div>
-                
-                <div class="p-5 bg-black/40 font-mono text-sm leading-relaxed text-gray-300">
-                    <div id="ai-terminal" class="typing-cursor whitespace-pre-wrap">Aguardando configurações...</div>
-                </div>
+            <div class="panel">
+                <div class="panel-title">Avanço de Ignição (BTDC)</div>
+                <div class="chart-box"><canvas id="chartIgnition"></canvas></div>
             </div>
 
-        </section>
-    </main>
+            <div class="panel">
+                <div class="panel-title">Estimativa de Potência x RPM</div>
+                <div class="chart-box"><canvas id="chartPower"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Operação realizada com sucesso!</div>
 
     <script>
-        // --- 1. ESTADO DA APLICAÇÃO ---
-        const state = {
-            // Quick 
-            qEngine: '160', qMod: 'stock', qFuel: 'gasoline', qGoal: 'daily',
-            // Detailed
-            fuelTrim: 100,
-            ignLow: 15, ignHigh: 32,
-            rpmLimit: 10000, rpmPre: 9500, preRetard: -5,
-            qsTime: 0, tsRpm: 0
-        };
+        let athlonMap = {"v":100,"x8100":"mapa start 160 original ","x8140":"Mapa padrao Cg 160 ","x8200":[28],"x8210":[4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120,124,128],"x0240":[424,421,429,434,479,494,535,556,582,596,607,627,647,648,646,644,639,625,623,599,590,562,525,515,493,472,433,382,290,290,240,240],"x0280":[90,84,82,77,75,71,63,52,39,31,23,17,8,5,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],"x03C0":[160,100,40,0,-40,-66,-86,-96,-106,-106,-106,-106,-106,-106,-106,-106],"x0780":[3754,3465,3005,2708,2376,2025,1675,1347,1055,808,607,449,328,238,171,123]};
+        let baseFuelMap = [...athlonMap.x0240];
+        let baseAccelMap = athlonMap.x0780 ? [...athlonMap.x0780] : [];
+        const rpmLabels = athlonMap.x8210.map(v => v * 100);
+        let chartFuel, chartIgnition, chartPower;
 
-        // DOM Elements globais
-        let chartPower, chartIgnition, chartFuel;
-        let aiTimeout;
-        const terminal = document.getElementById('ai-terminal');
-        const badgeStatus = document.getElementById('ai-status');
-
-        // --- 2. INICIALIZAÇÃO ---
-        window.onload = () => {
+        window.onload = function() {
             initCharts();
-            setupEventListeners();
-            applyQuickSetup(); // Inicia mapeando o modo rápido padrão
+            buildMatrixTables();
+            updateAll();
         };
 
-        // Troca de Abas
         function switchTab(tab) {
-            document.getElementById('tab-quick-btn').classList.toggle('active', tab === 'quick');
-            document.getElementById('tab-detailed-btn').classList.toggle('active', tab === 'detailed');
-            document.getElementById('tab-quick').classList.toggle('hidden', tab !== 'quick');
-            document.getElementById('tab-detailed').classList.toggle('hidden', tab !== 'detailed');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // --- 3. MAPEAMENTO (QUICK -> DETAILED) ---
-        function applyQuickSetup() {
-            // Ler valores da aba rápida
-            state.qEngine = document.getElementById('q-engine').value;
-            state.qMod = document.getElementById('q-mod').value;
-            state.qFuel = document.getElementById('q-fuel').value;
-            state.qGoal = document.getElementById('q-goal').value;
-
-            // Lógica baseada na cilindrada
-            let baseRpmLimit = state.qEngine === '600' ? 12000 : (state.qEngine === '300' ? 10500 : 9500);
+            document.getElementById('tab-rapido').style.display = tab === 'rapido' ? 'block' : 'none';
+            document.getElementById('tab-detalhado').style.display = tab === 'detalhado' ? 'block' : 'none';
+            document.getElementById('tab-performance').style.display = tab === 'performance' ? 'block' : 'none';
+            document.getElementById('tab-matriz').style.display = tab === 'matriz' ? 'block' : 'none';
             
-            // Lógica de Combustível (Avanço e Injeção)
-            let baseFuel = 100;
-            let baseIgnLow = 15;
-            let baseIgnHigh = 32;
-
-            if (state.qFuel === 'ethanol') { baseFuel = 135; baseIgnLow = 17; baseIgnHigh = 36; }
-            if (state.qFuel === 'methanol') { baseFuel = 200; baseIgnLow = 18; baseIgnHigh = 38; }
-
-            // Lógica de Preparação (Aumenta giro e injeção)
-            if (state.qMod === 'exhaust') { baseFuel += 5; baseRpmLimit += 300; }
-            if (state.qMod === 'cam') { baseFuel += 10; baseIgnHigh += 2; baseRpmLimit += 800; }
-            if (state.qMod === 'kit') { baseFuel += 20; baseIgnHigh += 3; baseRpmLimit += 500; }
-
-            // Lógica de Objetivo (Pipoco, Track, Drag)
-            let preRpm = baseRpmLimit - 500;
-            let retard = -5;
-            let qs = 0;
-            let ts = 0;
-
-            if (state.qGoal === 'daily') {
-                preRpm = baseRpmLimit - 200; // Corte limpo
-                retard = 5; // Sem pipoco
-            } else if (state.qGoal === 'track') {
-                qs = 60; // Liga QS
-                retard = 0;
-            } else if (state.qGoal === 'drag') {
-                qs = 50;
-                ts = Math.floor(baseRpmLimit * 0.6); // 2-step em 60% da rpm max
-                retard = 0;
-            } else if (state.qGoal === 'pop') {
-                preRpm = baseRpmLimit - 1000; // Faixa de pipoco longa
-                retard = -20; // Muito atraso para fogo
-            }
-
-            // Aplicar no Estado Detalhado
-            state.fuelTrim = Math.min(250, baseFuel);
-            state.ignLow = baseIgnLow;
-            state.ignHigh = baseIgnHigh;
-            state.rpmLimit = baseRpmLimit;
-            state.rpmPre = preRpm;
-            state.preRetard = retard;
-            state.qsTime = qs;
-            state.tsRpm = ts;
-
-            updateUIFromState();
-            triggerUpdate();
+            document.querySelectorAll('.tab-btn').forEach((b, i) => {
+                b.classList.toggle('active', 
+                    (tab==='rapido'&&i===0)||(tab==='detalhado'&&i===1)||(tab==='performance'&&i===2)||(tab==='matriz'&&i===3)
+                );
+            });
         }
 
-        // Atualizar inputs detalhados
-        function updateUIFromState() {
-            const map = {
-                'd-fuelTrim': 'fuelTrim', 'd-ignLow': 'ignLow', 'd-ignHigh': 'ignHigh',
-                'd-rpmLimit': 'rpmLimit', 'd-rpmPre': 'rpmPre', 'd-preRetard': 'preRetard',
-                'd-qsTime': 'qsTime', 'd-tsRpm': 'tsRpm'
-            };
-
-            for (const [id, key] of Object.entries(map)) {
-                const el = document.getElementById(id);
-                el.value = state[key];
-                
-                // Formatar Labels
-                const lbl = document.getElementById(id.replace('d-', 'lbl-'));
-                let val = state[key];
-                if (key === 'fuelTrim') lbl.innerText = `${val}%`;
-                else if (key.includes('ign') || key === 'preRetard') lbl.innerText = `${val}°`;
-                else if (key === 'qsTime') lbl.innerText = val > 0 ? `${val}ms` : 'Off';
-                else if (key === 'tsRpm') lbl.innerText = val > 0 ? val : 'Off';
-                else lbl.innerText = val;
-            }
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2000);
         }
 
-        function setupEventListeners() {
-            ['q-engine', 'q-mod', 'q-fuel', 'q-goal'].forEach(id => {
-                document.getElementById(id).addEventListener('change', applyQuickSetup);
+        function rawToDeg(raw) { return parseFloat(((100 - raw) * 0.25).toFixed(1)); }
+        function degToRaw(deg) { return Math.round(100 - (deg / 0.25)); }
+
+        function updateFuelGlobal(percent) {
+            document.getElementById('val-fuel-global').innerText = percent + '%';
+            const factor = percent / 100;
+            for(let i = 0; i < athlonMap.x0240.length; i++) athlonMap.x0240[i] = Math.round(baseFuelMap[i] * factor);
+            refreshMatrixFuel();
+            updateAll();
+        }
+
+        function updateIgnitionZone(zone, degVal) {
+            degVal = parseFloat(degVal);
+            const rawVal = degToRaw(degVal);
+            let start = zone === 'low' ? 0 : zone === 'mid' ? 8 : 20;
+            let end = zone === 'low' ? 8 : zone === 'mid' ? 20 : 32;
+            for(let i=start; i<end; i++) athlonMap.x0280[i] = rawVal;
+            document.getElementById(`val-ign-${zone}`).innerText = degVal.toFixed(1) + '°';
+            refreshMatrixIgnition();
+            updateAll();
+        }
+
+        function updateRPMLimit(val) {
+            document.getElementById('val-rpm-limit').innerText = parseInt(val).toLocaleString('pt-BR') + ' RPM';
+            updateAll();
+        }
+
+        function updateAccelEnrich(val) {
+            val = parseInt(val);
+            document.getElementById('val-accel-enrich').innerText = '+' + val + '%';
+            if (athlonMap.x0780 && baseAccelMap.length > 0) {
+                const factor = 1 + (val / 100);
+                for (let i = 0; i < athlonMap.x0780.length; i++) {
+                    athlonMap.x0780[i] = Math.round(baseAccelMap[i] * factor);
+                }
+            }
+            updateAll();
+        }
+
+        function updatePopRPM(val) {
+            document.getElementById('val-pop-rpm').innerText = parseInt(val).toLocaleString('pt-BR') + ' RPM';
+            updateAll();
+        }
+
+        function updatePopDegrees(val) {
+            document.getElementById('val-pop-deg').innerText = parseFloat(val).toFixed(1) + '°';
+            const rawVal = Math.round(val * 10);
+            for(let i=4; i<16; i++) athlonMap.x03C0[i] = rawVal;
+            updateAll();
+        }
+
+        function applyQuickPreset() {
+            const fuel = document.getElementById('quick-fuel').value;
+            let factor = fuel === 'ethanol' ? 128 : 100;
+            document.getElementById('slider-fuel-global').value = factor;
+            updateFuelGlobal(factor);
+        }
+
+        function buildMatrixTables() {
+            const h1 = document.getElementById('matrix-rpm-header');
+            const h2 = document.getElementById('matrix-rpm-header-2');
+            const fRow = document.getElementById('matrix-fuel-row');
+            const iRow = document.getElementById('matrix-ign-row');
+            h1.innerHTML = h2.innerHTML = fRow.innerHTML = iRow.innerHTML = '';
+
+            rpmLabels.forEach((rpm, idx) => {
+                h1.innerHTML += `<th>${rpm}</th>`;
+                h2.innerHTML += `<th>${rpm}</th>`;
+                fRow.innerHTML += `<td><input type="number" id="m-fuel-${idx}" value="${athlonMap.x0240[idx]}" onchange="onMatrixFuelChange(${idx}, this.value)"></td>`;
+                iRow.innerHTML += `<td><input type="number" step="0.5" id="m-ign-${idx}" value="${rawToDeg(athlonMap.x0280[idx])}" onchange="onMatrixIgnChange(${idx}, this.value)"></td>`;
             });
+        }
 
-            const detailSliders = [
-                'fuelTrim', 'ignLow', 'ignHigh', 'rpmLimit', 'rpmPre', 'preRetard', 'qsTime', 'tsRpm'
-            ];
-
-            detailSliders.forEach(key => {
-                const el = document.getElementById(`d-${key}`);
-                el.addEventListener('input', (e) => {
-                    let val = Number(e.target.value);
-                    
-                    if (key === 'rpmLimit' && val <= state.rpmPre) state.rpmPre = val - 100;
-                    if (key === 'rpmPre' && val >= state.rpmLimit) state.rpmLimit = val + 100;
-
-                    state[key] = val;
-                    
-                    if(key === 'rpmLimit') document.getElementById('d-rpmPre').value = state.rpmPre;
-                    if(key === 'rpmPre') document.getElementById('d-rpmLimit').value = state.rpmLimit;
-
-                    updateUIFromState();
-                    triggerUpdate();
-                });
+        function refreshMatrixFuel() {
+            athlonMap.x0240.forEach((val, idx) => {
+                const el = document.getElementById(`m-fuel-${idx}`);
+                if(el) el.value = val;
             });
+        }
+
+        function refreshMatrixIgnition() {
+            athlonMap.x0280.forEach((val, idx) => {
+                const el = document.getElementById(`m-ign-${idx}`);
+                if(el) el.value = rawToDeg(val);
+            });
+        }
+
+        function onMatrixFuelChange(idx, val) {
+            athlonMap.x0240[idx] = parseInt(val) || 0;
+            updateAll();
+        }
+
+        function onMatrixIgnChange(idx, deg) {
+            athlonMap.x0280[idx] = degToRaw(parseFloat(deg) || 0);
+            updateAll();
         }
 
         function initCharts() {
-            Chart.defaults.color = '#64748b';
-            Chart.defaults.font.family = "'Fira Code', monospace";
-            Chart.defaults.font.size = 10;
-            const gridOpts = { color: 'rgba(255,255,255,0.05)', drawBorder: false };
+            const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
 
-            const commonOptions = { 
-                responsive: true, maintainAspectRatio: false, 
-                plugins: { legend: { display: false } },
-                scales: { x: { grid: { display: false } }, y: { grid: gridOpts } },
-                animation: { duration: 300 }
-            };
-
-            chartPower = new Chart(document.getElementById('chartPower'), {
+            chartFuel = new Chart(document.getElementById('chartFuel'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: '#00ff66', backgroundColor: 'rgba(0, 255, 102, 0.1)', fill: true, tension: 0.4, pointRadius: 0 }] },
-                options: commonOptions
+                data: { labels: rpmLabels, datasets: [{ data: athlonMap.x0240, borderColor: '#00d2ff', borderWidth: 2, fill: false }] },
+                options: opt
             });
 
             chartIgnition = new Chart(document.getElementById('chartIgnition'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: '#fbbf24', borderWidth: 2, tension: 0.1, pointRadius: 0 }] },
-                options: { ...commonOptions, scales: { y: { grid: gridOpts, min: -35, max: 55 } } }
+                data: { labels: rpmLabels, datasets: [{ data: athlonMap.x0280.map(rawToDeg), borderColor: '#ff5500', borderWidth: 2, fill: false }] },
+                options: opt
             });
 
-            chartFuel = new Chart(document.getElementById('chartFuel'), {
-                type: 'bar',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: '#00d2ff', borderRadius: 2 }] },
-                options: commonOptions
+            chartPower = new Chart(document.getElementById('chartPower'), {
+                type: 'line',
+                data: { labels: rpmLabels, datasets: [{ data: calculatePowerCurve(), borderColor: '#00ff88', borderWidth: 2, fill: false }] },
+                options: opt
             });
         }
 
-        let updateTimer;
-        function triggerUpdate() {
-            clearTimeout(updateTimer);
-            drawCharts(); 
-            updateTimer = setTimeout(runAIEngine, 600);
+        function calculatePowerCurve() {
+            return athlonMap.x0240.map((f, i) => {
+                const ign = rawToDeg(athlonMap.x0280[i]);
+                const rpm = rpmLabels[i];
+                let pwr = (f * 0.02) + (ign * 0.4) + (rpm / 1200);
+                if (rpm > 9500) pwr -= (rpm - 9500) / 400;
+                return Math.max(0, parseFloat(pwr.toFixed(1)));
+            });
         }
 
-        function drawCharts() {
-            const labels = [];
-            const dataPower = [];
-            const dataIgn = [];
-            const dataFuel = [];
+        // DIAGNÓSTICO IA COM DETECÇÃO RIGOROSA DE FALHAS MECÂNICAS
+        function runDiagnosticIA() {
+            const fuelFactor = parseInt(document.getElementById('slider-fuel-global').value);
+            const highIgn = rawToDeg(athlonMap.x0280[26]);
+            const lowIgn = rawToDeg(athlonMap.x0280[2]);
+            const popDeg = parseFloat(document.getElementById('slider-pop-deg').value);
+            const rpmLimit = parseInt(document.getElementById('slider-rpm-limit').value);
+            const accelEnrich = parseInt(document.getElementById('slider-accel-enrich').value);
+            const exhaust = document.getElementById('setup-exhaust').value;
+            const camshaft = document.getElementById('setup-camshaft').value;
+            const injector = document.getElementById('setup-injector').value;
 
-            let maxHp = state.qEngine === '160' ? 14 : (state.qEngine === '300' ? 24 : 85);
-            if(state.qMod !== 'stock') maxHp *= 1.2;
-            let peakRpm = state.qEngine === '600' ? 10000 : 8000;
+            let html = "";
 
-            for (let rpm = 1000; rpm <= state.rpmLimit + 500; rpm += 500) {
-                if (rpm > state.rpmLimit) {
-                    labels.push(rpm); dataPower.push(0); dataIgn.push(0); dataFuel.push(0);
-                    continue;
-                }
-                
-                labels.push(rpm);
-
-                const dist = Math.abs(rpm - peakRpm);
-                let hp = Math.max(1, maxHp - Math.pow(dist/2000, 2) * (maxHp/8));
-                if (rpm >= state.rpmPre) hp *= 0.6; 
-                dataPower.push(hp.toFixed(1));
-
-                let adv = state.ignLow + ((state.ignHigh - state.ignLow) * ((rpm - 1000) / (peakRpm - 1000)));
-                if (rpm > peakRpm) adv = state.ignHigh;
-                if (rpm >= state.rpmPre) adv = state.preRetard; 
-                dataIgn.push(adv.toFixed(1));
-
-                let fuel = (5 + (rpm / 1000)) * (state.fuelTrim / 100);
-                if (rpm >= state.rpmPre && state.preRetard < 0) fuel *= 1.2; 
-                dataFuel.push(fuel.toFixed(1));
-            }
-
-            chartPower.data.labels = labels; chartPower.data.datasets[0].data = dataPower; chartPower.update();
-            chartIgnition.data.labels = labels; chartIgnition.data.datasets[0].data = dataIgn; chartIgnition.update();
-            chartFuel.data.labels = labels; chartFuel.data.datasets[0].data = dataFuel; chartFuel.update();
-        }
-
-        function runAIEngine() {
-            clearTimeout(aiTimeout);
-            terminal.innerHTML = '';
-            
-            let status = 'SEGURO';
-            let colorClass = 'text-green-400 bg-green-900/50 border-green-500/30';
-            let text = ">>> INICIANDO ANÁLISE DO MAPA ATUAL...\n\n";
-
-            text += `[MECÂNICA] Motor ${state.qEngine}cc | Modificação: ${state.qMod.toUpperCase()} | Combustível: ${state.qFuel.toUpperCase()}.\n`;
-
-            if (state.qFuel === 'methanol' && state.fuelTrim < 180) {
-                text += `\n[CRÍTICO - INJEÇÃO] Uso de METANOL detectado com trim baixo (${state.fuelTrim}%). Risco de mistura extremamente magra e derretimento.\n`;
-                status = 'RISCO CRÍTICO'; colorClass = 'text-red-400 bg-red-900/50 border-red-500/30';
-            } else if (state.qFuel === 'ethanol' && state.fuelTrim < 120) {
-                text += `\n[ALERTA - INJEÇÃO] Etanol exige cerca de 30% a 40% a mais de combustível que a gasolina. Aumente o Tempo de Injeção.\n`;
-                if(status === 'SEGURO') { status = 'ATENÇÃO'; colorClass = 'text-yellow-400 bg-yellow-900/50 border-yellow-500/30'; }
-            } else if (state.qFuel === 'gasoline' && state.fuelTrim > 130) {
-                text += `\n[AVISO - INJEÇÃO] Gasolina com injeção em ${state.fuelTrim}%. A moto pode engasgar por excesso.\n`;
+            // 1. ANÁLISE DOS GRÁFICOS
+            html += `<b style="color:var(--accent-blue);">📊 O que a IA leu nos Gráficos:</b><br>`;
+            html += `• <b>Injeção (x0240):</b> Vazão global estipulada em <b>${fuelFactor}%</b>. `;
+            if (fuelFactor > 120) {
+                html += `<span style="color:var(--accent-red);">Alerta: Excesso severo de combustível!</span><br>`;
+            } else if (fuelFactor < 95) {
+                html += `<span style="color:var(--accent-yellow);">Alerta: Vazão baixa (risco de pobreza).</span><br>`;
             } else {
-                text += `\n[OK] Fluxo de injeção adequado para o combustível selecionado.\n`;
+                html += `Curva proporcional ao fluxo de ar.<br>`;
             }
 
-            if (state.qFuel === 'gasoline' && state.ignHigh > 36) {
-                text += `\n[CRÍTICO - IGNIÇÃO] Avanço de ${state.ignHigh}° em alta RPM com Gasolina. RISCO EXTREMO DE DETONAÇÃO (Batida de pino)!\n`;
-                status = 'RISCO CRÍTICO'; colorClass = 'text-red-400 bg-red-900/50 border-red-500/30';
+            html += `• <b>Ignição (x0280):</b> Baixa em <b>${lowIgn}°</b> e Alta em <b>${highIgn}°</b>. `;
+            if (lowIgn < 8) {
+                html += `<span style="color:var(--accent-red);">⚠️ Ponto de baixa excessivamente atrasado (${lowIgn}°).</span><br>`;
+            } else if (highIgn > 35) {
+                html += `<span style="color:var(--accent-red);">⚠️ Ponto muito avançado em alta.</span><br>`;
+            } else {
+                html += `Ponto aceitável.<br>`;
             }
 
-            let range = state.rpmLimit - state.rpmPre;
-            if (range > 0) {
-                if (state.preRetard < -10) {
-                    text += `\n[ESTRUTURAL] Pré-corte configurado para PIPOCO EXTREMO (Atraso de ${state.preRetard}°). \n>> Efeito: Chamas longas pelo escape com desgaste severo das válvulas.\n`;
-                    if(status === 'SEGURO') { status = 'ATENÇÃO'; colorClass = 'text-yellow-400 bg-yellow-900/50 border-yellow-500/30'; }
-                } else if (state.preRetard < 0) {
-                    text += `\n[ESTRUTURAL] Pop & Bang moderado ativo nas reduções de marcha.\n`;
+            html += `<hr style="border-color:rgba(255,255,255,0.1); margin:8px 0;">`;
+
+            // 2. CORTE EM NEUTRO & FOGO / POPS
+            html += `<b style="color:var(--accent-orange);">🔥 Corte em Neutro & Pipocos (Fogo):</b><br>`;
+            const isPopActive = popDeg < -10;
+            const isOpenExhaust = exhaust !== 'original';
+
+            if (isPopActive && isOpenExhaust) {
+                html += `💥 <b>VAI SAIR FOGO:</b> Atraso em ${popDeg}° com escape aberto joga labaredas.<br>`;
+            } else if (isPopActive && !isOpenExhaust) {
+                html += `⚠️ <b>PIPOCO ABAFADO:</b> O escape original vai reter o fogo e sofrer estresse térmico.<br>`;
+            } else {
+                html += `🔇 <b>CORTE LIMPO:</b> Sem chamas ou pipocos expressivos.<br>`;
+            }
+
+            html += `<hr style="border-color:rgba(255,255,255,0.1); margin:8px 0;">`;
+
+            // 3. MARCHA LENTA E COMPORTAMENTO
+            html += `<b style="color:var(--accent-green);">⚙️ Comportamento de Lenta e Pista:</b><br>`;
+            if (lowIgn < 8) {
+                html += `• <b>Lenta:</b> Irregular e "amarrada", com forte tendência a morrer ao arrancar devido ao atraso de ignição.<br>`;
+            } else if (fuelFactor > 125) {
+                html += `• <b>Lenta:</b> Engasgando, com cheiro forte de combustível cru e vela encharcada.<br>`;
+            } else {
+                html += `• <b>Lenta:</b> Estável e redonda.<br>`;
+            }
+
+            // 4. TORQUE VS PERFORMANCE
+            html += `<br><b style="color:var(--accent-yellow);">📈 Rendimento (Torque vs Final):</b><br>`;
+            if (lowIgn < 8) {
+                html += `📉 <b>PERDA CRÍTICA DE TORQUE:</b> Com o ponto de baixa em ${lowIgn}°, a moto vai sair muito fraca ("choca"), exigindo muito acelerador e embreagem para arrancar.<br>`;
+            } else if (rpmLimit > 11000 && camshaft === 'original') {
+                html += `⚠️ <b>RISCO DE RUPTURA:</b> Giro esticado a ${rpmLimit.toLocaleString()} RPM com motor totalmente original põe em risco a integridade mecânica.<br>`;
+            } else {
+                html += `⚖️ <b>COMPORTAMENTO ATUAL:</b> Resposta configurada pelo usuário.<br>`;
+            }
+
+            html += `<hr style="border-color:rgba(255,255,255,0.1); margin:8px 0;">`;
+
+            // 5. ANÁLISE RIGOROSA DE RISCOS E DANOS MECÂNICOS
+            html += `<b style="color:var(--accent-red);">⚠️ Alertas de Riscos & Danos Mecânicos:</b><br>`;
+            let risksFound = 0;
+
+            // DETECÇÃO 1: Ponto de Baixa Atrasado Demais (< 8°)
+            if (lowIgn < 8) {
+                risksFound++;
+                html += `❌ <b>Risco Crítico (Ponto de Baixa em ${lowIgn}°):</b> Avanço muito baixo na arrancada causa <u>superaquecimento severo na cabeça do pistão e coletor de escape (ficando avermelhado de calor), perda drástica de torque e queima prematura das válvulas de escape</u>.<br>`;
+            }
+
+            // DETECÇÃO 2: Corte de Giro Alto com Comando/Molas Originais (> 11000 RPM)
+            if (rpmLimit > 11000 && camshaft === 'original') {
+                risksFound++;
+                html += `❌ <b>Risco Crítico (Flutuação de Válvulas / Atropelamento):</b> Girar até <b>${rpmLimit.toLocaleString()} RPM</b> com molas e comando originais causa <u>atropelamento de válvulas (as molas originais não conseguem fechar a válvula a tempo nessa rotação, fazendo o pistão bater violentamente nas válvulas e destruindo o motor)</u>.<br>`;
+            }
+
+            // DETECÇÃO 3: Aceleração Rápida Excessiva (>= 45%)
+            if (accelEnrich >= 45) {
+                risksFound++;
+                html += `⚠️ <b>Alerta de Enriquecimento Excessivo (+${accelEnrich}%):</b> Injeção de aceleração rápida no talo causa <u>afogamento transitório do motor, engasgos e buracos graves na resposta ao abrir o acelerador bruscamente</u>.<br>`;
+            }
+
+            // DETECÇÃO 4: Excesso Global de Combustível
+            if (fuelFactor > 120) {
+                risksFound++;
+                html += `❌ <b>Risco Crítico (Mistura Rica Extrema a ${fuelFactor}%):</b> Causa <u>lavagem do cilindro (o excesso de gasolina remove a película de óleo, riscando o cilindro e destruindo os anéis), diluição do óleo e velas encharcadas</u>.<br>`;
+            }
+
+            // DETECÇÃO 5: Mistura Pobre
+            if (fuelFactor < 95 && (camshaft !== 'original' || rpmLimit > 11000)) {
+                risksFound++;
+                html += `❌ <b>Risco Crítico (Mistura Pobre):</b> Vazão abaixo de 95% gera <u>superaquecimento, furação de pistão e queima de válvulas</u>.<br>`;
+            }
+
+            // DETECÇÃO 6: Ponto Alto / Detonação
+            if (highIgn > 36) {
+                risksFound++;
+                html += `❌ <b>Risco de Detonação (Ponto Alto):</b> Avanço em ${highIgn}° em alta RPM gera <u>batida de pino, trincas na saia do pistão e danos à biela</u>.<br>`;
+            }
+
+            if (risksFound === 0) {
+                html += `<span style="color:var(--accent-green);">✅ Nenhum risco mecânico crítico detectado nos parâmetros atuais. O mapa está dentro de uma margem segura.</span><br>`;
+            }
+
+            document.getElementById('terminal-content').innerHTML = html;
+        }
+
+        function updateAll() {
+            if(chartFuel && chartIgnition && chartPower) {
+                chartFuel.data.datasets[0].data = athlonMap.x0240;
+                chartFuel.update();
+                chartIgnition.data.datasets[0].data = athlonMap.x0280.map(rawToDeg);
+                chartIgnition.update();
+                chartPower.data.datasets[0].data = calculatePowerCurve();
+                chartPower.update();
+            }
+            runDiagnosticIA();
+        }
+
+        function syncControlsWithMap() {
+            baseFuelMap = [...athlonMap.x0240];
+            if (athlonMap.x0780) {
+                baseAccelMap = [...athlonMap.x0780];
+            }
+
+            const metaInfo = ((athlonMap.x8100 || '') + ' ' + (athlonMap.x8140 || '')).toLowerCase();
+            const motoSelect = document.getElementById('quick-moto');
+            if (metaInfo.includes('300') || metaInfo.includes('xre')) {
+                motoSelect.value = 'cb300';
+            } else if (metaInfo.includes('150')) {
+                motoSelect.value = 'cg150';
+            } else {
+                motoSelect.value = 'cg160';
+            }
+
+            document.getElementById('slider-fuel-global').value = 100;
+            document.getElementById('val-fuel-global').innerText = '100%';
+
+            if (athlonMap.x0280 && athlonMap.x0280.length >= 32) {
+                const lowDeg = rawToDeg(athlonMap.x0280[2]);
+                const midDeg = rawToDeg(athlonMap.x0280[14]);
+                const highDeg = rawToDeg(athlonMap.x0280[26]);
+
+                document.getElementById('slider-ign-low').value = lowDeg;
+                document.getElementById('val-ign-low').innerText = lowDeg.toFixed(1) + '°';
+
+                document.getElementById('slider-ign-mid').value = midDeg;
+                document.getElementById('val-ign-mid').innerText = midDeg.toFixed(1) + '°';
+
+                document.getElementById('slider-ign-high').value = highDeg;
+                document.getElementById('val-ign-high').innerText = highDeg.toFixed(1) + '°';
+            }
+
+            let detectedLimit = 10500;
+            if (athlonMap.x0240 && athlonMap.x8210) {
+                for (let i = athlonMap.x0240.length - 1; i >= 0; i--) {
+                    if (athlonMap.x0240[i] > 250) {
+                        detectedLimit = athlonMap.x8210[i] * 100;
+                        break;
+                    }
                 }
             }
+            detectedLimit = Math.max(9000, Math.min(12500, detectedLimit));
+            document.getElementById('slider-rpm-limit').value = detectedLimit;
+            document.getElementById('val-rpm-limit').innerText = detectedLimit.toLocaleString('pt-BR') + ' RPM';
 
-            if (state.qsTime > 0 || state.tsRpm > 0) {
-                text += `\n[EXTRAS]`;
-                if (state.qsTime > 0) text += ` Quickshifter ativado (${state.qsTime}ms).`;
-                if (state.tsRpm > 0) text += ` Two-Step travando em ${state.tsRpm} RPM.`;
-                text += `\n`;
+            let accelPerc = 15;
+            if (athlonMap.x0780 && athlonMap.x0780.length > 0) {
+                const baseRef = 3264;
+                const currentVal = athlonMap.x0780[0];
+                if (currentVal > baseRef) {
+                    accelPerc = Math.min(50, Math.round(((currentVal - baseRef) / baseRef) * 100));
+                } else {
+                    accelPerc = 0;
+                }
+            }
+            document.getElementById('slider-accel-enrich').value = accelPerc;
+            document.getElementById('val-accel-enrich').innerText = '+' + accelPerc + '%';
+
+            if (athlonMap.x03C0 && athlonMap.x03C0.length > 4) {
+                const popDeg = parseFloat((athlonMap.x03C0[4] / 10).toFixed(1));
+                document.getElementById('slider-pop-deg').value = popDeg;
+                document.getElementById('val-pop-deg').innerText = popDeg.toFixed(1) + '°';
             }
 
-            text += `\n>>> ANÁLISE CONCLUÍDA.`;
-
-            badgeStatus.innerText = status;
-            badgeStatus.className = `text-[10px] font-bold px-2 py-1 rounded ${colorClass}`;
-
-            typeWriterText(text, 0);
+            buildMatrixTables();
         }
 
-        function typeWriterText(text, index) {
-            if (index < text.length) {
-                terminal.innerHTML = text.substring(0, index + 1) + '<span class="typing-cursor"></span>';
-                let speed = Math.random() * 15 + 5;
-                aiTimeout = setTimeout(() => typeWriterText(text, index + 1), speed);
-            } else {
-                terminal.innerHTML = text;
-                terminal.classList.add('typing-cursor');
-            }
-        }
-
-        function exportConfig() {
-            let data = `;==========================================\n`;
-            data += `; R7Mapper - MAPA EXPORTADO (.MM)\n`;
-            data += `; Geração Híbrida Inteligente\n`;
-            data += `; Data: ${new Date().toLocaleString()}\n`;
-            data += `;==========================================\n\n`;
-            
-            data += `[BASE_INFO]\n`;
-            data += `Engine_CC=${state.qEngine}\n`;
-            data += `Hardware_Mod=${state.qMod}\n`;
-            data += `Fuel_Type=${state.qFuel}\n\n`;
-
-            data += `[FUEL_MAP]\n`;
-            data += `Global_Trim_Pct=${state.fuelTrim}\n\n`;
-
-            data += `[IGNITION_MAP]\n`;
-            data += `Low_RPM_Advance_Deg=${state.ignLow}\n`;
-            data += `High_RPM_Advance_Deg=${state.ignHigh}\n\n`;
-
-            data += `[REV_LIMITS]\n`;
-            data += `Hard_Cut_RPM=${state.rpmLimit}\n`;
-            data += `Pre_Cut_Start_RPM=${state.rpmPre}\n`;
-            data += `Pre_Cut_Retard_Deg=${state.preRetard}\n\n`;
-
-            data += `[SPECIAL_FUNCTIONS]\n`;
-            data += `Quickshifter_ms=${state.qsTime}\n`;
-            data += `TwoStep_RPM=${state.tsRpm}\n`;
-
-            const blob = new Blob([data], { type: "text/plain;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `Athlon_${state.qGoal}_${state.qEngine}cc.mm`;
+        function downloadMM() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(athlonMap));
+            const a = document.createElement('a');
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", `${(athlonMap.x8100 || 'mapa').trim().replace(/\s+/g, '_')}.mm`);
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
+            a.remove();
+            showToast('Arquivo .MM gerado!');
+        }
+
+        function importMMFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const r = new FileReader();
+            r.onload = function(evt) {
+                try {
+                    const parsed = JSON.parse(evt.target.result);
+                    if(parsed.x0240 && parsed.x0280) {
+                        athlonMap = parsed;
+                        syncControlsWithMap();
+                        updateAll();
+                        showToast('Mapa e configurações importados com sucesso!');
+                    } else {
+                        alert('Arquivo .MM com formato incompatível.');
+                    }
+                } catch(err) { 
+                    alert('Erro ao ler arquivo .MM: ' + err.message); 
+                }
+                e.target.value = '';
+            };
+            r.readAsText(file);
         }
     </script>
 </body>
 </html>
+
